@@ -4,6 +4,10 @@
     <jta-data-source>java:app/hops-site</jta-data-source>
     <class>se.kth.bootstrapserver.entities.RegisteredClusters</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
-    <properties/>
+    <properties>
+      <property name="eclipselink.target-database" value="MYSQL"/>
+      <property name="eclipselink.logging.level" value="SEVERE"/>
+      <property name="eclipselink.logging.parameters" value="true"/>
+    </properties>
   </persistence-unit>
 </persistence>
