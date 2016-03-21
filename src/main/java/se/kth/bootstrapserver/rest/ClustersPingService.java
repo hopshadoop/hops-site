@@ -21,7 +21,7 @@ import se.kth.bootstrapserver.entities.RegisteredClusters;
  *
  * @author jsvhqr
  */
-@Path("/available_clusters")
+@Path("/availableclusters")
 @Produces(MediaType.APPLICATION_JSON)
 public class ClustersPingService {
 
@@ -31,6 +31,7 @@ public class ClustersPingService {
     @EJB
     NoCacheResponse noCacheResponse;
 
+        
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response ping(@PathParam("name") String name, @PathParam("restendpoint") String rep, @PathParam("email") String mail, @PathParam("cert") String cert, @PathParam("udp_support") Boolean udps) {
