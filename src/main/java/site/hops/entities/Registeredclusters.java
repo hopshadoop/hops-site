@@ -19,19 +19,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  *
- * @author archer
+ * @author jsvhqr
  */
 @Entity
-@Table(name = "registered_clusters")
+@Table(name = "registeredclusters")
 @XmlRootElement
 @NamedQueries({
-    @NamedQuery(name = "RegisteredClusters.findAll", query = "SELECT r FROM RegisteredClusters r"),
-    @NamedQuery(name = "RegisteredClusters.findByName", query = "SELECT r FROM RegisteredClusters r WHERE r.name = :name"),
-    @NamedQuery(name = "RegisteredClusters.findByRestendpoint", query = "SELECT r FROM RegisteredClusters r WHERE r.restendpoint = :restendpoint"),
-    @NamedQuery(name = "RegisteredClusters.findByEmail", query = "SELECT r FROM RegisteredClusters r WHERE r.email = :email"),
-    @NamedQuery(name = "RegisteredClusters.findByCert", query = "SELECT r FROM RegisteredClusters r WHERE r.cert = :cert"),
-    @NamedQuery(name = "RegisteredClusters.findByUdpSupport", query = "SELECT r FROM RegisteredClusters r WHERE r.udpSupport = :udpSupport")})
-public class RegisteredClusters implements Serializable {
+    @NamedQuery(name = "Registeredclusters.findAll", query = "SELECT r FROM Registeredclusters r"),
+    @NamedQuery(name = "Registeredclusters.findByName", query = "SELECT r FROM Registeredclusters r WHERE r.name = :name"),
+    @NamedQuery(name = "Registeredclusters.findByRestendpoint", query = "SELECT r FROM Registeredclusters r WHERE r.restendpoint = :restendpoint"),
+    @NamedQuery(name = "Registeredclusters.findByEmail", query = "SELECT r FROM Registeredclusters r WHERE r.email = :email"),
+    @NamedQuery(name = "Registeredclusters.findByCert", query = "SELECT r FROM Registeredclusters r WHERE r.cert = :cert"),
+    @NamedQuery(name = "Registeredclusters.findByUdpendpoint", query = "SELECT r FROM Registeredclusters r WHERE r.udpendpoint = :udpendpoint"),
+    @NamedQuery(name = "Registeredclusters.findByHeartbeatsmissed", query = "SELECT r FROM Registeredclusters r WHERE r.heartbeatsmissed = :heartbeatsmissed"),
+    @NamedQuery(name = "Registeredclusters.findByDateregistered", query = "SELECT r FROM Registeredclusters r WHERE r.dateregistered = :dateregistered")})
+public class Registeredclusters implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -42,38 +44,44 @@ public class RegisteredClusters implements Serializable {
     private String name;
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 100)
+    @Size(min = 1, max = 300)
     @Column(name = "restendpoint")
     private String restendpoint;
     // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
     @Basic(optional = false)
     @NotNull
-    @Size(min = 1, max = 50)
+    @Size(min = 1, max = 100)
     @Column(name = "email")
     private String email;
-    @Basic(optional = false)
-    @NotNull
-    @Size(min = 1, max = 1000)
+    @Size(max = 1000)
     @Column(name = "cert")
     private String cert;
+    @Size(max = 300)
+    @Column(name = "udpendpoint")
+    private String udpendpoint;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "udp_support")
-    private boolean udpSupport;
+    @Column(name = "heartbeatsmissed")
+    private long heartbeatsmissed;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 300)
+    @Column(name = "dateregistered")
+    private String dateregistered;
 
-    public RegisteredClusters() {
+    public Registeredclusters() {
     }
 
-    public RegisteredClusters(String name) {
+    public Registeredclusters(String name) {
         this.name = name;
     }
 
-    public RegisteredClusters(String name, String restendpoint, String email, String cert, boolean udpSupport) {
+    public Registeredclusters(String name, String restendpoint, String email, long heartbeatsmissed, String dateregistered) {
         this.name = name;
         this.restendpoint = restendpoint;
         this.email = email;
-        this.cert = cert;
-        this.udpSupport = udpSupport;
+        this.heartbeatsmissed = heartbeatsmissed;
+        this.dateregistered = dateregistered;
     }
 
     public String getName() {
@@ -108,12 +116,28 @@ public class RegisteredClusters implements Serializable {
         this.cert = cert;
     }
 
-    public boolean getUdpSupport() {
-        return udpSupport;
+    public String getUdpendpoint() {
+        return udpendpoint;
     }
 
-    public void setUdpSupport(boolean udpSupport) {
-        this.udpSupport = udpSupport;
+    public void setUdpendpoint(String udpendpoint) {
+        this.udpendpoint = udpendpoint;
+    }
+
+    public long getHeartbeatsmissed() {
+        return heartbeatsmissed;
+    }
+
+    public void setHeartbeatsmissed(long heartbeatsmissed) {
+        this.heartbeatsmissed = heartbeatsmissed;
+    }
+
+    public String getDateregistered() {
+        return dateregistered;
+    }
+
+    public void setDateregistered(String dateregistered) {
+        this.dateregistered = dateregistered;
     }
 
     @Override
@@ -126,10 +150,10 @@ public class RegisteredClusters implements Serializable {
     @Override
     public boolean equals(Object object) {
         // TODO: Warning - this method won't work in the case the id fields are not set
-        if (!(object instanceof RegisteredClusters)) {
+        if (!(object instanceof Registeredclusters)) {
             return false;
         }
-        RegisteredClusters other = (RegisteredClusters) object;
+        Registeredclusters other = (Registeredclusters) object;
         if ((this.name == null && other.name != null) || (this.name != null && !this.name.equals(other.name))) {
             return false;
         }
@@ -138,7 +162,7 @@ public class RegisteredClusters implements Serializable {
 
     @Override
     public String toString() {
-        return "site.hops.entities.RegisteredClusters[ name=" + name + " ]";
+        return "site.hops.entities.Registeredclusters[ name=" + name + " ]";
     }
     
 }

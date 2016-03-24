@@ -8,14 +8,14 @@ package site.hops.beans;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import site.hops.entities.RegisteredClusters;
+import site.hops.entities.Registeredclusters;
 
 /**
  *
- * @author archer
+ * @author jsvhqr
  */
 @Stateless
-public class RegisteredClustersFacade extends AbstractFacade<RegisteredClusters> {
+public class RegisteredclustersFacade extends AbstractFacade<Registeredclusters> {
 
     @PersistenceContext(unitName = "site.hopshadoop.hops-site_hops-site_war_1.0-SNAPSHOTPU")
     private EntityManager em;
@@ -25,8 +25,8 @@ public class RegisteredClustersFacade extends AbstractFacade<RegisteredClusters>
         return em;
     }
 
-    public RegisteredClustersFacade() {
-        super(RegisteredClusters.class);
+    public RegisteredclustersFacade() {
+        super(Registeredclusters.class);
     }
     
 }

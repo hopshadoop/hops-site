@@ -4,14 +4,16 @@ import javax.annotation.Generated;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 
-@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2016-03-23T20:14:29")
-@StaticMetamodel(RegisteredClusters.class)
-public class RegisteredClusters_ { 
+@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2016-03-24T12:18:07")
+@StaticMetamodel(Registeredclusters.class)
+public class Registeredclusters_ { 
 
-    public static volatile SingularAttribute<RegisteredClusters, String> cert;
-    public static volatile SingularAttribute<RegisteredClusters, Boolean> udpSupport;
-    public static volatile SingularAttribute<RegisteredClusters, String> email;
-    public static volatile SingularAttribute<RegisteredClusters, String> name;
-    public static volatile SingularAttribute<RegisteredClusters, String> restendpoint;
+    public static volatile SingularAttribute<Registeredclusters, String> restendpoint;
+    public static volatile SingularAttribute<Registeredclusters, String> name;
+    public static volatile SingularAttribute<Registeredclusters, Long> heartbeatsmissed;
+    public static volatile SingularAttribute<Registeredclusters, String> cert;
+    public static volatile SingularAttribute<Registeredclusters, String> udpendpoint;
+    public static volatile SingularAttribute<Registeredclusters, String> dateregistered;
+    public static volatile SingularAttribute<Registeredclusters, String> email;
 
 }
