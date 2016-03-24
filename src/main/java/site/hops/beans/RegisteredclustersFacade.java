@@ -19,11 +19,13 @@ public class RegisteredclustersFacade extends AbstractFacade<Registeredclusters>
 
     @PersistenceContext(unitName = "site.hopshadoop.hops-site_hops-site_war_1.0-SNAPSHOTPU")
     private EntityManager em;
-
+    
     @Override
     protected EntityManager getEntityManager() {
         return em;
     }
+    
+    
 
     public RegisteredclustersFacade() {
         super(Registeredclusters.class);
