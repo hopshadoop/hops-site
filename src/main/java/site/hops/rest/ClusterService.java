@@ -5,6 +5,9 @@
  */
 package site.hops.rest;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.ws.rs.Consumes;
@@ -52,19 +55,25 @@ public class ClusterService {
     }*/
     
     @GET
-    @Path("/ping/{name}/{restEndpoint}/{email}/{cert}/{udpEndpoint}/{heartbeatMissed}/{dateRegistered}")
+    @Path("/ping/{name}/{restEndpoint}/{email}/{cert}/{udpEndpoint}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response Ping(@PathParam("name") String name, @PathParam("restEndpoint") String restEndpoint,@PathParam("email") String email,@PathParam("cert") String cert,@PathParam("udpEndpoint") String udpEndpoint, @PathParam("heartbeatMissed") Long heartbeatMissed, @PathParam("dateRegistered") String dateRegistered) {
+    public Response Ping(@PathParam("name") String name, @PathParam("restEndpoint") String restEndpoint,@PathParam("email") String email,@PathParam("cert") String cert,@PathParam("udpEndpoint") String udpEndpoint) {
         
         List<Registeredclusters> clusters;
         
-        if(null != registeredClustersFacade.find(name)){
+        Registeredclusters clusterExist = registeredClustersFacade.find(name);
+        if(clusterExist != null){
             
+            clusterExist.setHeartbeatsmissed(0);
+            registeredClustersFacade.edit(clusterExist);
             clusters = registeredClustersFacade.findAll();
+            
         }
         else{
-            Registeredclusters rc = new Registeredclusters(name,restEndpoint,email,heartbeatMissed,dateRegistered);
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Date date = new Date();
+            Registeredclusters rc = new Registeredclusters(name,restEndpoint,email,0,dateFormat.format(date));
             rc.setCert(cert);
             rc.setUdpendpoint(udpEndpoint);
             registeredClustersFacade.create(rc);
