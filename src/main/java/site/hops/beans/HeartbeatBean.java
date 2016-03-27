@@ -15,7 +15,7 @@ public class HeartbeatBean {
     @EJB
     RegisteredclustersFacade registeredclustersFacade;
 
-    @Schedule(minute = "*/1", hour="*")
+    @Schedule(minute = "*/1", hour="*", persistent = false)
     public void automaticTimeout() {
         for(Registeredclusters cluster : registeredclustersFacade.findAll()){
             cluster.setHeartbeatsmissed(cluster.getHeartbeatsmissed() + 1);
