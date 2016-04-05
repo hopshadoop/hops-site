@@ -5,6 +5,7 @@
  */
 package site.hops.rest;
 
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -61,6 +62,9 @@ public class ClusterService {
     public Response Ping(@PathParam("name") String name, @PathParam("restEndpoint") String restEndpoint,@PathParam("email") String email,@PathParam("cert") String cert,@PathParam("udpEndpoint") String udpEndpoint) {
         
         List<Registeredclusters> clusters;
+        
+        restEndpoint = restEndpoint.replaceAll("'", "/");
+        udpEndpoint = udpEndpoint.replaceAll("'", "/");
         
         Registeredclusters clusterExist = registeredClustersFacade.find(name);
         if(clusterExist != null){

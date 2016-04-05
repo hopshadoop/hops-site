@@ -43,6 +43,8 @@ public class NewJerseyClient {
 
     public <T> T Ping(Class<T> responseType, String name, String restEndpoint, String email, String cert, String udpEndpoint) throws ClientErrorException {
         WebTarget resource = webTarget;
+        restEndpoint = restEndpoint.replaceAll("/", "'");
+        udpEndpoint = udpEndpoint.replaceAll("/", "'");
         resource = resource.path(java.text.MessageFormat.format("ping/{0}/{1}/{2}/{3}/{4}", new Object[]{name, restEndpoint, email, cert, udpEndpoint}));
         return resource.request(javax.ws.rs.core.MediaType.APPLICATION_JSON).get(responseType);
     }

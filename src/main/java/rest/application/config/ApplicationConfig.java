@@ -10,7 +10,7 @@ import site.hops.rest.ClusterService;
 
 /**
  *
- * @author archer
+ * @author jsvhqr
  */
 @javax.ws.rs.ApplicationPath("webapi")
 public class ApplicationConfig extends ResourceConfig {
