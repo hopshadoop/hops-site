@@ -70,6 +70,7 @@ public class ClusterService {
         if(clusterExist != null){
             
             clusterExist.setHeartbeatsmissed(0);
+            registeredClustersFacade.edit(clusterExist);
             clusters = registeredClustersFacade.findAll();
             
         }
