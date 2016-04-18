@@ -70,6 +70,9 @@ public class ClusterService {
         if(clusterExist != null){
             
             clusterExist.setHeartbeatsmissed(0);
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Date date = new Date();
+            clusterExist.setDatelastping(dateFormat.format(date));
             registeredClustersFacade.edit(clusterExist);
             clusters = registeredClustersFacade.findAll();
             
@@ -77,9 +80,7 @@ public class ClusterService {
         else{
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             Date date = new Date();
-            Registeredclusters rc = new Registeredclusters(name,restEndpoint,email,0,dateFormat.format(date));
-            rc.setCert(cert);
-            rc.setUdpendpoint(udpEndpoint);
+            Registeredclusters rc = new Registeredclusters(name,restEndpoint,email,cert,udpEndpoint,0,dateFormat.format(date),dateFormat.format(date));
             registeredClustersFacade.create(rc);
             clusters = registeredClustersFacade.findAll();
         }

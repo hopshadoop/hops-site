@@ -32,7 +32,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Registeredclusters.findByCert", query = "SELECT r FROM Registeredclusters r WHERE r.cert = :cert"),
     @NamedQuery(name = "Registeredclusters.findByUdpendpoint", query = "SELECT r FROM Registeredclusters r WHERE r.udpendpoint = :udpendpoint"),
     @NamedQuery(name = "Registeredclusters.findByHeartbeatsmissed", query = "SELECT r FROM Registeredclusters r WHERE r.heartbeatsmissed = :heartbeatsmissed"),
-    @NamedQuery(name = "Registeredclusters.findByDateregistered", query = "SELECT r FROM Registeredclusters r WHERE r.dateregistered = :dateregistered")})
+    @NamedQuery(name = "Registeredclusters.findByDateregistered", query = "SELECT r FROM Registeredclusters r WHERE r.dateregistered = :dateregistered"),
+    @NamedQuery(name = "Registeredclusters.findByDatelastping", query = "SELECT r FROM Registeredclusters r WHERE r.datelastping = :datelastping")})
 public class Registeredclusters implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -53,10 +54,14 @@ public class Registeredclusters implements Serializable {
     @Size(min = 1, max = 100)
     @Column(name = "email")
     private String email;
-    @Size(max = 1000)
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 1000)
     @Column(name = "cert")
     private String cert;
-    @Size(max = 300)
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 300)
     @Column(name = "udpendpoint")
     private String udpendpoint;
     @Basic(optional = false)
@@ -68,6 +73,11 @@ public class Registeredclusters implements Serializable {
     @Size(min = 1, max = 300)
     @Column(name = "dateregistered")
     private String dateregistered;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 300)
+    @Column(name = "datelastping")
+    private String datelastping;
 
     public Registeredclusters() {
     }
@@ -76,12 +86,15 @@ public class Registeredclusters implements Serializable {
         this.name = name;
     }
 
-    public Registeredclusters(String name, String restendpoint, String email, long heartbeatsmissed, String dateregistered) {
+    public Registeredclusters(String name, String restendpoint, String email, String cert, String udpendpoint, long heartbeatsmissed, String dateregistered, String datelastping) {
         this.name = name;
         this.restendpoint = restendpoint;
         this.email = email;
+        this.cert = cert;
+        this.udpendpoint = udpendpoint;
         this.heartbeatsmissed = heartbeatsmissed;
         this.dateregistered = dateregistered;
+        this.datelastping = datelastping;
     }
 
     public String getName() {
@@ -138,6 +151,14 @@ public class Registeredclusters implements Serializable {
 
     public void setDateregistered(String dateregistered) {
         this.dateregistered = dateregistered;
+    }
+
+    public String getDatelastping() {
+        return datelastping;
+    }
+
+    public void setDatelastping(String datelastping) {
+        this.datelastping = datelastping;
     }
 
     @Override
