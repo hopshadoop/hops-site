@@ -32,29 +32,6 @@ public class ClusterService {
     @EJB
     RegisteredclustersFacade registeredClustersFacade;
     
-    
-    
-    /*@GET
-    @Path("/ping/{name}/{restEndpoint}/{email}/{heartbeatmissed}/{dateregistered}")
-    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response Ping(@PathParam("name") String name, @PathParam("restEndpoint") String restEndpoint,@PathParam("email") String email, @PathParam("heartbeatMissed") Long heartbeatMissed, @PathParam("dateRegistered") String dateRegistered) {
-        
-        List<Registeredclusters> clusters;
-        
-        if(null != registeredClustersFacade.find(name)){
-            
-            clusters = registeredClustersFacade.findAll();
-        }
-        else{
-            Registeredclusters rc = new Registeredclusters(name,restEndpoint,email,heartbeatMissed,dateRegistered);
-            registeredClustersFacade.create(rc);
-            clusters = registeredClustersFacade.findAll();
-        }
-        
-        return Response.status(200).entity(clusters).build();
-    }*/
-    
     @GET
     @Path("/ping/{name}/{restEndpoint}/{email}/{cert}/{udpEndpoint}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
