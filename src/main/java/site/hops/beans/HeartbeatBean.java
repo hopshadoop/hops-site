@@ -3,7 +3,7 @@ package site.hops.beans;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
 import javax.ejb.Stateless;
-import site.hops.entities.Registeredclusters;
+import site.hops.entities.RegisteredClusters;
 
 /**
  *
@@ -13,12 +13,12 @@ import site.hops.entities.Registeredclusters;
 public class HeartbeatBean {
     
     @EJB
-    RegisteredclustersFacade registeredclustersFacade;
+    RegisteredClustersFacade registeredclustersFacade;
 
     @Schedule(minute = "*/5", hour="*", persistent = false)
     public void automaticTimeout() {
-        for(Registeredclusters cluster : registeredclustersFacade.findAll()){
-            cluster.setHeartbeatsmissed(cluster.getHeartbeatsmissed() + 1);
+        for(RegisteredClusters cluster : registeredclustersFacade.findAll()){
+            cluster.setHeartbeatsMissed(cluster.getHeartbeatsMissed() + 1);
         }
     }
 
