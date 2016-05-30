@@ -10,7 +10,7 @@ import site.hops.entities.RegisteredClusters;
  * @author jsvhqr
  */
 @Stateless
-public class HeartbeatBean {
+public class MissedHeartBeatsUpdater {
     
     @EJB
     RegisteredClustersFacade registeredclustersFacade;

@@ -69,9 +69,6 @@ public class ClusterService {
 
         List<RegisteredClusters> clusters;
 
-        search_endpoint = search_endpoint.replaceAll("'", "/");
-        gvod_endpoint = gvod_endpoint.replaceAll("'", "/");
-
         RegisteredClusters registeredCluster = registeredClustersFacade.find(cluster_id);
         if (registeredCluster != null) {
             registeredCluster.setHeartbeatsMissed(0);
