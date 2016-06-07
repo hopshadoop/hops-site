@@ -26,10 +26,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "PopularDatasets.findAll", query = "SELECT p FROM PopularDatasets p"),
+    @NamedQuery(name = "PopularDatasets.findByName", query = "SELECT p FROM PopularDatasets p WHERE p.name = :name"),
     @NamedQuery(name = "PopularDatasets.findByDatasetId", query = "SELECT p FROM PopularDatasets p WHERE p.datasetId = :datasetId"),
-    @NamedQuery(name = "PopularDatasets.findByComments", query = "SELECT p FROM PopularDatasets p WHERE p.comments = :comments"),
-    @NamedQuery(name = "PopularDatasets.findByDownloads", query = "SELECT p FROM PopularDatasets p WHERE p.downloads = :downloads"),
-    @NamedQuery(name = "PopularDatasets.findByUpload", query = "SELECT p FROM PopularDatasets p WHERE p.upload = :upload")})
+    @NamedQuery(name = "PopularDatasets.findByPositiveVotes", query = "SELECT p FROM PopularDatasets p WHERE p.positiveVotes = :positiveVotes"),
+    @NamedQuery(name = "PopularDatasets.findByNegativeVotes", query = "SELECT p FROM PopularDatasets p WHERE p.negativeVotes = :negativeVotes"),
+    @NamedQuery(name = "PopularDatasets.findByFiles", query = "SELECT p FROM PopularDatasets p WHERE p.files = :files"),
+    @NamedQuery(name = "PopularDatasets.findBySize", query = "SELECT p FROM PopularDatasets p WHERE p.size = :size"),
+    @NamedQuery(name = "PopularDatasets.findByLeeches", query = "SELECT p FROM PopularDatasets p WHERE p.leeches = :leeches"),
+    @NamedQuery(name = "PopularDatasets.findBySeeds", query = "SELECT p FROM PopularDatasets p WHERE p.seeds = :seeds")})
 public class PopularDatasets implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -37,31 +41,62 @@ public class PopularDatasets implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 300)
+    @Column(name = "name")
+    private String name;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 300)
     @Column(name = "dataset_id")
     private String datasetId;
-    @Size(max = 1000)
-    @Column(name = "comments")
-    private String comments;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "downloads")
-    private int downloads;
+    @Column(name = "positive_votes")
+    private int positiveVotes;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "upload")
-    private int upload;
+    @Column(name = "negative_votes")
+    private int negativeVotes;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "files")
+    private int files;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "size")
+    private int size;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "leeches")
+    private int leeches;
+    @Basic(optional = false)
+    @NotNull
+    @Column(name = "seeds")
+    private int seeds;
 
     public PopularDatasets() {
     }
 
-    public PopularDatasets(String datasetId) {
-        this.datasetId = datasetId;
+    public PopularDatasets(String name) {
+        this.name = name;
     }
 
-    public PopularDatasets(String datasetId, int downloads, int upload) {
+    public PopularDatasets(String name, String datasetId, int positiveVotes, int negativeVotes, int files, int size, int leeches, int seeds) {
+        this.name = name;
         this.datasetId = datasetId;
-        this.downloads = downloads;
-        this.upload = upload;
+        this.positiveVotes = positiveVotes;
+        this.negativeVotes = negativeVotes;
+        this.files = files;
+        this.size = size;
+        this.leeches = leeches;
+        this.seeds = seeds;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDatasetId() {
@@ -72,34 +107,58 @@ public class PopularDatasets implements Serializable {
         this.datasetId = datasetId;
     }
 
-    public String getComments() {
-        return comments;
+    public int getPositiveVotes() {
+        return positiveVotes;
     }
 
-    public void setComments(String comments) {
-        this.comments = comments;
+    public void setPositiveVotes(int positiveVotes) {
+        this.positiveVotes = positiveVotes;
     }
 
-    public int getDownloads() {
-        return downloads;
+    public int getNegativeVotes() {
+        return negativeVotes;
     }
 
-    public void setDownloads(int downloads) {
-        this.downloads = downloads;
+    public void setNegativeVotes(int negativeVotes) {
+        this.negativeVotes = negativeVotes;
     }
 
-    public int getUpload() {
-        return upload;
+    public int getFiles() {
+        return files;
     }
 
-    public void setUpload(int upload) {
-        this.upload = upload;
+    public void setFiles(int files) {
+        this.files = files;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public int getLeeches() {
+        return leeches;
+    }
+
+    public void setLeeches(int leeches) {
+        this.leeches = leeches;
+    }
+
+    public int getSeeds() {
+        return seeds;
+    }
+
+    public void setSeeds(int seeds) {
+        this.seeds = seeds;
     }
 
     @Override
     public int hashCode() {
         int hash = 0;
-        hash += (datasetId != null ? datasetId.hashCode() : 0);
+        hash += (name != null ? name.hashCode() : 0);
         return hash;
     }
 
@@ -110,7 +169,7 @@ public class PopularDatasets implements Serializable {
             return false;
         }
         PopularDatasets other = (PopularDatasets) object;
-        if ((this.datasetId == null && other.datasetId != null) || (this.datasetId != null && !this.datasetId.equals(other.datasetId))) {
+        if ((this.name == null && other.name != null) || (this.name != null && !this.name.equals(other.name))) {
             return false;
         }
         return true;
@@ -118,7 +177,7 @@ public class PopularDatasets implements Serializable {
 
     @Override
     public String toString() {
-        return "site.hops.entities.PopularDatasets[ datasetId=" + datasetId + " ]";
+        return "site.hops.entities.PopularDatasets[ name=" + name + " ]";
     }
     
 }
