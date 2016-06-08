@@ -46,24 +46,15 @@ public class ClusterService {
 
             if (isValid(cert)) {
 
-                registerCluster(search_endpoint, email, cert, gvod_endpoint);
-                List<RegisteredClusters> clusters = getAllRegisteredClusters();
-                GenericEntity<List<RegisteredClusters>> to_return = new GenericEntity<List<RegisteredClusters>>(clusters) {
-                };
+                String registeredId = registerCluster(search_endpoint, email, cert, gvod_endpoint);
 
-                return Response.status(200).entity(to_return).build();
+                return Response.status(200).entity(registeredId).build();
             } else {
-                List<RegisteredClusters> clusters = new ArrayList<>();
-                GenericEntity<List<RegisteredClusters>> to_return = new GenericEntity<List<RegisteredClusters>>(clusters) {
-                };
-                return Response.status(403).entity(to_return).build();
+                return Response.status(403).entity(null).build();
             }
 
         } else {
-            List<RegisteredClusters> clusters = new ArrayList<>();
-            GenericEntity<List<RegisteredClusters>> to_return = new GenericEntity<List<RegisteredClusters>>(clusters) {
-            };
-            return Response.status(403).entity(to_return).build();
+            return Response.status(403).entity(null).build();
         }
 
     }
@@ -76,11 +67,14 @@ public class ClusterService {
 
        
         if(!ClusterRegistered(email)){
-            List<RegisteredClusters> clusters = new ArrayList<>();
-                GenericEntity<List<RegisteredClusters>> to_return = new GenericEntity<List<RegisteredClusters>>(clusters) {
-                };
-                return Response.status(403).entity(to_return).build();
+                return Response.status(403).entity(null).build();
         }else{
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Date date = new Date();
+            RegisteredClusters rc = this.registeredClustersFacade.findByEmail(email);
+            rc.setHeartbeatsMissed(0);
+            rc.setDateLastPing(dateFormat.format(date));
+            this.registeredClustersFacade.edit(rc);
             List<RegisteredClusters> clusters = getAllRegisteredClusters();
                 GenericEntity<List<RegisteredClusters>> to_return = new GenericEntity<List<RegisteredClusters>>(clusters) {
                 };
@@ -112,14 +106,15 @@ public class ClusterService {
 
     }
 
-    private void registerCluster(String search_endpoint, String email, String cert, String gvod_endpoint) {
+    private String registerCluster(String search_endpoint, String email, String cert, String gvod_endpoint) {
 
         String uniqueId = UUID.randomUUID().toString();
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
         this.registeredClustersFacade.create(new RegisteredClusters(uniqueId, search_endpoint, email, cert, gvod_endpoint, 0, dateFormat.format(date), dateFormat.format(date)));
-
+        
+        return uniqueId;
     }
 
     private List<RegisteredClusters> getAllRegisteredClusters() {

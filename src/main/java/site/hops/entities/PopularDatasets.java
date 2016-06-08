@@ -28,8 +28,6 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "PopularDatasets.findAll", query = "SELECT p FROM PopularDatasets p"),
     @NamedQuery(name = "PopularDatasets.findByName", query = "SELECT p FROM PopularDatasets p WHERE p.name = :name"),
     @NamedQuery(name = "PopularDatasets.findByDatasetId", query = "SELECT p FROM PopularDatasets p WHERE p.datasetId = :datasetId"),
-    @NamedQuery(name = "PopularDatasets.findByPositiveVotes", query = "SELECT p FROM PopularDatasets p WHERE p.positiveVotes = :positiveVotes"),
-    @NamedQuery(name = "PopularDatasets.findByNegativeVotes", query = "SELECT p FROM PopularDatasets p WHERE p.negativeVotes = :negativeVotes"),
     @NamedQuery(name = "PopularDatasets.findByFiles", query = "SELECT p FROM PopularDatasets p WHERE p.files = :files"),
     @NamedQuery(name = "PopularDatasets.findBySize", query = "SELECT p FROM PopularDatasets p WHERE p.size = :size"),
     @NamedQuery(name = "PopularDatasets.findByLeeches", query = "SELECT p FROM PopularDatasets p WHERE p.leeches = :leeches"),
@@ -48,14 +46,6 @@ public class PopularDatasets implements Serializable {
     @Size(min = 1, max = 300)
     @Column(name = "dataset_id")
     private String datasetId;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "positive_votes")
-    private int positiveVotes;
-    @Basic(optional = false)
-    @NotNull
-    @Column(name = "negative_votes")
-    private int negativeVotes;
     @Basic(optional = false)
     @NotNull
     @Column(name = "files")
@@ -80,11 +70,9 @@ public class PopularDatasets implements Serializable {
         this.name = name;
     }
 
-    public PopularDatasets(String name, String datasetId, int positiveVotes, int negativeVotes, int files, int size, int leeches, int seeds) {
+    public PopularDatasets(String name, String datasetId, int files, int size, int leeches, int seeds) {
         this.name = name;
         this.datasetId = datasetId;
-        this.positiveVotes = positiveVotes;
-        this.negativeVotes = negativeVotes;
         this.files = files;
         this.size = size;
         this.leeches = leeches;
@@ -105,22 +93,6 @@ public class PopularDatasets implements Serializable {
 
     public void setDatasetId(String datasetId) {
         this.datasetId = datasetId;
-    }
-
-    public int getPositiveVotes() {
-        return positiveVotes;
-    }
-
-    public void setPositiveVotes(int positiveVotes) {
-        this.positiveVotes = positiveVotes;
-    }
-
-    public int getNegativeVotes() {
-        return negativeVotes;
-    }
-
-    public void setNegativeVotes(int negativeVotes) {
-        this.negativeVotes = negativeVotes;
     }
 
     public int getFiles() {
