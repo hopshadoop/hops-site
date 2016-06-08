@@ -7,6 +7,7 @@ package site.hops.beans;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import site.hops.entities.RegisteredClusters;
 
@@ -23,6 +24,16 @@ public class RegisteredClustersFacade extends AbstractFacade<RegisteredClusters>
     @Override
     protected EntityManager getEntityManager() {
         return em;
+    }
+    
+    public RegisteredClusters findByEmail(String email){
+        RegisteredClusters ret = null;
+        try{
+            ret = em.createNamedQuery("RegisteredClusters.findByEmail", RegisteredClusters.class).setParameter("email", email).getSingleResult();
+        }catch(NoResultException e){
+            return ret;
+        }
+        return ret;
     }
 
     public RegisteredClustersFacade() {
