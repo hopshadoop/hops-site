@@ -21,7 +21,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import site.hops.beans.PopularDatasetsFacade;
 import site.hops.beans.RegisteredClustersFacade;
+import site.hops.entities.PopularDatasets;
 import site.hops.entities.RegisteredClusters;
 
 /**
@@ -32,6 +34,8 @@ public class ClusterService {
 
     @EJB
     RegisteredClustersFacade registeredClustersFacade;
+    
+    @EJB PopularDatasetsFacade popularDatasetsFacade;
 
     @GET
     @Path("/register/{search_endpoint}/{email}/{cert}/{gvod_endpoint}")
@@ -42,7 +46,7 @@ public class ClusterService {
         search_endpoint = search_endpoint.replaceAll("'", "/");
         gvod_endpoint = gvod_endpoint.replaceAll("'", "/");
 
-        if (!ClusterRegistered(email)) {
+        if (!ClusterRegisteredWithEmail(email)) {
 
             if (isValid(cert)) {
 
@@ -60,18 +64,18 @@ public class ClusterService {
     }
 
     @GET
-    @Path("/ping/{cluster_id}/{search_endpoint}/{email}/{cert}/{gvod_endpoint}")
+    @Path("/ping/{cluster_id}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response Ping(@PathParam("cluster_id") String cluster_id, @PathParam("search_endpoint") String search_endpoint, @PathParam("email") String email, @PathParam("cert") String cert, @PathParam("gvod_endpoint") String gvod_endpoint) {
+    public Response Ping(@PathParam("cluster_id") String cluster_id) {
 
        
-        if(!ClusterRegistered(email)){
+        if(!ClusterRegisteredWithId(cluster_id)){
                 return Response.status(403).entity(null).build();
         }else{
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             Date date = new Date();
-            RegisteredClusters rc = this.registeredClustersFacade.findByEmail(email);
+            RegisteredClusters rc = this.registeredClustersFacade.find(cluster_id);
             rc.setHeartbeatsMissed(0);
             rc.setDateLastPing(dateFormat.format(date));
             this.registeredClustersFacade.edit(rc);
@@ -83,6 +87,24 @@ public class ClusterService {
         
 
     }
+    
+    @GET
+    @Path("/populardatasets/{cluster_id}")
+    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response PopularDatasets(@PathParam("cluster_id") String cluster_id) {
+        
+        if(!ClusterRegisteredWithId(cluster_id)){
+            return Response.status(403).entity(null).build();
+        }else{
+            List<PopularDatasets> popularDatasets = this.popularDatasetsFacade.findAll();
+            GenericEntity<List<PopularDatasets>> to_return = new GenericEntity<List<PopularDatasets>>(popularDatasets) {
+                };
+                return Response.status(200).entity(to_return).build();
+        }
+        
+    }
+    
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -94,15 +116,9 @@ public class ClusterService {
         return true;
     }
 
-    private boolean ClusterRegistered(String email) {
-
-        boolean exists;
+    private boolean ClusterRegisteredWithEmail(String email) {
         RegisteredClusters rq = this.registeredClustersFacade.findByEmail(email);
-        if (rq != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return rq != null;
 
     }
 
@@ -120,6 +136,13 @@ public class ClusterService {
     private List<RegisteredClusters> getAllRegisteredClusters() {
 
         return this.registeredClustersFacade.findAll();
+    }
+
+    private boolean ClusterRegisteredWithId(String cluster_id) {
+        
+        RegisteredClusters rq = this.registeredClustersFacade.find(cluster_id);
+        return rq != null;
+        
     }
 
 }
