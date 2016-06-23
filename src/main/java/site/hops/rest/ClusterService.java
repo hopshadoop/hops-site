@@ -41,16 +41,17 @@ public class ClusterService {
     @Path("/register/{search_endpoint}/{email}/{cert}/{gvod_endpoint}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response Register(@PathParam("search_endpoint") String search_endpoint, @PathParam("email") String email, @PathParam("cert") String cert, @PathParam("gvod_endpoint") String gvod_endpoint) {
+    public Response Register(@PathParam("search_endpoint") String searchEndpoint, @PathParam("email") String email, @PathParam("cert") String cert, @PathParam("gvod_endpoint") String gvodEndpoint) {
 
-        search_endpoint = search_endpoint.replaceAll("'", "/");
-        gvod_endpoint = gvod_endpoint.replaceAll("'", "/");
-
+        searchEndpoint = searchEndpoint.replaceAll("'", "/");
+        gvodEndpoint = gvodEndpoint.replace("&", "{");
+        gvodEndpoint = gvodEndpoint.replace("%", "}");
+        
         if (!ClusterRegisteredWithEmail(email)) {
 
             if (isValid(cert)) {
 
-                String registeredId = registerCluster(search_endpoint, email, cert, gvod_endpoint);
+                String registeredId = registerCluster(searchEndpoint, email, cert, gvodEndpoint);
 
                 return Response.status(200).entity(registeredId).build();
             } else {
