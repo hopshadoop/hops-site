@@ -25,6 +25,7 @@ import site.hops.beans.PopularDatasetsFacade;
 import site.hops.beans.RegisteredClustersFacade;
 import site.hops.entities.PopularDatasets;
 import site.hops.entities.RegisteredClusters;
+import site.hops.model.RegisterJson;
 
 /**
  * Root resource (exposed at "myresource" path)
@@ -38,20 +39,16 @@ public class ClusterService {
     @EJB PopularDatasetsFacade popularDatasetsFacade;
 
     @GET
-    @Path("/register/{search_endpoint}/{email}/{cert}/{gvod_endpoint}")
-    @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    @Path("register")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response Register(@PathParam("search_endpoint") String searchEndpoint, @PathParam("email") String email, @PathParam("cert") String cert, @PathParam("gvod_endpoint") String gvodEndpoint) {
-
-        searchEndpoint = searchEndpoint.replaceAll("'", "/");
-        gvodEndpoint = gvodEndpoint.replace("&", "{");
-        gvodEndpoint = gvodEndpoint.replace("%", "}");
+    public Response Register(RegisterJson registerJson) {
         
-        if (!ClusterRegisteredWithEmail(email)) {
+        if (!ClusterRegisteredWithEmail(registerJson.getEmail())) {
 
-            if (isValid(cert)) {
+            if (isValid(registerJson.getCert())) {
 
-                String registeredId = registerCluster(searchEndpoint, email, cert, gvodEndpoint);
+                String registeredId = registerCluster(registerJson.getSearchEndpoint(), registerJson.getEmail(), registerJson.getCert(), registerJson.getGVodEndpoint());
 
                 return Response.status(200).entity(registeredId).build();
             } else {
