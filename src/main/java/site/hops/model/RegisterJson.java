@@ -5,13 +5,12 @@
  */
 package site.hops.model;
 
-import javax.xml.bind.annotation.XmlRootElement;
 
+import org.json.JSONObject;
 /**
  *
  * @author jsvhqr
  */
-@XmlRootElement
 public class RegisterJson {
 
     private String searchEndpoint;
@@ -22,11 +21,14 @@ public class RegisterJson {
 
     private String cert;
 
-    public RegisterJson(String searchEndpoint, String gvodEndpoint, String email, String cert) {
-        this.searchEndpoint = searchEndpoint;
-        this.gvodEndpoint = gvodEndpoint;
-        this.email = email;
-        this.cert = cert;
+    public RegisterJson(String registerJson) {
+        
+        JSONObject jsonObject = new JSONObject(registerJson);
+        
+        this.searchEndpoint = jsonObject.getString("searchEndpoint");
+        this.gvodEndpoint = jsonObject.getString("gvodEndpoint");
+        this.email = jsonObject.getString("email");
+        this.cert = jsonObject.getString("cert");
     }
 
     public String getSearchEndpoint() {

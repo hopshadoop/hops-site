@@ -5,16 +5,15 @@
  */
 package site.hops.rest;
 
-import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import javax.ejb.EJB;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -32,17 +31,18 @@ import site.hops.model.RegisterJson;
  */
 @Path("myresource")
 public class ClusterService {
-
     @EJB
     RegisteredClustersFacade registeredClustersFacade;
     
     @EJB PopularDatasetsFacade popularDatasetsFacade;
 
-    @GET
+    @POST
     @Path("register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response Register(RegisterJson registerJson) {
+    public Response Register(String json) {
+        
+        RegisterJson registerJson = new RegisterJson(json);
         
         if (!ClusterRegisteredWithEmail(registerJson.getEmail())) {
 
