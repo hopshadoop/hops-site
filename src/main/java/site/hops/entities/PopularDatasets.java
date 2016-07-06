@@ -29,9 +29,9 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "PopularDatasets.findByName", query = "SELECT p FROM PopularDatasets p WHERE p.name = :name"),
     @NamedQuery(name = "PopularDatasets.findByDatasetId", query = "SELECT p FROM PopularDatasets p WHERE p.datasetId = :datasetId"),
     @NamedQuery(name = "PopularDatasets.findByFiles", query = "SELECT p FROM PopularDatasets p WHERE p.files = :files"),
-    @NamedQuery(name = "PopularDatasets.findBySize", query = "SELECT p FROM PopularDatasets p WHERE p.size = :size"),
     @NamedQuery(name = "PopularDatasets.findByLeeches", query = "SELECT p FROM PopularDatasets p WHERE p.leeches = :leeches"),
-    @NamedQuery(name = "PopularDatasets.findBySeeds", query = "SELECT p FROM PopularDatasets p WHERE p.seeds = :seeds")})
+    @NamedQuery(name = "PopularDatasets.findBySeeds", query = "SELECT p FROM PopularDatasets p WHERE p.seeds = :seeds"),
+    @NamedQuery(name = "PopularDatasets.findByDatasetStructure", query = "SELECT p FROM PopularDatasets p WHERE p.datasetStructure = :datasetStructure")})
 public class PopularDatasets implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -52,16 +52,17 @@ public class PopularDatasets implements Serializable {
     private int files;
     @Basic(optional = false)
     @NotNull
-    @Column(name = "size")
-    private int size;
-    @Basic(optional = false)
-    @NotNull
     @Column(name = "leeches")
     private int leeches;
     @Basic(optional = false)
     @NotNull
     @Column(name = "seeds")
     private int seeds;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 1000)
+    @Column(name = "dataset_structure")
+    private String datasetStructure;
 
     public PopularDatasets() {
     }
@@ -70,13 +71,13 @@ public class PopularDatasets implements Serializable {
         this.name = name;
     }
 
-    public PopularDatasets(String name, String datasetId, int files, int size, int leeches, int seeds) {
+    public PopularDatasets(String name, String datasetId, int files, int leeches, int seeds, String datasetStructure) {
         this.name = name;
         this.datasetId = datasetId;
         this.files = files;
-        this.size = size;
         this.leeches = leeches;
         this.seeds = seeds;
+        this.datasetStructure = datasetStructure;
     }
 
     public String getName() {
@@ -103,14 +104,6 @@ public class PopularDatasets implements Serializable {
         this.files = files;
     }
 
-    public int getSize() {
-        return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
-    }
-
     public int getLeeches() {
         return leeches;
     }
@@ -125,6 +118,14 @@ public class PopularDatasets implements Serializable {
 
     public void setSeeds(int seeds) {
         this.seeds = seeds;
+    }
+
+    public String getDatasetStructure() {
+        return datasetStructure;
+    }
+
+    public void setDatasetStructure(String datasetStructure) {
+        this.datasetStructure = datasetStructure;
     }
 
     @Override

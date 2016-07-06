@@ -6,7 +6,7 @@
 package rest.application.config;
 
 import org.glassfish.jersey.server.ResourceConfig;
-import site.hops.rest.ClusterService;
+import site.hops.rest.RegisterAndPingService;
 
 /**
  *
@@ -15,6 +15,6 @@ import site.hops.rest.ClusterService;
 @javax.ws.rs.ApplicationPath("webapi")
 public class ApplicationConfig extends ResourceConfig {
     public ApplicationConfig() {
-        register(ClusterService.class);
+        register(RegisterAndPingService.class);
     }
 }
