@@ -61,7 +61,7 @@ public class RegisterAndPingService {
     }
 
     @GET
-    @Path("/ping/{cluster_id}")
+    @Path("ping/{cluster_id}")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
     public Response Ping(@PathParam("cluster_id") String cluster_id) {
