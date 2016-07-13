@@ -11,14 +11,17 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import site.hops.beans.PopularDatasetsFacade;
 import site.hops.entities.PopularDatasets;
-import site.hops.model.PopularDatasetsJson;
+import site.hops.model.popular_datasets.FailureAddDatasetJson;
+import site.hops.model.popular_datasets.FailureGetPopularDatasetsJson;
+import site.hops.model.popular_datasets.GetPopularDatasetsJson;
+import site.hops.model.popular_datasets.PopularDatasetsJson;
+import site.hops.model.popular_datasets.SuccessAddDatasetJson;
+import site.hops.model.popular_datasets.SuccessGetPopularDatasetsJson;
 import site.hops.tools.HelperFunctions;
 
 /**
@@ -29,7 +32,6 @@ import site.hops.tools.HelperFunctions;
 public class PopularDatasetsService {
     
     
-    
     @EJB 
     PopularDatasetsFacade popularDatasetsFacade;
     @EJB
@@ -37,34 +39,31 @@ public class PopularDatasetsService {
     
     
     @GET
-    @Path("populardatasets/{cluster_id}")
+    @Path("populardatasets")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response PopularDatasets(@PathParam("cluster_id") String cluster_id) {
+    public Response PopularDatasets(GetPopularDatasetsJson getPopularDatasetsJson) {
         
-        if(!helperFunctions.ClusterRegisteredWithId(cluster_id)){
-            return Response.status(403).entity(null).build();
+        if(!helperFunctions.ClusterRegisteredWithId(getPopularDatasetsJson.getClusterId())){
+            return Response.status(403).entity(new FailureGetPopularDatasetsJson("invalid cluster id")).build();
         }else{
             List<PopularDatasets> popularDatasets = this.popularDatasetsFacade.findAll();
-            GenericEntity<List<PopularDatasets>> to_return = new GenericEntity<List<PopularDatasets>>(popularDatasets) {
-                };
-                return Response.status(200).entity(to_return).build();
+                return Response.status(200).entity(new SuccessGetPopularDatasetsJson(popularDatasets)).build();
         }
         
     }
     
     @POST
-    @Path("populardatasets/{cluster_id}")
+    @Path("populardatasets")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response PopularDatasetsAdd(@PathParam("cluster_id") String cluster_id,String json) {
+    public Response PopularDatasetsAdd(PopularDatasetsJson popularDatasetsJson) {
         
-        if(!helperFunctions.ClusterRegisteredWithId(cluster_id)){
-            return Response.status(403).entity(null).build();
+        if(!helperFunctions.ClusterRegisteredWithId(popularDatasetsJson.getClusterId())){
+            return Response.status(403).entity(new FailureAddDatasetJson("invalid id")).build();
         }else{
-            PopularDatasetsJson popularDatasetsJson = new PopularDatasetsJson(json);
             popularDatasetsFacade.create(new PopularDatasets(popularDatasetsJson.getDatasetName(), popularDatasetsJson.getDatasetId(),popularDatasetsJson.getFiles(),popularDatasetsJson.getLeeches(),popularDatasetsJson.getSeeds(),popularDatasetsJson.getStructure()));
-            return Response.status(200).build();
+            return Response.status(200).entity(new SuccessAddDatasetJson("Added your dataset")).build();
         }
                 
                 

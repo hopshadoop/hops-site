@@ -21,7 +21,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import site.hops.beans.RegisteredClustersFacade;
 import site.hops.entities.RegisteredClusters;
-import site.hops.model.RegisterJson;
+import site.hops.model.ping.FailurePingJson;
+import site.hops.model.ping.PingJson;
+import site.hops.model.ping.SuccessPingJson;
+import site.hops.model.register.FailureRegisterJson;
+import site.hops.model.register.RegisterJson;
+import site.hops.model.register.SuccessRegisterJson;
 import site.hops.tools.HelperFunctions;
 
 /**
@@ -39,9 +44,7 @@ public class RegisterAndPingService {
     @Path("register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response Register(String json) {
-        
-        RegisterJson registerJson = new RegisterJson(json);
+    public Response Register(RegisterJson registerJson) {
         
         if (!helperFunctions.ClusterRegisteredWithEmail(registerJson.getEmail())) {
 
@@ -49,46 +52,40 @@ public class RegisterAndPingService {
 
                 String registeredId = helperFunctions.registerCluster(registerJson.getSearchEndpoint(), registerJson.getEmail(), registerJson.getCert(), registerJson.getGVodEndpoint());
 
-                return Response.status(200).entity(registeredId).build();
+                return Response.status(200).entity(new SuccessRegisterJson(registeredId)).build();
+                
             } else {
-                return Response.status(403).entity(null).build();
+                
+                
+                return Response.status(403).entity(new FailureRegisterJson("invalid cert")).build();
             }
 
         } else {
-            return Response.status(403).entity(null).build();
+            
+            return Response.status(403).entity(new FailureRegisterJson("already registered")).build();
         }
 
     }
 
     @GET
-    @Path("ping/{cluster_id}")
+    @Path("ping")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response Ping(@PathParam("cluster_id") String cluster_id) {
-
+    public Response Ping(PingJson pingJson) {
        
-        if(!helperFunctions.ClusterRegisteredWithId(cluster_id)){
-                return Response.status(403).entity(null).build();
+        if(!helperFunctions.ClusterRegisteredWithId(pingJson.getClusterId())){
+                return Response.status(403).entity(new FailurePingJson("invalid id")).build();
         }else{
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             Date date = new Date();
-            RegisteredClusters rc = this.registeredClustersFacade.find(cluster_id);
+            RegisteredClusters rc = this.registeredClustersFacade.find(pingJson.getClusterId());
             rc.setHeartbeatsMissed(0);
             rc.setDateLastPing(dateFormat.format(date));
             registeredClustersFacade.edit(rc);
             List<RegisteredClusters> clusters = helperFunctions.getAllRegisteredClusters();
-                GenericEntity<List<RegisteredClusters>> to_return = new GenericEntity<List<RegisteredClusters>>(clusters) {
-                };
-                return Response.status(200).entity(to_return).build();
+            return Response.status(200).entity(new SuccessPingJson(clusters)).build();
         }
         
 
     }
-
-    @GET
-    @Produces(MediaType.TEXT_PLAIN)
-    public String getIt() {
-        return "Got it!";
-    }
-
 }

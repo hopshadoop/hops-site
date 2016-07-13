@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package site.hops.model;
+package site.hops.model.popular_datasets;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import org.json.JSONObject;
@@ -15,31 +15,40 @@ import org.json.JSONObject;
 @XmlRootElement
 public class PopularDatasetsJson {
     
-    private final String datasetName;
+    private String clusterId;
     
-    private final String structure;
+    private String datasetName;
     
-    private final String datasetId;
+    private String structure;
     
-    private final int files;
+    private String datasetId;
     
-    private final int leeches;
+    private int files;
     
-    private final int seeds;
+    private int leeches;
+    
+    private int seeds;
 
-    public PopularDatasetsJson(String json) {
-        
-        JSONObject jsonObject = new JSONObject(json);
-        
-        datasetName = jsonObject.getString("datsetName");
-        structure = jsonObject.getString("datasetStructure");
-        datasetId = jsonObject.getString("datasetId");
-        files = jsonObject.getJSONArray("childrenFiles").length();
-        seeds = Integer.parseInt(jsonObject.getString("seeds"));
-        leeches = Integer.parseInt(jsonObject.getString("leeches"));
+    public PopularDatasetsJson() {
         
         
     }
+
+    public PopularDatasetsJson(String clusterId, String datasetName, String structure, String datasetId, int files, int leeches, int seeds) {
+        this.clusterId = clusterId;
+        this.datasetName = datasetName;
+        this.structure = structure;
+        this.datasetId = datasetId;
+        this.files = files;
+        this.leeches = leeches;
+        this.seeds = seeds;
+    }
+
+    public String getClusterId() {
+        return clusterId;
+    }
+    
+    
 
     public String getDatasetName() {
         return datasetName;
