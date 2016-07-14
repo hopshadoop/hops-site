@@ -6,7 +6,6 @@
 package site.hops.model.popular_datasets;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import org.json.JSONObject;
 
 /**
  *
@@ -47,8 +46,6 @@ public class PopularDatasetsJson {
     public String getClusterId() {
         return clusterId;
     }
-    
-    
 
     public String getDatasetName() {
         return datasetName;
@@ -72,6 +69,34 @@ public class PopularDatasetsJson {
 
     public int getSeeds() {
         return seeds;
+    }
+
+    public void setClusterId(String clusterId) {
+        this.clusterId = clusterId;
+    }
+
+    public void setDatasetName(String datasetName) {
+        this.datasetName = datasetName;
+    }
+
+    public void setStructure(String structure) {
+        this.structure = structure;
+    }
+
+    public void setDatasetId(String datasetId) {
+        this.datasetId = datasetId;
+    }
+
+    public void setFiles(int files) {
+        this.files = files;
+    }
+
+    public void setLeeches(int leeches) {
+        this.leeches = leeches;
+    }
+
+    public void setSeeds(int seeds) {
+        this.seeds = seeds;
     }
     
     

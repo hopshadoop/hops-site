@@ -16,11 +16,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import site.hops.beans.PopularDatasetsFacade;
 import site.hops.entities.PopularDatasets;
-import site.hops.model.popular_datasets.FailureAddDatasetJson;
 import site.hops.model.popular_datasets.FailureGetPopularDatasetsJson;
 import site.hops.model.popular_datasets.GetPopularDatasetsJson;
 import site.hops.model.popular_datasets.PopularDatasetsJson;
-import site.hops.model.popular_datasets.SuccessAddDatasetJson;
 import site.hops.model.popular_datasets.SuccessGetPopularDatasetsJson;
 import site.hops.tools.HelperFunctions;
 
@@ -57,13 +55,10 @@ public class PopularDatasetsService {
     @Path("populardatasets")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response PopularDatasetsAdd(PopularDatasetsJson popularDatasetsJson) {
+    public void PopularDatasetsAdd(PopularDatasetsJson popularDatasetsJson) {
         
-        if(!helperFunctions.ClusterRegisteredWithId(popularDatasetsJson.getClusterId())){
-            return Response.status(403).entity(new FailureAddDatasetJson("invalid id")).build();
-        }else{
+        if(helperFunctions.ClusterRegisteredWithId(popularDatasetsJson.getClusterId())){
             popularDatasetsFacade.create(new PopularDatasets(popularDatasetsJson.getDatasetName(), popularDatasetsJson.getDatasetId(),popularDatasetsJson.getFiles(),popularDatasetsJson.getLeeches(),popularDatasetsJson.getSeeds(),popularDatasetsJson.getStructure()));
-            return Response.status(200).entity(new SuccessAddDatasetJson("Added your dataset")).build();
         }
                 
                 

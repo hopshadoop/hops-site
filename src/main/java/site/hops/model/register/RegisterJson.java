@@ -42,4 +42,26 @@ public class RegisterJson {
         return cert;
     }
 
+    public String getGvodEndpoint() {
+        return gvodEndpoint;
+    }
+
+    public void setSearchEndpoint(String searchEndpoint) {
+        this.searchEndpoint = searchEndpoint;
+    }
+
+    public void setGvodEndpoint(String gvodEndpoint) {
+        this.gvodEndpoint = gvodEndpoint;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setCert(String cert) {
+        this.cert = cert;
+    }
+    
+    
+    
 }

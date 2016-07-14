@@ -31,6 +31,10 @@ public class SuccessPingJson {
     public List<RegisteredClusters> getClusters() {
         return clusters;
     }
+
+    public void setClusters(List<RegisteredClusters> clusters) {
+        this.clusters = clusters;
+    }
     
     
     

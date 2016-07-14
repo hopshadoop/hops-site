@@ -30,6 +30,10 @@ public class SuccessGetPopularDatasetsJson {
     public List<PopularDatasets> getPopularDatasets() {
         return popularDatasets;
     }
+
+    public void setPopularDatasets(List<PopularDatasets> popularDatasets) {
+        this.popularDatasets = popularDatasets;
+    }
     
     
     

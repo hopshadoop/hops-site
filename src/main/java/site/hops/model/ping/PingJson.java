@@ -23,6 +23,10 @@ public class PingJson {
     public String getClusterId() {
         return clusterId;
     }
+
+    public void setClusterId(String clusterId) {
+        this.clusterId = clusterId;
+    }
     
     
     
