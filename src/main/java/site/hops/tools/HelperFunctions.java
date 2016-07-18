@@ -7,13 +7,17 @@ package site.hops.tools;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
-import site.hops.beans.RegisteredClustersFacade;
-import site.hops.entities.RegisteredClusters;
+import site.hops.beans.PopularDatasetFacade;
+import site.hops.beans.RegisteredClusterFacade;
+import site.hops.entities.PopularDataset;
+import site.hops.entities.RegisteredCluster;
 
 /**
  *
@@ -23,15 +27,17 @@ import site.hops.entities.RegisteredClusters;
 public class HelperFunctions {
     
     @EJB
-    RegisteredClustersFacade registeredClustersFacade;
+    RegisteredClusterFacade registeredClusterFacade;
+    @EJB
+    PopularDatasetFacade popularDatasetFacade;
     
     public boolean isValid(String cert) {
         return true;
     }
 
     public boolean ClusterRegisteredWithEmail(String email) {
-        RegisteredClusters rq = this.registeredClustersFacade.findByEmail(email);
-        return rq != null;
+        RegisteredCluster registeredCluster = this.registeredClusterFacade.findByEmail(email);
+        return registeredCluster != null;
 
     }
 
@@ -41,20 +47,37 @@ public class HelperFunctions {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
 
-        this.registeredClustersFacade.create(new RegisteredClusters(uniqueId, search_endpoint, email, cert, gvod_endpoint, 0, dateFormat.format(date), dateFormat.format(date)));
+        this.registeredClusterFacade.create(new RegisteredCluster(uniqueId, search_endpoint, email, cert, gvod_endpoint, 0, dateFormat.format(date), dateFormat.format(date)));
         
         return uniqueId;
     }
 
-    public List<RegisteredClusters> getAllRegisteredClusters() {
+    public List<RegisteredCluster> getAllRegisteredClusters() {
 
-        return this.registeredClustersFacade.findAll();
+        return this.registeredClusterFacade.findAll();
+    }
+    
+    public List<PopularDataset> getTopTenDatasets(){
+        
+        List<PopularDataset> to_ret = new LinkedList<>(popularDatasetFacade.findAll());
+        
+        Collections.sort(to_ret, new PopularDataset());
+        
+       if(to_ret.size() <= 10){
+           return to_ret;
+       }else{
+           List<PopularDataset> top_ten = new LinkedList<>();
+           for(int i=0; i<10; i++){
+               top_ten.add(to_ret.get(i));
+           }
+           return top_ten;
+       }
     }
 
     public boolean ClusterRegisteredWithId(String cluster_id) {
         
-        RegisteredClusters rq = this.registeredClustersFacade.find(cluster_id);
-        return rq != null;
+        RegisteredCluster registeredCluster = this.registeredClusterFacade.find(cluster_id);
+        return registeredCluster != null;
         
     }
     
