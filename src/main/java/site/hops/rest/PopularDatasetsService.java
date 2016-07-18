@@ -25,11 +25,11 @@ import site.hops.entities.DatasetStructure;
 import site.hops.entities.File;
 import site.hops.entities.Partner;
 import site.hops.entities.PopularDataset;
-import site.hops.model.failure.FailJson;
-import site.hops.model.identity.Identification;
-import site.hops.model.populardatasets.DatasetStructureJson;
-import site.hops.model.populardatasets.KafkaInfo;
-import site.hops.model.populardatasets.PopularDatasetJson;
+import site.hops.io.failure.FailJson;
+import site.hops.io.identity.Identification;
+import site.hops.io.populardatasets.DatasetStructureJson;
+import site.hops.io.populardatasets.KafkaInfo;
+import site.hops.io.populardatasets.PopularDatasetJson;
 import site.hops.tools.HelperFunctions;
 
 /**

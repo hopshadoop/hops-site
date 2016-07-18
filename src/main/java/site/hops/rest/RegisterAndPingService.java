@@ -19,11 +19,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import site.hops.beans.RegisteredClusterFacade;
 import site.hops.entities.RegisteredCluster;
-import site.hops.model.failure.FailJson;
-import site.hops.model.identity.Identification;
-import site.hops.model.ping.PingedJson;
-import site.hops.model.register.RegisterJson;
-import site.hops.model.register.RegisteredJson;
+import site.hops.io.failure.FailJson;
+import site.hops.io.identity.Identification;
+import site.hops.io.ping.PingedJson;
+import site.hops.io.register.RegisterJson;
+import site.hops.io.register.RegisteredJson;
 import site.hops.tools.HelperFunctions;
 
 /**
