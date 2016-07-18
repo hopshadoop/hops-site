@@ -26,7 +26,7 @@ import site.hops.entities.File;
 import site.hops.entities.Partner;
 import site.hops.entities.PopularDataset;
 import site.hops.io.failure.FailJson;
-import site.hops.io.identity.Identification;
+import site.hops.io.identity.IdentificationJson;
 import site.hops.io.populardatasets.DatasetStructureJson;
 import site.hops.io.populardatasets.KafkaInfo;
 import site.hops.io.populardatasets.PopularDatasetJson;
@@ -48,7 +48,7 @@ public class PopularDatasetsService {
     @Path("populardatasets")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response PopularDatasets(Identification identificatiob) {
+    public Response PopularDatasets(IdentificationJson identificatiob) {
 
         if (!helperFunctions.ClusterRegisteredWithId(identificatiob.getClusterId())) {
             return Response.status(403).entity(new FailJson("invalid cluster id")).build();

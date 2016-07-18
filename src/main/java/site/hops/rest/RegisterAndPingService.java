@@ -20,7 +20,7 @@ import javax.ws.rs.core.Response;
 import site.hops.beans.RegisteredClusterFacade;
 import site.hops.entities.RegisteredCluster;
 import site.hops.io.failure.FailJson;
-import site.hops.io.identity.Identification;
+import site.hops.io.identity.IdentificationJson;
 import site.hops.io.ping.PingedJson;
 import site.hops.io.register.RegisterJson;
 import site.hops.io.register.RegisteredJson;
@@ -68,7 +68,7 @@ public class RegisterAndPingService {
     @Path("ping")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response Ping(Identification identification) {
+    public Response Ping(IdentificationJson identification) {
        
         if(!helperFunctions.ClusterRegisteredWithId(identification.getClusterId())){
                 return Response.status(403).entity(new FailJson("invalid id")).build();

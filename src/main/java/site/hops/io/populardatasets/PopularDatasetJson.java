@@ -8,7 +8,7 @@ package site.hops.io.populardatasets;
 import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import site.hops.io.identity.Identification;
+import site.hops.io.identity.IdentificationJson;
 /**
  *
  * @author jsvhqr
@@ -26,7 +26,7 @@ public class PopularDatasetJson {
     
     private List<String> gvodEndpoints;
     
-    private Identification identification;
+    private IdentificationJson identification;
 
     public PopularDatasetJson() {
         
@@ -41,11 +41,11 @@ public class PopularDatasetJson {
         this.gvodEndpoints = partners;
     }
 
-    public Identification getIdentification() {
+    public IdentificationJson getIdentification() {
         return identification;
     }
 
-    public void setIdentification(Identification identification) {
+    public void setIdentification(IdentificationJson identification) {
         this.identification = identification;
     }
     
