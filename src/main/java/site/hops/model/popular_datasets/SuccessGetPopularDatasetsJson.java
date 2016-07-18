@@ -6,7 +6,6 @@
 package site.hops.model.popular_datasets;
 
 import java.util.List;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import site.hops.entities.PopularDatasets;
 
@@ -26,7 +25,6 @@ public class SuccessGetPopularDatasetsJson {
         this.popularDatasets = popularDatasets;
     }
 
-    @XmlElement(name = "popular_datasets")
     public List<PopularDatasets> getPopularDatasets() {
         return popularDatasets;
     }

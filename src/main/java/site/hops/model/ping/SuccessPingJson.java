@@ -6,7 +6,6 @@
 package site.hops.model.ping;
 
 import java.util.List;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import site.hops.entities.RegisteredClusters;
 
@@ -27,7 +26,6 @@ public class SuccessPingJson {
         this.clusters = clusters;
     }
     
-    @XmlElement(name = "clusters")
     public List<RegisteredClusters> getClusters() {
         return clusters;
     }
