@@ -6,11 +6,8 @@
 package site.hops.rest;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import javax.ejb.EJB;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -22,14 +19,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import site.hops.beans.PopularDatasetFacade;
 import site.hops.entities.DatasetStructure;
-import site.hops.entities.File;
 import site.hops.entities.Partner;
 import site.hops.entities.PopularDataset;
 import site.hops.io.failure.FailJson;
 import site.hops.io.identity.IdentificationJson;
-import site.hops.io.populardatasets.DatasetStructureJson;
-import site.hops.io.populardatasets.KafkaInfo;
-import site.hops.io.populardatasets.PopularDatasetJson;
+import site.hops.io.popularDatasets.DatasetStructureJson;
+import site.hops.io.popularDatasets.PopularDatasetJson;
 import site.hops.tools.HelperFunctions;
 
 /**
@@ -56,20 +51,7 @@ public class PopularDatasetsService {
             
             List<PopularDatasetJson> popularDatasetsJsons = new LinkedList<>();
             for(PopularDataset pd : helperFunctions.getTopTenDatasets()){
-                
-                Map<String,KafkaInfo> files = new HashMap<>();
-                for(File f : pd.getDatasetStructure().getFileCollection()){
-                    String name = f.getName();
-                    KafkaInfo kafkaInfo;
-                    if(f.getKafkaFile()){
-                        kafkaInfo = new KafkaInfo(f.getKafkaFile(),f.getAvroSchema());
-                    }else{
-                        kafkaInfo = new KafkaInfo(f.getKafkaFile(), null);
-                    }
-                    
-                    files.put(name, kafkaInfo);
-                }
-                DatasetStructureJson datasetStructureJson = new DatasetStructureJson(pd.getDatasetStructure().getDatasetName(), pd.getDatasetStructure().getDatasetDescription(), files);
+                DatasetStructureJson datasetStructureJson = new DatasetStructureJson(pd.getDatasetStructure().getDatasetName(), pd.getDatasetStructure().getDatasetDescription(), pd.getDatasetStructure().getManifestJson());
                 List<String> gvodEndpoints = new ArrayList<>();
                 for(Partner p : pd.getPartnerCollection()){
                     gvodEndpoints.add(p.getGvodUdpEndpoint());
@@ -92,39 +74,20 @@ public class PopularDatasetsService {
 
         if (popularDatasetsJson.getIdentification().getClusterId() != null && helperFunctions.ClusterRegisteredWithId(popularDatasetsJson.getIdentification().getClusterId())) {
 
-            PopularDataset popularDataset = new PopularDataset(popularDatasetsJson.getIdentification().getClusterId(), popularDatasetsJson.getLeeches(), popularDatasetsJson.getSeeds());
-
             DatasetStructure datasetStructure = new DatasetStructure();
 
             datasetStructure.setDatasetName(popularDatasetsJson.getStructure().getName());
             datasetStructure.setDatasetDescription(popularDatasetsJson.getStructure().getDescription());
+            datasetStructure.setManifestJson(popularDatasetsJson.getStructure().getManifestJson());
 
-            Collection<File> files = new ArrayList<>();
-
-            for (Map.Entry<String, KafkaInfo> entry : popularDatasetsJson.getStructure().getChildrenFiles().entrySet()) {
-
-                File newFile = new File();
-                if (entry.getValue().isKafka()) {
-                    newFile.setName(entry.getKey());
-                    newFile.setKafkaFile(true);
-                    newFile.setAvroSchema(entry.getValue().getSchema());
-                    newFile.setDatasetName(datasetStructure);
-                } else {
-                    newFile.setName(entry.getKey());
-                    newFile.setKafkaFile(false);
-                    newFile.setDatasetName(datasetStructure);
-                }
-                files.add(newFile);
-            }
-            
-            datasetStructure.setFileCollection(files);
-
-            Collection<Partner> partners = new ArrayList<>();
+            List<Partner> partners = new LinkedList<>();
 
             for (String s : popularDatasetsJson.getGvodEndpoints()) {
                 Partner p = new Partner();
                 p.setGvodUdpEndpoint(s);
             }
+            
+            PopularDataset popularDataset = new PopularDataset(popularDatasetsJson.getIdentification().getClusterId(), popularDatasetsJson.getLeeches(), popularDatasetsJson.getSeeds());
             
             popularDataset.setDatasetStructure(datasetStructure);
             popularDataset.setPartnerCollection(partners);

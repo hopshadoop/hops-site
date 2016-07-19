@@ -143,13 +143,14 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
 
     @Override
     public int compare(PopularDataset o1, PopularDataset o2) {
-
-        int a = (int) (o1.getSeeds() + (0.5 * o1.getLeeches()));
-        int b = (int) (o2.getSeeds() + (0.5 * o2.getLeeches()));
-
-        return a < b ? -1
-                : a > b ? 1
-                        : 0;
+        
+        int a = (int) (o1.seeds + (o1.leeches*0.5));
+        int b = (int) (o2.seeds + (o2.leeches*0.5));
+        
+         return a < b ? -1
+         : a > b ? 1
+         : 0;
+        
     }
-
+    
 }

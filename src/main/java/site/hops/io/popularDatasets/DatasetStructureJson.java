@@ -3,9 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package site.hops.io.populardatasets;
+package site.hops.io.popularDatasets;
 
-import java.util.Map;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -17,15 +16,15 @@ public class DatasetStructureJson {
     
     private String name;
     private String description;
-    private Map<String,KafkaInfo> childrenFiles;
+    private String manifestJson;
 
     public DatasetStructureJson() {
     }
 
-    public DatasetStructureJson(String name, String description, Map<String, KafkaInfo> files) {
+    public DatasetStructureJson(String name, String description, String manifestJson) {
         this.name = name;
         this.description = description;
-        this.childrenFiles = files;
+        this.manifestJson = manifestJson;
     }
 
     public String getName() {
@@ -44,14 +43,16 @@ public class DatasetStructureJson {
         this.description = description;
     }
 
-    public Map<String, KafkaInfo> getChildrenFiles() {
-        return childrenFiles;
+    public String getManifestJson() {
+        return manifestJson;
     }
 
-    public void setChildrenFiles(Map<String, KafkaInfo> childrenFiles) {
-        this.childrenFiles = childrenFiles;
+    public void setManifestJson(String manifestJson) {
+        this.manifestJson = manifestJson;
     }
 
+    
+    
     
     
     

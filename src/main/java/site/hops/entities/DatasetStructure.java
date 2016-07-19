@@ -6,22 +6,18 @@
 package site.hops.entities;
 
 import java.io.Serializable;
-import java.util.Collection;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -34,7 +30,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "DatasetStructure.findAll", query = "SELECT d FROM DatasetStructure d"),
     @NamedQuery(name = "DatasetStructure.findByDatasetName", query = "SELECT d FROM DatasetStructure d WHERE d.datasetName = :datasetName"),
     @NamedQuery(name = "DatasetStructure.findByDatasetDescription", query = "SELECT d FROM DatasetStructure d WHERE d.datasetDescription = :datasetDescription"),
-    @NamedQuery(name = "DatasetStructure.findByDatasetId", query = "SELECT d FROM DatasetStructure d WHERE d.datasetId = :datasetId")})
+    @NamedQuery(name = "DatasetStructure.findByDatasetId", query = "SELECT d FROM DatasetStructure d WHERE d.datasetId = :datasetId"),
+    @NamedQuery(name = "DatasetStructure.findByManifestJson", query = "SELECT d FROM DatasetStructure d WHERE d.manifestJson = :manifestJson")})
 public class DatasetStructure implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -43,7 +40,9 @@ public class DatasetStructure implements Serializable {
     @Size(min = 1, max = 300)
     @Column(name = "dataset_name")
     private String datasetName;
-    @Size(max = 1000)
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 1000)
     @Column(name = "dataset_description")
     private String datasetDescription;
     @Id
@@ -52,8 +51,11 @@ public class DatasetStructure implements Serializable {
     @Size(min = 1, max = 300)
     @Column(name = "dataset_id")
     private String datasetId;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "datasetName")
-    private Collection<File> fileCollection;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 3000)
+    @Column(name = "manifest_json")
+    private String manifestJson;
     @JoinColumn(name = "dataset_id", referencedColumnName = "dataset_id", insertable = false, updatable = false)
     @OneToOne(optional = false)
     private PopularDataset popularDataset;
@@ -65,9 +67,11 @@ public class DatasetStructure implements Serializable {
         this.datasetId = datasetId;
     }
 
-    public DatasetStructure(String datasetId, String datasetName) {
+    public DatasetStructure(String datasetId, String datasetName, String datasetDescription, String manifestJson) {
         this.datasetId = datasetId;
         this.datasetName = datasetName;
+        this.datasetDescription = datasetDescription;
+        this.manifestJson = manifestJson;
     }
 
     public String getDatasetName() {
@@ -94,13 +98,12 @@ public class DatasetStructure implements Serializable {
         this.datasetId = datasetId;
     }
 
-    @XmlTransient
-    public Collection<File> getFileCollection() {
-        return fileCollection;
+    public String getManifestJson() {
+        return manifestJson;
     }
 
-    public void setFileCollection(Collection<File> fileCollection) {
-        this.fileCollection = fileCollection;
+    public void setManifestJson(String manifestJson) {
+        this.manifestJson = manifestJson;
     }
 
     public PopularDataset getPopularDataset() {
