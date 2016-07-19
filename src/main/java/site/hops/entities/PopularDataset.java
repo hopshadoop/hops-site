@@ -9,16 +9,15 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Comparator;
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -48,6 +47,12 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
     private String datasetId;
     @Basic(optional = false)
     @NotNull
+    @Lob
+    @Size(min = 1, max = 2147483647)
+    @Column(name = "manifest")
+    private String manifest;
+    @Basic(optional = false)
+    @NotNull
     @Column(name = "leeches")
     private int leeches;
     @Basic(optional = false)
@@ -59,8 +64,6 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
         @JoinColumn(name = "partner_id", referencedColumnName = "partner_id")})
     @ManyToMany
     private Collection<Partner> partnerCollection;
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "popularDataset")
-    private DatasetStructure datasetStructure;
 
     public PopularDataset() {
     }
@@ -69,8 +72,9 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
         this.datasetId = datasetId;
     }
 
-    public PopularDataset(String datasetId, int leeches, int seeds) {
+    public PopularDataset(String datasetId, String manifest, int leeches, int seeds) {
         this.datasetId = datasetId;
+        this.manifest = manifest;
         this.leeches = leeches;
         this.seeds = seeds;
     }
@@ -81,6 +85,14 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
 
     public void setDatasetId(String datasetId) {
         this.datasetId = datasetId;
+    }
+
+    public String getManifest() {
+        return manifest;
+    }
+
+    public void setManifest(String manifest) {
+        this.manifest = manifest;
     }
 
     public int getLeeches() {
@@ -106,14 +118,6 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
 
     public void setPartnerCollection(Collection<Partner> partnerCollection) {
         this.partnerCollection = partnerCollection;
-    }
-
-    public DatasetStructure getDatasetStructure() {
-        return datasetStructure;
-    }
-
-    public void setDatasetStructure(DatasetStructure datasetStructure) {
-        this.datasetStructure = datasetStructure;
     }
 
     @Override
@@ -150,7 +154,6 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
          return a < b ? -1
          : a > b ? 1
          : 0;
-        
     }
     
 }

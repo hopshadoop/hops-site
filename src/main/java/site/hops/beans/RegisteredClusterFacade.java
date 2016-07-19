@@ -30,9 +30,7 @@ public class RegisteredClusterFacade extends AbstractFacade<RegisteredCluster> {
     }
 
     public RegisteredCluster findByEmail(String email) {
-        
-       return (RegisteredCluster) em.createNamedQuery("RegisteredCluster.findByEmail").getSingleResult();
-        
+        return (RegisteredCluster) em.createNamedQuery("RegisteredCluster.findByEmail").getSingleResult();
     }
     
 }

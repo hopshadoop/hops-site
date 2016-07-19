@@ -18,7 +18,7 @@ public class PopularDatasetJson {
     
     private String datasetId;
     
-    private DatasetStructureJson structure;
+    private ManifestJson manifestJson;
     
     private int leeches;
     
@@ -33,8 +33,8 @@ public class PopularDatasetJson {
         
     }
 
-    public PopularDatasetJson(DatasetStructureJson structure, String datasetId, int leeches, int seeds, List<String> partners) {
-        this.structure = structure;
+    public PopularDatasetJson(ManifestJson manifestJson, String datasetId, int leeches, int seeds, List<String> partners) {
+        this.manifestJson = manifestJson;
         this.datasetId = datasetId;
         this.leeches = leeches;
         this.seeds = seeds;
@@ -48,12 +48,6 @@ public class PopularDatasetJson {
     public void setIdentification(IdentificationJson identification) {
         this.identification = identification;
     }
-    
-    
-
-    public DatasetStructureJson getStructure() {
-        return structure;
-    }
 
     public String getDatasetId() {
         return datasetId;
@@ -65,10 +59,6 @@ public class PopularDatasetJson {
 
     public int getSeeds() {
         return seeds;
-    }
-
-    public void setStructure(DatasetStructureJson structure) {
-        this.structure = structure;
     }
 
     public void setDatasetId(String datasetId) {
@@ -90,6 +80,14 @@ public class PopularDatasetJson {
 
     public void setGvodEndpoints(List<String> gvodEndpoints) {
         this.gvodEndpoints = gvodEndpoints;
+    }
+
+    public ManifestJson getManifestJson() {
+        return manifestJson;
+    }
+
+    public void setManifestJson(ManifestJson manifestJson) {
+        this.manifestJson = manifestJson;
     }
     
     
