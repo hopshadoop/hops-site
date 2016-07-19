@@ -16,12 +16,12 @@ public class DatasetStructureJson {
     
     private String name;
     private String description;
-    private String manifestJson;
+    private ManifestJson manifestJson;
 
     public DatasetStructureJson() {
     }
 
-    public DatasetStructureJson(String name, String description, String manifestJson) {
+    public DatasetStructureJson(String name, String description, ManifestJson manifestJson) {
         this.name = name;
         this.description = description;
         this.manifestJson = manifestJson;
@@ -43,11 +43,11 @@ public class DatasetStructureJson {
         this.description = description;
     }
 
-    public String getManifestJson() {
+    public ManifestJson getManifestJson() {
         return manifestJson;
     }
 
-    public void setManifestJson(String manifestJson) {
+    public void setManifestJson(ManifestJson manifestJson) {
         this.manifestJson = manifestJson;
     }
 

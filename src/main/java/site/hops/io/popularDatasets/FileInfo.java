@@ -12,26 +12,26 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author jsvhqr
  */
 @XmlRootElement
-public class KafkaInfo {
+public class FileInfo {
     
-    private boolean kafka;
+    private String fileName;
     
     private String schema;
 
-    public KafkaInfo() {
+    public FileInfo() {
     }
 
-    public KafkaInfo(boolean kafka, String schema) {
-        this.kafka = kafka;
+    public FileInfo(String fileName, String schema) {
+        this.fileName = fileName;
         this.schema = schema;
     }
 
-    public boolean isKafka() {
-        return kafka;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setKafka(boolean kafka) {
-        this.kafka = kafka;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
     public String getSchema() {
@@ -41,7 +41,6 @@ public class KafkaInfo {
     public void setSchema(String schema) {
         this.schema = schema;
     }
-    
     
     
 }

@@ -5,6 +5,9 @@
  */
 package site.hops.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,6 +27,7 @@ import site.hops.entities.PopularDataset;
 import site.hops.io.failure.FailJson;
 import site.hops.io.identity.IdentificationJson;
 import site.hops.io.popularDatasets.DatasetStructureJson;
+import site.hops.io.popularDatasets.ManifestJson;
 import site.hops.io.popularDatasets.PopularDatasetJson;
 import site.hops.tools.HelperFunctions;
 
@@ -38,12 +42,14 @@ public class PopularDatasetsService {
     PopularDatasetFacade popularDatasetsFacade;
     @EJB
     HelperFunctions helperFunctions;
+    
+    private ObjectMapper mapper = new ObjectMapper();
 
     @PUT
     @Path("populardatasets")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response PopularDatasets(IdentificationJson identificatiob) {
+    public Response PopularDatasets(IdentificationJson identificatiob) throws IOException {
 
         if (!helperFunctions.ClusterRegisteredWithId(identificatiob.getClusterId())) {
             return Response.status(403).entity(new FailJson("invalid cluster id")).build();
@@ -51,7 +57,7 @@ public class PopularDatasetsService {
             
             List<PopularDatasetJson> popularDatasetsJsons = new LinkedList<>();
             for(PopularDataset pd : helperFunctions.getTopTenDatasets()){
-                DatasetStructureJson datasetStructureJson = new DatasetStructureJson(pd.getDatasetStructure().getDatasetName(), pd.getDatasetStructure().getDatasetDescription(), pd.getDatasetStructure().getManifestJson());
+                DatasetStructureJson datasetStructureJson = new DatasetStructureJson(pd.getDatasetStructure().getDatasetName(), pd.getDatasetStructure().getDatasetDescription(), mapper.readValue(pd.getDatasetStructure().getManifestJson(), ManifestJson.class));
                 List<String> gvodEndpoints = new ArrayList<>();
                 for(Partner p : pd.getPartnerCollection()){
                     gvodEndpoints.add(p.getGvodUdpEndpoint());
@@ -70,7 +76,7 @@ public class PopularDatasetsService {
     @Path("populardatasets")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public void PopularDatasetsAdd(PopularDatasetJson popularDatasetsJson) {
+    public void PopularDatasetsAdd(PopularDatasetJson popularDatasetsJson) throws JsonProcessingException {
 
         if (popularDatasetsJson.getIdentification().getClusterId() != null && helperFunctions.ClusterRegisteredWithId(popularDatasetsJson.getIdentification().getClusterId())) {
 
@@ -78,7 +84,7 @@ public class PopularDatasetsService {
 
             datasetStructure.setDatasetName(popularDatasetsJson.getStructure().getName());
             datasetStructure.setDatasetDescription(popularDatasetsJson.getStructure().getDescription());
-            datasetStructure.setManifestJson(popularDatasetsJson.getStructure().getManifestJson());
+            datasetStructure.setManifestJson(mapper.writeValueAsString(popularDatasetsJson.getStructure().getManifestJson()));
 
             List<Partner> partners = new LinkedList<>();
 
