@@ -45,7 +45,7 @@ public class PopularDatasetsService {
     @EJB
     HelperFunctions helperFunctions;
     
-    private ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     @PUT
     @Path("populardatasets")

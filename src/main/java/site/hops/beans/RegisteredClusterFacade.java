@@ -5,6 +5,7 @@
  */
 package site.hops.beans;
 
+import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -29,8 +30,8 @@ public class RegisteredClusterFacade extends AbstractFacade<RegisteredCluster> {
         super(RegisteredCluster.class);
     }
 
-    public RegisteredCluster findByEmail(String email) {
-        return (RegisteredCluster) em.createNamedQuery("RegisteredCluster.findByEmail").getSingleResult();
+    public List<RegisteredCluster> findByEmail(String email) {
+        return em.createNamedQuery("RegisteredCluster.findByEmail").setParameter("email", email).getResultList();
     }
     
 }

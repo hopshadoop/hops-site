@@ -36,9 +36,7 @@ public class HelperFunctions {
     }
 
     public boolean ClusterRegisteredWithEmail(String email) {
-        RegisteredCluster registeredCluster = this.registeredClusterFacade.findByEmail(email);
-        return registeredCluster != null;
-
+        return !this.registeredClusterFacade.findByEmail(email).isEmpty();
     }
 
     public String registerCluster(String search_endpoint, String email, String cert, String gvod_endpoint) {
@@ -76,9 +74,7 @@ public class HelperFunctions {
 
     public boolean ClusterRegisteredWithId(String cluster_id) {
         
-        RegisteredCluster registeredCluster = this.registeredClusterFacade.find(cluster_id);
-        return registeredCluster != null;
-        
+        return this.registeredClusterFacade.find(cluster_id) != null;
     }
     
 }
