@@ -23,6 +23,8 @@ public class ManifestJson {
     
     private String creatorDate;
     
+    private boolean kafkaSupport;
+    
     private List<FileInfo> fileInfos;
     
     private List<String> metaDataJsons;
@@ -30,11 +32,12 @@ public class ManifestJson {
     public ManifestJson() {
     }
 
-    public ManifestJson(String datasetName, String datasetDescription, String creatorEmail, String creatorDate, List<FileInfo> fileInfos, List<String> metaDataJsons) {
+    public ManifestJson(String datasetName, String datasetDescription, String creatorEmail, String creatorDate, boolean kafkaSupport, List<FileInfo> fileInfos, List<String> metaDataJsons) {
         this.datasetName = datasetName;
         this.datasetDescription = datasetDescription;
         this.creatorEmail = creatorEmail;
         this.creatorDate = creatorDate;
+        this.kafkaSupport = kafkaSupport;
         this.fileInfos = fileInfos;
         this.metaDataJsons = metaDataJsons;
     }
@@ -86,6 +89,14 @@ public class ManifestJson {
 
     public void setMetaDataJsons(List<String> metaDataJsons) {
         this.metaDataJsons = metaDataJsons;
+    }
+
+    public boolean isKafkaSupport() {
+        return kafkaSupport;
+    }
+
+    public void setKafkaSupport(boolean kafkaSupport) {
+        this.kafkaSupport = kafkaSupport;
     }
     
     

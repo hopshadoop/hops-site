@@ -6,7 +6,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 import site.hops.entities.Partner;
 
-@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2016-07-22T13:40:30")
+@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2016-07-26T21:11:56")
 @StaticMetamodel(PopularDataset.class)
 public class PopularDataset_ { 
 
