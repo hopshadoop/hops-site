@@ -23,8 +23,6 @@ public class FailJson {
     public FailJson(String details) {
         this.details = details;
     }
-    
-    
 
     public String getDetails() {
         return details;
