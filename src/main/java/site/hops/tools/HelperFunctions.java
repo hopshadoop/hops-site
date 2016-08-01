@@ -5,6 +5,8 @@
  */
 package site.hops.tools;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -12,12 +14,15 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import site.hops.beans.PopularDatasetFacade;
 import site.hops.beans.RegisteredClusterFacade;
 import site.hops.entities.PopularDataset;
 import site.hops.entities.RegisteredCluster;
+import site.hops.io.register.AddressJSON;
 
 /**
  *
@@ -31,6 +36,8 @@ public class HelperFunctions {
     @EJB
     PopularDatasetFacade popularDatasetFacade;
     
+    private final ObjectMapper mapper = new ObjectMapper();
+    
     public boolean isValid(String cert) {
         return true;
     }
@@ -39,15 +46,21 @@ public class HelperFunctions {
         return !this.registeredClusterFacade.findByEmail(email).isEmpty();
     }
 
-    public String registerCluster(String search_endpoint, String email, String cert, String gvod_endpoint) {
+    public String registerCluster(String search_endpoint, String email, String cert, AddressJSON gvod_endpoint) {
 
-        String uniqueId = UUID.randomUUID().toString();
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-
-        this.registeredClusterFacade.create(new RegisteredCluster(uniqueId, search_endpoint, email, cert, gvod_endpoint, 0, dateFormat.format(date), dateFormat.format(date)));
+        try {
+            String uniqueId = UUID.randomUUID().toString();
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Date date = new Date();
+            
+            this.registeredClusterFacade.create(new RegisteredCluster(uniqueId, search_endpoint, email, cert, mapper.writeValueAsString(gvod_endpoint), 0, dateFormat.format(date), dateFormat.format(date)));
+            
+            return uniqueId;
+        } catch (JsonProcessingException ex) {
+            Logger.getLogger(HelperFunctions.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
-        return uniqueId;
+        return null;
     }
 
     public List<RegisteredCluster> getAllRegisteredClusters() {

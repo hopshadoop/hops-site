@@ -16,7 +16,7 @@ public class RegisterJson {
 
     private String searchEndpoint;
 
-    private String gvodEndpoint;
+    private AddressJSON gvodEndpoint;
 
     private String email;
 
@@ -30,7 +30,7 @@ public class RegisterJson {
         return searchEndpoint;
     }
 
-    public String getGVodEndpoint() {
+    public AddressJSON getGVodEndpoint() {
         return gvodEndpoint;
     }
 
@@ -42,7 +42,7 @@ public class RegisterJson {
         return cert;
     }
 
-    public String getGvodEndpoint() {
+    public AddressJSON getGvodEndpoint() {
         return gvodEndpoint;
     }
 
@@ -50,7 +50,7 @@ public class RegisterJson {
         this.searchEndpoint = searchEndpoint;
     }
 
-    public void setGvodEndpoint(String gvodEndpoint) {
+    public void setGvodEndpoint(AddressJSON gvodEndpoint) {
         this.gvodEndpoint = gvodEndpoint;
     }
 

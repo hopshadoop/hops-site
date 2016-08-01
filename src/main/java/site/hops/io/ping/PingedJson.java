@@ -7,7 +7,6 @@ package site.hops.io.ping;
 
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
-import site.hops.entities.RegisteredCluster;
 
 /**
  *
@@ -17,20 +16,20 @@ import site.hops.entities.RegisteredCluster;
 public class PingedJson {
     
     
-    private List<RegisteredCluster> clusters;
+    private List<RegisteredClusterJson> clusters;
     public PingedJson(){
         
     }
 
-    public PingedJson(List<RegisteredCluster> clusters) {
+    public PingedJson(List<RegisteredClusterJson> clusters) {
         this.clusters = clusters;
     }
     
-    public List<RegisteredCluster> getClusters() {
+    public List<RegisteredClusterJson> getClusters() {
         return clusters;
     }
 
-    public void setClusters(List<RegisteredCluster> clusters) {
+    public void setClusters(List<RegisteredClusterJson> clusters) {
         this.clusters = clusters;
     }
     
