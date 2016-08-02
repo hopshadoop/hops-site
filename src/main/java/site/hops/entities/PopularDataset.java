@@ -6,23 +6,17 @@
 package site.hops.entities;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Comparator;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.Lob;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -36,7 +30,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "PopularDataset.findByDatasetId", query = "SELECT p FROM PopularDataset p WHERE p.datasetId = :datasetId"),
     @NamedQuery(name = "PopularDataset.findByLeeches", query = "SELECT p FROM PopularDataset p WHERE p.leeches = :leeches"),
     @NamedQuery(name = "PopularDataset.findBySeeds", query = "SELECT p FROM PopularDataset p WHERE p.seeds = :seeds")})
-public class PopularDataset implements Serializable, Comparator<PopularDataset> {
+public class PopularDataset implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
@@ -48,9 +42,15 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
     @Basic(optional = false)
     @NotNull
     @Lob
-    @Size(min = 1, max = 2147483647)
+    @Size(min = 1, max = 65535)
     @Column(name = "manifest")
     private String manifest;
+    @Basic(optional = false)
+    @NotNull
+    @Lob
+    @Size(min = 1, max = 65535)
+    @Column(name = "partners")
+    private String partners;
     @Basic(optional = false)
     @NotNull
     @Column(name = "leeches")
@@ -59,11 +59,6 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
     @NotNull
     @Column(name = "seeds")
     private int seeds;
-    @JoinTable(name = "partner_endpoint", joinColumns = {
-        @JoinColumn(name = "dataset_id", referencedColumnName = "dataset_id")}, inverseJoinColumns = {
-        @JoinColumn(name = "partner_id", referencedColumnName = "partner_id")})
-    @ManyToMany
-    private Collection<Partner> partnerCollection;
 
     public PopularDataset() {
     }
@@ -72,9 +67,10 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
         this.datasetId = datasetId;
     }
 
-    public PopularDataset(String datasetId, String manifest, int leeches, int seeds) {
+    public PopularDataset(String datasetId, String manifest, String partners, int leeches, int seeds) {
         this.datasetId = datasetId;
         this.manifest = manifest;
+        this.partners = partners;
         this.leeches = leeches;
         this.seeds = seeds;
     }
@@ -95,6 +91,14 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
         this.manifest = manifest;
     }
 
+    public String getPartners() {
+        return partners;
+    }
+
+    public void setPartners(String partners) {
+        this.partners = partners;
+    }
+
     public int getLeeches() {
         return leeches;
     }
@@ -109,15 +113,6 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
 
     public void setSeeds(int seeds) {
         this.seeds = seeds;
-    }
-
-    @XmlTransient
-    public Collection<Partner> getPartnerCollection() {
-        return partnerCollection;
-    }
-
-    public void setPartnerCollection(Collection<Partner> partnerCollection) {
-        this.partnerCollection = partnerCollection;
     }
 
     @Override
@@ -143,17 +138,6 @@ public class PopularDataset implements Serializable, Comparator<PopularDataset> 
     @Override
     public String toString() {
         return "site.hops.entities.PopularDataset[ datasetId=" + datasetId + " ]";
-    }
-
-    @Override
-    public int compare(PopularDataset o1, PopularDataset o2) {
-        
-        int a = (int) (o1.seeds + (o1.leeches*0.5));
-        int b = (int) (o2.seeds + (o2.leeches*0.5));
-        
-         return a < b ? -1
-         : a > b ? 1
-         : 0;
     }
     
 }

@@ -9,6 +9,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import site.hops.io.identity.IdentificationJson;
+import site.hops.io.register.AddressJSON;
 /**
  *
  * @author jsvhqr
@@ -24,7 +25,7 @@ public class PopularDatasetJson {
     
     private int seeds;
     
-    private List<String> gvodEndpoints;
+    private List<AddressJSON> gvodEndpoints;
     
     private IdentificationJson identification;
 
@@ -33,7 +34,7 @@ public class PopularDatasetJson {
         
     }
 
-    public PopularDatasetJson(ManifestJson manifestJson, String datasetId, int leeches, int seeds, List<String> partners) {
+    public PopularDatasetJson(ManifestJson manifestJson, String datasetId, int leeches, int seeds, List<AddressJSON> partners) {
         this.manifestJson = manifestJson;
         this.datasetId = datasetId;
         this.leeches = leeches;
@@ -74,11 +75,11 @@ public class PopularDatasetJson {
     }
     
     @XmlElement(name = "gvodEndpoints")
-    public List<String> getGvodEndpoints() {
+    public List<AddressJSON> getGvodEndpoints() {
         return gvodEndpoints;
     }
 
-    public void setGvodEndpoints(List<String> gvodEndpoints) {
+    public void setGvodEndpoints(List<AddressJSON> gvodEndpoints) {
         this.gvodEndpoints = gvodEndpoints;
     }
 

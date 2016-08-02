@@ -72,8 +72,6 @@ public class HelperFunctions {
         
         List<PopularDataset> to_ret = new LinkedList<>(popularDatasetFacade.findAll());
         
-        Collections.sort(to_ret, new PopularDataset());
-        
        if(to_ret.size() <= 10){
            return to_ret;
        }else{
