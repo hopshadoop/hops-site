@@ -9,7 +9,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import javax.ejb.EJB;
@@ -23,11 +22,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import site.hops.beans.PopularDatasetFacade;
 import site.hops.entities.PopularDataset;
-import site.hops.io.failure.FailJson;
-import site.hops.io.identity.IdentificationJson;
-import site.hops.io.popularDatasets.ManifestJson;
-import site.hops.io.popularDatasets.PopularDatasetJson;
-import site.hops.io.leechseed.LeechSeedJson;
+import site.hops.io.failure.FailJSON;
+import site.hops.io.identity.IdentificationJSON;
+import site.hops.io.popularDatasets.ManifestJSON;
+import site.hops.io.popularDatasets.PopularDatasetJSON;
 import site.hops.io.register.AddressJSON;
 import site.hops.tools.HelperFunctions;
 
@@ -49,23 +47,23 @@ public class PopularDatasetsService {
     @Path("populardatasets")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response PopularDatasets(IdentificationJson identificatiob) throws IOException {
+    public Response PopularDatasets(IdentificationJSON identificatiob) throws IOException {
 
         if (!helperFunctions.ClusterRegisteredWithId(identificatiob.getClusterId())) {
-            return Response.status(403).entity(new FailJson("invalid cluster id")).build();
+            return Response.status(403).entity(new FailJSON("invalid cluster id")).build();
         } else {
             
-            List<PopularDatasetJson> popularDatasetsJsons = new LinkedList<>();
+            List<PopularDatasetJSON> popularDatasetsJsons = new LinkedList<>();
             for(PopularDataset pd : helperFunctions.getTopTenDatasets()){
-                ManifestJson manifestJson = mapper.readValue(pd.getManifest(), ManifestJson.class);
+                ManifestJSON manifestJson = mapper.readValue(pd.getManifest(), ManifestJSON.class);
                 
                 List<AddressJSON> gvodEndpoints = mapper.readValue(pd.getPartners(), new TypeReference<List<AddressJSON>>(){});
                 
-                popularDatasetsJsons.add(new PopularDatasetJson(manifestJson, pd.getDatasetId(), pd.getLeeches(), pd.getSeeds(), gvodEndpoints));
+                popularDatasetsJsons.add(new PopularDatasetJSON(manifestJson, pd.getDatasetId(), pd.getLeeches(), pd.getSeeds(), gvodEndpoints));
 
             }
             
-            GenericEntity<List<PopularDatasetJson>> searchResults = new GenericEntity<List<PopularDatasetJson>>(popularDatasetsJsons) {};
+            GenericEntity<List<PopularDatasetJSON>> searchResults = new GenericEntity<List<PopularDatasetJSON>>(popularDatasetsJsons) {};
             return Response.status(200).entity(searchResults).build();
         }
 
@@ -75,7 +73,7 @@ public class PopularDatasetsService {
     @Path("populardatasets")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public void PopularDatasetsAdd(PopularDatasetJson popularDatasetsJson) throws JsonProcessingException {
+    public void PopularDatasetsAdd(PopularDatasetJSON popularDatasetsJson) throws JsonProcessingException {
 
         if (popularDatasetsJson.getIdentification().getClusterId() != null && helperFunctions.ClusterRegisteredWithId(popularDatasetsJson.getIdentification().getClusterId())) {
 

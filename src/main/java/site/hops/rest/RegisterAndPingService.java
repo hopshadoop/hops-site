@@ -24,13 +24,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import site.hops.beans.RegisteredClusterFacade;
 import site.hops.entities.RegisteredCluster;
-import site.hops.io.failure.FailJson;
-import site.hops.io.identity.IdentificationJson;
-import site.hops.io.ping.PingedJson;
-import site.hops.io.ping.RegisteredClusterJson;
+import site.hops.io.failure.FailJSON;
+import site.hops.io.identity.IdentificationJSON;
+import site.hops.io.ping.PingedJSON;
+import site.hops.io.ping.RegisteredClusterJSON;
 import site.hops.io.register.AddressJSON;
-import site.hops.io.register.RegisterJson;
-import site.hops.io.register.RegisteredJson;
+import site.hops.io.register.RegisterJSON;
+import site.hops.io.register.RegisteredJSON;
 import site.hops.tools.HelperFunctions;
 
 /**
@@ -50,7 +50,7 @@ public class RegisterAndPingService {
     @Path("register")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response Register(RegisterJson registerJson) {
+    public Response Register(RegisterJSON registerJson) {
 
         if (!helperFunctions.ClusterRegisteredWithEmail(registerJson.getEmail())) {
 
@@ -60,22 +60,22 @@ public class RegisterAndPingService {
 
                 if (registeredId != null) {
 
-                    return Response.status(200).entity(new RegisteredJson(registeredId)).build();
+                    return Response.status(200).entity(new RegisteredJSON(registeredId)).build();
 
                 } else {
 
-                    return Response.status(403).entity(new FailJson("invalid gvodEndpoint")).build();
+                    return Response.status(403).entity(new FailJSON("invalid gvodEndpoint")).build();
 
                 }
 
             } else {
 
-                return Response.status(403).entity(new FailJson("invalid cert")).build();
+                return Response.status(403).entity(new FailJSON("invalid cert")).build();
             }
 
         } else {
 
-            return Response.status(403).entity(new FailJson("already registered")).build();
+            return Response.status(403).entity(new FailJSON("already registered")).build();
         }
 
     }
@@ -84,10 +84,10 @@ public class RegisterAndPingService {
     @Path("ping")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response Ping(IdentificationJson identification) {
+    public Response Ping(IdentificationJSON identification) {
 
         if (!helperFunctions.ClusterRegisteredWithId(identification.getClusterId())) {
-            return Response.status(403).entity(new FailJson("invalid id")).build();
+            return Response.status(403).entity(new FailJSON("invalid id")).build();
         } else {
             DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
             Date date = new Date();
@@ -96,16 +96,16 @@ public class RegisterAndPingService {
             registeredCluster.setDateLastPing(dateFormat.format(date));
             registeredClustersFacade.edit(registeredCluster);
             List<RegisteredCluster> registeredClusters = helperFunctions.getAllRegisteredClusters();
-            List<RegisteredClusterJson> to_ret = new ArrayList<>();
+            List<RegisteredClusterJSON> to_ret = new ArrayList<>();
             for (RegisteredCluster r : registeredClusters) {
                 try {
-                    to_ret.add(new RegisteredClusterJson(r.getClusterId(), r.getEmail(), r.getCert(), mapper.readValue(r.getGvodEndpoint(), AddressJSON.class), r.getHeartbeatsMissed(), r.getDateRegistered(), r.getDateLastPing(), r.getSearchEndpoint()));
+                    to_ret.add(new RegisteredClusterJSON(r.getClusterId(), mapper.readValue(r.getGvodEndpoint(), AddressJSON.class), r.getHeartbeatsMissed(), r.getDateRegistered(), r.getDateLastPing(), r.getSearchEndpoint()));
                 } catch (IOException ex) {
                     Logger.getLogger(RegisterAndPingService.class.getName()).log(Level.SEVERE, null, ex);
-                    return Response.status(403).entity(new FailJson("parsing of gvodEndpoint failed")).build();
+                    return Response.status(403).entity(new FailJSON("parsing of gvodEndpoint failed")).build();
                 }
             }
-            return Response.status(200).entity(new PingedJson(to_ret)).build();
+            return Response.status(200).entity(new PingedJSON(to_ret)).build();
         }
 
     }
