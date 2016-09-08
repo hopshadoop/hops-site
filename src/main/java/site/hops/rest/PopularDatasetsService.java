@@ -47,9 +47,9 @@ public class PopularDatasetsService {
     @Path("populardatasets")
     @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     @Produces(MediaType.APPLICATION_JSON)
-    public Response PopularDatasets(IdentificationJSON identificatiob) throws IOException {
+    public Response PopularDatasets(IdentificationJSON identification) throws IOException {
 
-        if (!helperFunctions.ClusterRegisteredWithId(identificatiob.getClusterId())) {
+        if (!helperFunctions.ClusterRegisteredWithId(identification.getClusterId())) {
             return Response.status(403).entity(new FailJSON("invalid cluster id")).build();
         } else {
             
