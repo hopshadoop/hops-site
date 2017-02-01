@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author jsvhqr
  */
 @Entity
-@Table(name = "registered_cluster")
+@Table(name = "hops_site.registered_cluster")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "RegisteredCluster.findAll", query = "SELECT r FROM RegisteredCluster r"),

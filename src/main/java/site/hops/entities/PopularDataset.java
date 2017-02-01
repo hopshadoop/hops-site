@@ -23,7 +23,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  * @author jsvhqr
  */
 @Entity
-@Table(name = "popular_dataset")
+@Table(name = "hops_site.popular_dataset")
 @XmlRootElement
 @NamedQueries({
     @NamedQuery(name = "PopularDataset.findAll", query = "SELECT p FROM PopularDataset p"),
