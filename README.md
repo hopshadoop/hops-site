@@ -24,12 +24,12 @@ create table popular_dataset(dataset_id varchar(300) not null, manifest longtext
     /srv/hops/mysql-cluster/ndb/scripts/mysql-client.sh hops_site -e "create table popular_dataset(dataset_id varchar(300) not null, manifest longtext not null, partners longtext not null, leeches int not null, seeds int not null, PRIMARY KEY(dataset_id))"
     
     
-    rm -f dela-hops.ear
+    rm -f dela-hops.war
     /srv/hops/glassfish/versions/current/bin/asadmin --host localhost --port 4848 --user adminuser --passwordfile /srv/hops/domains/domain1_admin_passwd --interactive=false undeploy --target server dela-hops
 
     wget http://snurran.sics.se/hops/hopsworks/0.1.0/dela-hops.war
 
-    /srv/hops/glassfish/versions/current/bin/asadmin --host localhost --port 4848 --user adminuser --passwordfile /srv/hops/domains/domain1_admin_passwd --interactive=false --echo=true --terse=false deploy --name dela-hops --force=true --precompilejsp=true --verify=false --enabled=true --generatermistubs=false --availabilityenabled=false --asyncreplication=false --target server --keepreposdir=false --keepfailedstubs=false --isredeploy=false --logreportederrors=true --keepstate=false --lbenabled true --_classicstyle=false --upload=true dela-hops.ear
+    /srv/hops/glassfish/versions/current/bin/asadmin --host localhost --port 4848 --user adminuser --passwordfile /srv/hops/domains/domain1_admin_passwd --interactive=false --echo=true --terse=false deploy --name dela-hops --force=true --precompilejsp=true --verify=false --enabled=true --generatermistubs=false --availabilityenabled=false --asyncreplication=false --target server --keepreposdir=false --keepfailedstubs=false --isredeploy=false --logreportederrors=true --keepstate=false --lbenabled true --_classicstyle=false --upload=true dela-hops.war
 
 
 
