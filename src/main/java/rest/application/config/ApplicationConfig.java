@@ -1,20 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package rest.application.config;
 
 import org.glassfish.jersey.server.ResourceConfig;
-import site.hops.rest.RegisterAndPingService;
+import io.hops.site.rest.RegisterAndPingService;
 
-/**
- *
- * @author jsvhqr
- */
 @javax.ws.rs.ApplicationPath("webapi")
 public class ApplicationConfig extends ResourceConfig {
-    public ApplicationConfig() {
-        register(RegisterAndPingService.class);
-    }
+
+  public ApplicationConfig() {
+    register(RegisterAndPingService.class);
+  }
 }
