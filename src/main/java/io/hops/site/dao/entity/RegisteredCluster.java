@@ -244,7 +244,7 @@ public class RegisteredCluster implements Serializable {
 
   @Override
   public String toString() {
-    return "io.hops.site.dao.RegisteredCluster[ clusterId=" + clusterId + " ]";
+    return "io.hops.site.dao.entity.RegisteredCluster[ clusterId=" + clusterId + " ]";
   }
   
 }

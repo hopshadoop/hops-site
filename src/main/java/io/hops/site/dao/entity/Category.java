@@ -16,40 +16,35 @@
 package io.hops.site.dao.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.util.Collection;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
-@Table(name = "dataset_rating",
+@Table(name = "category",
         catalog = "hops_site",
         schema = "")
 @XmlRootElement
 @NamedQueries({
-  @NamedQuery(name = "DatasetRating.findAll",
-          query = "SELECT d FROM DatasetRating d"),
-  @NamedQuery(name = "DatasetRating.findById",
-          query = "SELECT d FROM DatasetRating d WHERE d.id = :id"),
-  @NamedQuery(name = "DatasetRating.findByRating",
-          query
-          = "SELECT d FROM DatasetRating d WHERE d.rating = :rating"),
-  @NamedQuery(name = "DatasetRating.findByDatePublished",
-          query
-          = "SELECT d FROM DatasetRating d WHERE d.datePublished = :datePublished")})
-public class DatasetRating implements Serializable {
+  @NamedQuery(name = "Category.findAll",
+          query = "SELECT c FROM Category c"),
+  @NamedQuery(name = "Category.findById",
+          query = "SELECT c FROM Category c WHERE c.id = :id"),
+  @NamedQuery(name = "Category.findByName",
+          query = "SELECT c FROM Category c WHERE c.name = :name")})
+public class Category implements Serializable {
 
   private static final long serialVersionUID = 1L;
   @Id
@@ -59,30 +54,23 @@ public class DatasetRating implements Serializable {
   private Integer id;
   @Basic(optional = false)
   @NotNull
-  @Column(name = "rating")
-  private int rating;
-  @Column(name = "date_published")
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date datePublished;
-  @JoinColumn(name = "users",
-          referencedColumnName = "id")
-  @ManyToOne(optional = false)
-  private Users users;
-  @JoinColumn(name = "dataset_id",
-          referencedColumnName = "Id")
-  @ManyToOne(optional = false)
-  private Dataset datasetId;
+  @Size(min = 1,
+          max = 45)
+  @Column(name = "name")
+  private String name;
+  @ManyToMany(mappedBy = "categoryCollection")
+  private Collection<Dataset> datasetCollection;
 
-  public DatasetRating() {
+  public Category() {
   }
 
-  public DatasetRating(Integer id) {
+  public Category(Integer id) {
     this.id = id;
   }
 
-  public DatasetRating(Integer id, int rating) {
+  public Category(Integer id, String name) {
     this.id = id;
-    this.rating = rating;
+    this.name = name;
   }
 
   public Integer getId() {
@@ -93,36 +81,21 @@ public class DatasetRating implements Serializable {
     this.id = id;
   }
 
-  public int getRating() {
-    return rating;
+  public String getName() {
+    return name;
   }
 
-  public void setRating(int rating) {
-    this.rating = rating;
+  public void setName(String name) {
+    this.name = name;
   }
 
-  public Date getDatePublished() {
-    return datePublished;
+  @XmlTransient
+  public Collection<Dataset> getDatasetCollection() {
+    return datasetCollection;
   }
 
-  public void setDatePublished(Date datePublished) {
-    this.datePublished = datePublished;
-  }
-
-  public Users getUsers() {
-    return users;
-  }
-
-  public void setUsers(Users users) {
-    this.users = users;
-  }
-
-  public Dataset getDatasetId() {
-    return datasetId;
-  }
-
-  public void setDatasetId(Dataset datasetId) {
-    this.datasetId = datasetId;
+  public void setDatasetCollection(Collection<Dataset> datasetCollection) {
+    this.datasetCollection = datasetCollection;
   }
 
   @Override
@@ -135,10 +108,10 @@ public class DatasetRating implements Serializable {
   @Override
   public boolean equals(Object object) {
     // TODO: Warning - this method won't work in the case the id fields are not set
-    if (!(object instanceof DatasetRating)) {
+    if (!(object instanceof Category)) {
       return false;
     }
-    DatasetRating other = (DatasetRating) object;
+    Category other = (Category) object;
     if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
       return false;
     }
@@ -147,7 +120,7 @@ public class DatasetRating implements Serializable {
 
   @Override
   public String toString() {
-    return "io.hops.site.dao.entity.DatasetRating[ id=" + id + " ]";
+    return "io.hops.site.dao.entity.Category[ id=" + id + " ]";
   }
   
 }

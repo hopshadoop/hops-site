@@ -19,15 +19,18 @@ import java.io.Serializable;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
-
 
 @Entity
 @Table(name = "popular_dataset",
@@ -37,6 +40,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @NamedQueries({
   @NamedQuery(name = "PopularDataset.findAll",
           query = "SELECT p FROM PopularDataset p"),
+  @NamedQuery(name = "PopularDataset.findById",
+          query = "SELECT p FROM PopularDataset p WHERE p.id = :id"),
   @NamedQuery(name = "PopularDataset.findByDatasetId",
           query
           = "SELECT p FROM PopularDataset p WHERE p.datasetId = :datasetId"),
@@ -49,24 +54,22 @@ public class PopularDataset implements Serializable {
 
   private static final long serialVersionUID = 1L;
   @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Basic(optional = false)
-  @NotNull
-  @Size(min = 1,
-          max = 300)
-  @Column(name = "dataset_id")
-  private String datasetId;
+  @Column(name = "id")
+  private Integer id;
   @Basic(optional = false)
   @NotNull
   @Lob
   @Size(min = 1,
-          max = 2147483647)
+          max = 16777215)
   @Column(name = "manifest")
   private String manifest;
   @Basic(optional = false)
   @NotNull
   @Lob
   @Size(min = 1,
-          max = 2147483647)
+          max = 16777215)
   @Column(name = "partners")
   private String partners;
   @Basic(optional = false)
@@ -77,15 +80,19 @@ public class PopularDataset implements Serializable {
   @NotNull
   @Column(name = "seeds")
   private int seeds;
+  @JoinColumn(name = "dataset_id",
+          referencedColumnName = "Id")
+  @OneToOne(optional = false)
+  private Dataset datasetId;
 
   public PopularDataset() {
   }
 
-  public PopularDataset(String datasetId) {
-    this.datasetId = datasetId;
+  public PopularDataset(Integer id) {
+    this.id = id;
   }
 
-  public PopularDataset(String datasetId, String manifest, String partners, int leeches, int seeds) {
+  public PopularDataset(Dataset datasetId, String manifest, String partners, int leeches, int seeds) {
     this.datasetId = datasetId;
     this.manifest = manifest;
     this.partners = partners;
@@ -93,12 +100,12 @@ public class PopularDataset implements Serializable {
     this.seeds = seeds;
   }
 
-  public String getDatasetId() {
-    return datasetId;
+  public Integer getId() {
+    return id;
   }
 
-  public void setDatasetId(String datasetId) {
-    this.datasetId = datasetId;
+  public void setId(Integer id) {
+    this.id = id;
   }
 
   public String getManifest() {
@@ -133,10 +140,18 @@ public class PopularDataset implements Serializable {
     this.seeds = seeds;
   }
 
+  public Dataset getDatasetId() {
+    return datasetId;
+  }
+
+  public void setDatasetId(Dataset datasetId) {
+    this.datasetId = datasetId;
+  }
+
   @Override
   public int hashCode() {
     int hash = 0;
-    hash += (datasetId != null ? datasetId.hashCode() : 0);
+    hash += (id != null ? id.hashCode() : 0);
     return hash;
   }
 
@@ -147,8 +162,7 @@ public class PopularDataset implements Serializable {
       return false;
     }
     PopularDataset other = (PopularDataset) object;
-    if ((this.datasetId == null && other.datasetId != null) ||
-            (this.datasetId != null && !this.datasetId.equals(other.datasetId))) {
+    if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
       return false;
     }
     return true;
@@ -156,7 +170,7 @@ public class PopularDataset implements Serializable {
 
   @Override
   public String toString() {
-    return "io.hops.site.dao.PopularDataset[ datasetId=" + datasetId + " ]";
+    return "io.hops.site.dao.entity.PopularDataset[ id=" + id + " ]";
   }
-  
+
 }

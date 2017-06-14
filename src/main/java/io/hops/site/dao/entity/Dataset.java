@@ -22,13 +22,18 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -47,6 +52,8 @@ import javax.xml.bind.annotation.XmlTransient;
           query = "SELECT d FROM Dataset d"),
   @NamedQuery(name = "Dataset.findById",
           query = "SELECT d FROM Dataset d WHERE d.id = :id"),
+  @NamedQuery(name = "Dataset.findByPublicId",
+          query = "SELECT d FROM Dataset d WHERE d.publicId = :publicId"),
   @NamedQuery(name = "Dataset.findByName",
           query = "SELECT d FROM Dataset d WHERE d.name = :name"),
   @NamedQuery(name = "Dataset.findByDescription",
@@ -63,12 +70,16 @@ public class Dataset implements Serializable {
 
   private static final long serialVersionUID = 1L;
   @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  @Basic(optional = false)
+  @Column(name = "Id")
+  private Integer id;
   @Basic(optional = false)
   @NotNull
   @Size(min = 1,
           max = 1000)
-  @Column(name = "Id")
-  private String id;
+  @Column(name = "public_id")
+  private String publicId;
   @Size(max = 255)
   @Column(name = "name")
   private String name;
@@ -82,13 +93,27 @@ public class Dataset implements Serializable {
   @Column(name = "owner")
   private String owner;
   @Lob
+  @Size(max = 16777215)
   @Column(name = "readme")
-  private byte[] readme;
+  private String readme;
   @Column(name = "status")
   private Integer status;
+  @JoinTable(name = "dataset_category",
+          joinColumns = {
+            @JoinColumn(name = "dataset_id",
+                    referencedColumnName = "Id")},
+          inverseJoinColumns
+          = {
+            @JoinColumn(name = "category_id",
+                    referencedColumnName = "id")})
+  @ManyToMany
+  private Collection<Category> categoryCollection;
   @OneToMany(cascade = CascadeType.ALL,
           mappedBy = "datasetId")
   private Collection<DatasetIssue> datasetIssueCollection;
+  @OneToOne(cascade = CascadeType.ALL,
+          mappedBy = "datasetId")
+  private PopularDataset popularDataset;
   @OneToMany(cascade = CascadeType.ALL,
           mappedBy = "datasetId")
   private Collection<Comment> commentCollection;
@@ -97,22 +122,35 @@ public class Dataset implements Serializable {
   @ManyToOne
   private RegisteredCluster clusterId;
   @OneToMany(cascade = CascadeType.ALL,
-          mappedBy = "datasetIs")
+          mappedBy = "datasetId")
   private Collection<DatasetRating> datasetRatingCollection;
 
   public Dataset() {
   }
 
-  public Dataset(String id) {
+  public Dataset(Integer id) {
     this.id = id;
   }
 
-  public String getId() {
+  public Dataset(Integer id, String publicId) {
+    this.id = id;
+    this.publicId = publicId;
+  }
+
+  public Integer getId() {
     return id;
   }
 
-  public void setId(String id) {
+  public void setId(Integer id) {
     this.id = id;
+  }
+
+  public String getPublicId() {
+    return publicId;
+  }
+
+  public void setPublicId(String publicId) {
+    this.publicId = publicId;
   }
 
   public String getName() {
@@ -147,11 +185,11 @@ public class Dataset implements Serializable {
     this.owner = owner;
   }
 
-  public byte[] getReadme() {
+  public String getReadme() {
     return readme;
   }
 
-  public void setReadme(byte[] readme) {
+  public void setReadme(String readme) {
     this.readme = readme;
   }
 
@@ -164,12 +202,29 @@ public class Dataset implements Serializable {
   }
 
   @XmlTransient
+  public Collection<Category> getCategoryCollection() {
+    return categoryCollection;
+  }
+
+  public void setCategoryCollection(Collection<Category> categoryCollection) {
+    this.categoryCollection = categoryCollection;
+  }
+
+  @XmlTransient
   public Collection<DatasetIssue> getDatasetIssueCollection() {
     return datasetIssueCollection;
   }
 
   public void setDatasetIssueCollection(Collection<DatasetIssue> datasetIssueCollection) {
     this.datasetIssueCollection = datasetIssueCollection;
+  }
+
+  public PopularDataset getPopularDataset() {
+    return popularDataset;
+  }
+
+  public void setPopularDataset(PopularDataset popularDataset) {
+    this.popularDataset = popularDataset;
   }
 
   @XmlTransient
@@ -220,7 +275,7 @@ public class Dataset implements Serializable {
 
   @Override
   public String toString() {
-    return "io.hops.site.dao.Dataset[ id=" + id + " ]";
+    return "io.hops.site.dao.entity.Dataset[ id=" + id + " ]";
   }
   
 }
