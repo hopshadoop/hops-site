@@ -27,13 +27,16 @@ import io.hops.site.dto.AddressJSON;
 import io.hops.site.dto.RegisterJSON;
 import io.hops.site.dto.RegisteredJSON;
 import io.hops.site.controller.HelperFunctions;
+import javax.ejb.Stateless;
 
 /**
  * Root resource (exposed at "myresource" path)
  */
 @Path("myresource")
+@Stateless
 public class RegisterAndPingService {
 
+  private final static Logger LOGGER = Logger.getLogger(RegisterAndPingService.class.getName());
   @EJB
   HelperFunctions helperFunctions;
   @EJB

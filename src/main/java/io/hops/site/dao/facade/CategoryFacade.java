@@ -15,36 +15,21 @@
  */
 package io.hops.site.dao.facade;
 
-import io.hops.site.dao.entity.Users;
-import javax.ejb.Stateless;
+import io.hops.site.dao.entity.Category;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 
-@Stateless
-public class UsersFacade extends AbstractFacade<Users> {
-
+public class CategoryFacade extends AbstractFacade<Category>{
   @PersistenceContext(unitName = "hops-sitePU")
   private EntityManager em;
+
+  public CategoryFacade(Class<Category> entityClass) {
+    super(entityClass);
+  }
 
   @Override
   protected EntityManager getEntityManager() {
     return em;
   }
-
-  public UsersFacade() {
-    super(Users.class);
-  }
-
-  public Users findByEmail(String email) {
-    TypedQuery<Users> query = em.createNamedQuery("Users.findByEmail", Users.class).setParameter("email",
-            email);
-    try {
-      return query.getSingleResult();
-    } catch (NoResultException e) {
-      return null;
-    }
-  }
-
+  
 }

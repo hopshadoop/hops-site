@@ -48,8 +48,8 @@ import javax.xml.bind.annotation.XmlTransient;
           query = "SELECT c FROM Comment c"),
   @NamedQuery(name = "Comment.findById",
           query = "SELECT c FROM Comment c WHERE c.id = :id"),
-  @NamedQuery(name = "Comment.findByContent",
-          query = "SELECT c FROM Comment c WHERE c.content = :content"),
+  @NamedQuery(name = "Comment.findByDataset",
+          query = "SELECT c FROM Comment c WHERE c.datasetId = :datasetId"),
   @NamedQuery(name = "Comment.findByDatePublished",
           query
           = "SELECT c FROM Comment c WHERE c.datePublished = :datePublished")})

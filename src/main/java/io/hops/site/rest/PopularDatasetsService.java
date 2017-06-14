@@ -25,10 +25,14 @@ import io.hops.site.dto.AddressJSON;
 import io.hops.site.controller.HelperFunctions;
 import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.facade.DatasetFacade;
+import java.util.logging.Logger;
+import javax.ejb.Stateless;
 
 @Path("myresource")
+@Stateless
 public class PopularDatasetsService {
 
+  private final static Logger LOGGER = Logger.getLogger(PopularDatasetsService.class.getName());
   @EJB
   PopularDatasetFacade popularDatasetsFacade;
   @EJB
