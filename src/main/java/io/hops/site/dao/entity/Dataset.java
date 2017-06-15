@@ -80,6 +80,7 @@ public class Dataset implements Serializable {
           max = 1000)
   @Column(name = "public_id")
   private String publicId;
+  @NotNull
   @Size(max = 255)
   @Column(name = "name")
   private String name;
@@ -89,6 +90,7 @@ public class Dataset implements Serializable {
   @Column(name = "made_public_on")
   @Temporal(TemporalType.TIMESTAMP)
   private Date madePublicOn;
+  @NotNull
   @Size(max = 150)
   @Column(name = "owner")
   private String owner;

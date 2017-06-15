@@ -15,6 +15,7 @@
  */
 package io.hops.site.rest;
 
+import io.hops.site.controller.CommentController;
 import io.hops.site.dao.entity.Comment;
 import io.hops.site.dao.entity.CommentIssue;
 import io.hops.site.dao.entity.Dataset;
@@ -44,7 +45,8 @@ import javax.ws.rs.core.Response;
 @Path("comment")
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Comment", description = "Comment service")
+@Api(value = "/comment",
+        description = "Comment service")
 public class CommentService {
 
   private final static Logger LOGGER = Logger.getLogger(CommentService.class.getName());
@@ -52,17 +54,19 @@ public class CommentService {
   @EJB
   private DatasetFacade datasetFacade;
   @EJB
-  private CommentFacade commentFacade;
-  @EJB
-  private CommentIssueFacade commentIssueFacade;
+  private CommentController commentController;
 
   @GET
   @Path("{datasetId}")
   public Response getAll(@PathParam("datasetId") Integer datasetId) {
     Dataset dataset = datasetFacade.find(datasetId);
+    if (dataset == null) {
+      throw new IllegalArgumentException("Dataset not found.");
+    }
     List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
     GenericEntity<List<DatasetRating>> datasetRatings
-            = new GenericEntity<List<DatasetRating>>(ratings) {};
+            = new GenericEntity<List<DatasetRating>>(ratings) {
+    };
     LOGGER.log(Level.INFO, "Get all comments for dataset: {0}", datasetId);
     return Response.ok().entity(datasetRatings).build();
   }
@@ -71,9 +75,13 @@ public class CommentService {
   @Path("byPublicId/{publicId}")
   public Response getAllByPublicId(@PathParam("publicId") String publicId) {
     Dataset dataset = datasetFacade.findByPublicId(publicId);
+    if (dataset == null) {
+      throw new IllegalArgumentException("Dataset not found.");
+    }
     List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
     GenericEntity<List<DatasetRating>> datasetRatings
-            = new GenericEntity<List<DatasetRating>>(ratings) {};
+            = new GenericEntity<List<DatasetRating>>(ratings) {
+    };
     LOGGER.log(Level.INFO, "Get all comments for dataset: {0}", publicId);
     return Response.ok().entity(datasetRatings).build();
   }
@@ -81,7 +89,7 @@ public class CommentService {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addComment(Comment comment) {
-
+    commentController.addComment(comment);
     LOGGER.log(Level.INFO, "Add comment for dataset: {0}", comment.getDatasetId().getId());
     return Response.ok().build();
   }
@@ -90,7 +98,7 @@ public class CommentService {
   @Path("reportAbuse")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response reportAbuse(CommentIssue commentIssue) {
-
+    commentController.reportAbuse(commentIssue);
     LOGGER.log(Level.INFO, "Report abuse for comment: {0}", commentIssue.getCommentId().getId());
     return Response.ok().build();
   }
@@ -98,7 +106,7 @@ public class CommentService {
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
   public Response updateComment(Comment comment) {
-
+    commentController.updateComment(comment);
     LOGGER.log(Level.INFO, "Update comment with id: {0}", comment.getId());
     return Response.ok().build();
   }
@@ -106,7 +114,7 @@ public class CommentService {
   @DELETE
   @Path("{commentId}")
   public Response deleteComment(@PathParam("commentId") Integer commentId) {
-
+    commentController.removeComment(commentId);
     LOGGER.log(Level.INFO, "Delete comment with id: {0}", commentId);
     return Response.ok().build();
   }

@@ -32,16 +32,16 @@ import javax.ejb.Stateless;
 
 @Path("populardatasets")
 @Stateless
-@Api(value = "Popular Dataset", description = "Popular Dataset service")
+@Api(value = "/populardatasets", description = "Popular Dataset service")
 public class PopularDatasetsService {
 
   private final static Logger LOGGER = Logger.getLogger(PopularDatasetsService.class.getName());
   @EJB
-  PopularDatasetFacade popularDatasetsFacade;
+  private PopularDatasetFacade popularDatasetsFacade;
   @EJB
-  DatasetFacade dsFacade;
+  private DatasetFacade dsFacade;
   @EJB
-  HelperFunctions helperFunctions;
+  private HelperFunctions helperFunctions;
 
   private final ObjectMapper mapper = new ObjectMapper();
 

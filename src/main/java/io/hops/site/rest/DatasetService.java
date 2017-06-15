@@ -15,11 +15,10 @@
  */
 package io.hops.site.rest;
 
+import io.hops.site.controller.DatasetController;
 import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.DatasetIssue;
-import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.dao.facade.DatasetFacade;
-import io.hops.site.dao.facade.DatasetIssueFacade;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.logging.Level;
@@ -41,20 +40,22 @@ import javax.ws.rs.core.Response;
 @Path("dataset")
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Dataset", description = "Dataset service")
+@Api(value = "/dataset",
+        description = "Dataset service")
 public class DatasetService {
 
   private final static Logger LOGGER = Logger.getLogger(DatasetService.class.getName());
   @EJB
   private DatasetFacade datasetFacade;
   @EJB
-  private DatasetIssueFacade datasetIssueFacade;
+  private DatasetController datasetController;
 
   @GET
   public Response getAll() {
     List<Dataset> datasets = datasetFacade.findAll();
     GenericEntity<List<Dataset>> datasetList
-            = new GenericEntity<List<Dataset>>(datasets) { };
+            = new GenericEntity<List<Dataset>>(datasets) {
+    };
     LOGGER.log(Level.INFO, "Get all datasets");
     return Response.ok().entity(datasetList).build();
   }
@@ -63,7 +64,7 @@ public class DatasetService {
   @Path("{datasetId}")
   public Response getADataset(@PathParam("datasetId") Integer datasetId) {
     Dataset dataset = datasetFacade.find(datasetId);
-    LOGGER.log(Level.INFO, "Get a dataset:", dataset.getId());
+    LOGGER.log(Level.INFO, "Get a dataset with id: {0}", dataset.getId());
     return Response.ok().entity(dataset).build();
   }
 
@@ -71,14 +72,14 @@ public class DatasetService {
   @Path("byPublicId/{publicId}")
   public Response getByPublicId(@PathParam("publicId") String publicId) {
     Dataset dataset = datasetFacade.findByPublicId(publicId);
-    LOGGER.log(Level.INFO, "Get a dataset:", dataset.getId());
+    LOGGER.log(Level.INFO, "Get a dataset with public id: {0}:", dataset.getId());
     return Response.ok().entity(dataset).build();
   }
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addDatase(Dataset dataset) {
-
+    datasetController.addDataset(dataset);
     LOGGER.log(Level.INFO, "Add rating for dataset: {0}", dataset.getId());
     return Response.ok().build();
   }
@@ -87,24 +88,41 @@ public class DatasetService {
   @Path("datasetIssue")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addDatasetIssue(DatasetIssue datasetIssue) {
-
+    datasetController.reportDatasetIssue(datasetIssue);
     LOGGER.log(Level.INFO, "Add dataset issue for dataset: {0}", datasetIssue.getDatasetId().getId());
     return Response.ok().build();
   }
 
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateRating(DatasetRating datasetRating) {
+  public Response updateDataset(Dataset dataset) {
+    datasetController.updateDataset(dataset);
+    LOGGER.log(Level.INFO, "Update rating with id: {0}", dataset.getId());
+    return Response.ok().build();
+  }
 
-    LOGGER.log(Level.INFO, "Update rating with id: {0}", datasetRating.getId());
+  @PUT
+  @Path("addCategory")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response addCategory(Dataset dataset) {
+    datasetController.addCategory(dataset.getId(), dataset.getCategoryCollection());
+    LOGGER.log(Level.INFO, "Update rating with id: {0}", dataset.getId());
     return Response.ok().build();
   }
 
   @DELETE
-  @Path("{commentId}")
-  public Response deleteRating(@PathParam("datasetId") Integer datasetId) {
-
+  @Path("{datasetId}")
+  public Response deleteDataset(@PathParam("datasetId") Integer datasetId) {
+    datasetController.removeDataset(datasetId);
     LOGGER.log(Level.INFO, "Delete dataset with id: {0}", datasetId);
+    return Response.ok().build();
+  }
+
+  @DELETE
+  @Path("byPublicId/{publicId}")
+  public Response deleteDataset(@PathParam("publicId") String publicId) {
+    datasetController.removeDataset(publicId);
+    LOGGER.log(Level.INFO, "Delete dataset with id: {0}", publicId);
     return Response.ok().build();
   }
 }

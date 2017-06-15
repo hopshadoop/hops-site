@@ -42,7 +42,7 @@ import javax.ws.rs.core.Response;
 @Path("rating")
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "Rating", description = "Rating service")
+@Api(value = "/rating", description = "Rating service")
 public class RatingService {
 
   private final static Logger LOGGER = Logger.getLogger(RatingService.class.getName());
@@ -57,7 +57,7 @@ public class RatingService {
   public Response getRating(@PathParam("datasetId") Integer datasetId) {
     Dataset dataset = datasetFacade.find(datasetId);
     if (dataset == null) {
-      return Response.status(Response.Status.BAD_REQUEST).build();
+      throw new IllegalArgumentException("Dataset not found.");
     }
     RatingDTO ratingDto = ratingController.getRating(dataset);
     LOGGER.log(Level.INFO, "Get all rating for dataset: {0}", datasetId);
@@ -69,7 +69,7 @@ public class RatingService {
   public Response getRatingByPublicId(@PathParam("publicId") String publicId) {
     Dataset dataset = datasetFacade.findByPublicId(publicId);
     if (dataset == null) {
-      return Response.status(Response.Status.BAD_REQUEST).build();
+      throw new IllegalArgumentException("Dataset not found.");
     }
     RatingDTO ratingDto = ratingController.getRating(dataset);
     LOGGER.log(Level.INFO, "Get all rating for dataset: {0}", publicId);
@@ -81,7 +81,7 @@ public class RatingService {
   public Response getAllRatings(@PathParam("datasetId") Integer datasetId) {
     Dataset dataset = datasetFacade.find(datasetId);
     if (dataset == null) {
-      return Response.status(Response.Status.BAD_REQUEST).build();
+      throw new IllegalArgumentException("Dataset not found.");
     }
     List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
     GenericEntity<List<DatasetRating>> datasetRatings
@@ -96,7 +96,7 @@ public class RatingService {
   public Response getAllRatingsByPublicId(@PathParam("publicId") String publicId) {
     Dataset dataset = datasetFacade.findByPublicId(publicId);
     if (dataset == null) {
-      return Response.status(Response.Status.BAD_REQUEST).build();
+      throw new IllegalArgumentException("Dataset not found.");
     }
     List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
     GenericEntity<List<DatasetRating>> datasetRatings

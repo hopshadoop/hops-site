@@ -7,6 +7,8 @@ import io.hops.site.rest.RatingService;
 import org.glassfish.jersey.server.ResourceConfig;
 import io.hops.site.rest.RegisterAndPingService;
 import io.swagger.annotations.Api;
+import io.swagger.jaxrs.listing.ApiListingResource;
+import io.swagger.jaxrs.listing.SwaggerSerializers;
 
 @Api
 @javax.ws.rs.ApplicationPath("api")
@@ -20,7 +22,7 @@ public class ApplicationConfig extends ResourceConfig {
     register(RatingService.class);
     
     //swagger
-    register(io.swagger.jaxrs.listing.ApiListingResource.class);
-    register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+    register(ApiListingResource.class);
+    register(SwaggerSerializers.class);
   }
 }

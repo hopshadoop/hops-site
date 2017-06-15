@@ -60,7 +60,7 @@ public class RatingController {
    * @param datasetRating 
    */
   public void addRating(DatasetRating datasetRating) {
-    if (datasetRating.getDatasetId() == null || datasetRating.getUsers() == null) {
+    if (datasetRating == null || datasetRating.getDatasetId() == null || datasetRating.getUsers() == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
     if (datasetRating.getUsers().getEmail() == null) {

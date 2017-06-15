@@ -30,19 +30,16 @@ import io.hops.site.controller.HelperFunctions;
 import io.swagger.annotations.Api;
 import javax.ejb.Stateless;
 
-/**
- * Root resource (exposed at "myresource" path)
- */
 @Path("cluster")
 @Stateless
-@Api(value = "Cluster register and ping", description = "Cluster Register And Ping service")
+@Api(value = "/cluster", description = "Cluster Register And Ping service")
 public class RegisterAndPingService {
 
   private final static Logger LOGGER = Logger.getLogger(RegisterAndPingService.class.getName());
   @EJB
-  HelperFunctions helperFunctions;
+  private HelperFunctions helperFunctions;
   @EJB
-  RegisteredClusterFacade registeredClustersFacade;
+  private RegisteredClusterFacade registeredClustersFacade;
 
   private final ObjectMapper mapper = new ObjectMapper();
 
