@@ -20,6 +20,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class RatingDTO {
+
   private Integer datasetId;
   private int rate;
   private int ratedBy;
@@ -79,5 +80,4 @@ public class RatingDTO {
     return true;
   }
 
-  
 }

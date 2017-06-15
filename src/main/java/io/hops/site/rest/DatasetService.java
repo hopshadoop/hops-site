@@ -20,6 +20,7 @@ import io.hops.site.dao.entity.DatasetIssue;
 import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dao.facade.DatasetIssueFacade;
+import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,6 +41,7 @@ import javax.ws.rs.core.Response;
 @Path("dataset")
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
+@Api(value = "Dataset", description = "Dataset service")
 public class DatasetService {
 
   private final static Logger LOGGER = Logger.getLogger(DatasetService.class.getName());

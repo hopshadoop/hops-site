@@ -6,83 +6,79 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class PopularDatasetJSON {
-    
-    private String datasetId;
-    
-    private ManifestJSON manifestJson;
-    
-    private int leeches;
-    
-    private int seeds;
-    
-    private List<AddressJSON> gvodEndpoints;
-    
-    private IdentificationJSON identification;
 
-    public PopularDatasetJSON() {
-        
-        
-    }
+  private String datasetId;
 
-    public PopularDatasetJSON(ManifestJSON manifestJson, String datasetId, int leeches, int seeds, List<AddressJSON> partners) {
-        this.manifestJson = manifestJson;
-        this.datasetId = datasetId;
-        this.leeches = leeches;
-        this.seeds = seeds;
-        this.gvodEndpoints = partners;
-    }
+  private ManifestJSON manifestJson;
 
-    public IdentificationJSON getIdentification() {
-        return identification;
-    }
+  private int leeches;
 
-    public void setIdentification(IdentificationJSON identification) {
-        this.identification = identification;
-    }
+  private int seeds;
 
-    public String getDatasetId() {
-        return datasetId;
-    }
+  private List<AddressJSON> gvodEndpoints;
 
-    public int getLeeches() {
-        return leeches;
-    }
+  private IdentificationJSON identification;
 
-    public int getSeeds() {
-        return seeds;
-    }
+  public PopularDatasetJSON() {
 
-    public void setDatasetId(String datasetId) {
-        this.datasetId = datasetId;
-    }
+  }
 
-    public void setLeeches(int leeches) {
-        this.leeches = leeches;
-    }
+  public PopularDatasetJSON(ManifestJSON manifestJson, String datasetId, int leeches, int seeds,
+          List<AddressJSON> partners) {
+    this.manifestJson = manifestJson;
+    this.datasetId = datasetId;
+    this.leeches = leeches;
+    this.seeds = seeds;
+    this.gvodEndpoints = partners;
+  }
 
-    public void setSeeds(int seeds) {
-        this.seeds = seeds;
-    }
-    
-    @XmlElement(name = "gvodEndpoints")
-    public List<AddressJSON> getGvodEndpoints() {
-        return gvodEndpoints;
-    }
+  public IdentificationJSON getIdentification() {
+    return identification;
+  }
 
-    public void setGvodEndpoints(List<AddressJSON> gvodEndpoints) {
-        this.gvodEndpoints = gvodEndpoints;
-    }
+  public void setIdentification(IdentificationJSON identification) {
+    this.identification = identification;
+  }
 
-    public ManifestJSON getManifestJson() {
-        return manifestJson;
-    }
+  public String getDatasetId() {
+    return datasetId;
+  }
 
-    public void setManifestJson(ManifestJSON manifestJson) {
-        this.manifestJson = manifestJson;
-    }
-    
-    
-    
-    
-    
+  public int getLeeches() {
+    return leeches;
+  }
+
+  public int getSeeds() {
+    return seeds;
+  }
+
+  public void setDatasetId(String datasetId) {
+    this.datasetId = datasetId;
+  }
+
+  public void setLeeches(int leeches) {
+    this.leeches = leeches;
+  }
+
+  public void setSeeds(int seeds) {
+    this.seeds = seeds;
+  }
+
+  @XmlElement(name = "gvodEndpoints")
+  public List<AddressJSON> getGvodEndpoints() {
+    return gvodEndpoints;
+  }
+
+  public void setGvodEndpoints(List<AddressJSON> gvodEndpoints) {
+    this.gvodEndpoints = gvodEndpoints;
+  }
+
+  public ManifestJSON getManifestJson() {
+    return manifestJson;
+  }
+
+  public void setManifestJson(ManifestJSON manifestJson) {
+    this.manifestJson = manifestJson;
+  }
+
 }

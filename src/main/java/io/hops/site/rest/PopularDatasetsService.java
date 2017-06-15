@@ -25,11 +25,14 @@ import io.hops.site.dto.AddressJSON;
 import io.hops.site.controller.HelperFunctions;
 import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.facade.DatasetFacade;
+import io.swagger.annotations.Api;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
 
-@Path("myresource")
+@Path("populardatasets")
 @Stateless
+@Api(value = "Popular Dataset", description = "Popular Dataset service")
 public class PopularDatasetsService {
 
   private final static Logger LOGGER = Logger.getLogger(PopularDatasetsService.class.getName());
@@ -43,15 +46,14 @@ public class PopularDatasetsService {
   private final ObjectMapper mapper = new ObjectMapper();
 
   @PUT
-  @Path("populardatasets")
   @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
   @Produces(MediaType.APPLICATION_JSON)
   public Response PopularDatasets(IdentificationJSON identification) throws IOException {
 
     if (!helperFunctions.ClusterRegisteredWithId(identification.getClusterId())) {
-      return Response.status(403).entity(new FailJSON("invalid cluster id")).build();
+      LOGGER.log(Level.INFO, "Invalid cluster id.");
+      return Response.status(Response.Status.FORBIDDEN).entity(new FailJSON("Invalid cluster id")).build();
     } else {
-
       List<PopularDatasetJSON> popularDatasetsJsons = new LinkedList<>();
       for (PopularDataset pd : helperFunctions.getTopTenDatasets()) {
         ManifestJSON manifestJson = mapper.readValue(pd.getManifest(), ManifestJSON.class);
@@ -65,13 +67,12 @@ public class PopularDatasetsService {
       GenericEntity<List<PopularDatasetJSON>> searchResults = new GenericEntity<List<PopularDatasetJSON>>(
               popularDatasetsJsons) {
       };
-      return Response.status(200).entity(searchResults).build();
+      return Response.status(Response.Status.OK).entity(searchResults).build();
     }
 
   }
 
   @POST
-  @Path("populardatasets")
   @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
   @Produces(MediaType.APPLICATION_JSON)
   public void PopularDatasetsAdd(PopularDatasetJSON popularDatasetsJson) throws JsonProcessingException {

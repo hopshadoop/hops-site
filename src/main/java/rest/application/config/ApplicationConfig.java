@@ -6,8 +6,10 @@ import io.hops.site.rest.PopularDatasetsService;
 import io.hops.site.rest.RatingService;
 import org.glassfish.jersey.server.ResourceConfig;
 import io.hops.site.rest.RegisterAndPingService;
+import io.swagger.annotations.Api;
 
-@javax.ws.rs.ApplicationPath("webapi")
+@Api
+@javax.ws.rs.ApplicationPath("api")
 public class ApplicationConfig extends ResourceConfig {
 
   public ApplicationConfig() {
@@ -16,5 +18,9 @@ public class ApplicationConfig extends ResourceConfig {
     register(DatasetService.class);
     register(CommentService.class);
     register(RatingService.class);
+    
+    //swagger
+    register(io.swagger.jaxrs.listing.ApiListingResource.class);
+    register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
   }
 }

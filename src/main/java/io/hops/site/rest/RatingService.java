@@ -20,6 +20,7 @@ import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dto.RatingDTO;
+import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -41,6 +42,7 @@ import javax.ws.rs.core.Response;
 @Path("rating")
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
+@Api(value = "Rating", description = "Rating service")
 public class RatingService {
 
   private final static Logger LOGGER = Logger.getLogger(RatingService.class.getName());

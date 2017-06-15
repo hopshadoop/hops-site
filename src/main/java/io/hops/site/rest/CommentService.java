@@ -22,6 +22,7 @@ import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.dao.facade.CommentFacade;
 import io.hops.site.dao.facade.CommentIssueFacade;
 import io.hops.site.dao.facade.DatasetFacade;
+import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,6 +44,7 @@ import javax.ws.rs.core.Response;
 @Path("comment")
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
+@Api(value = "Comment", description = "Comment service")
 public class CommentService {
 
   private final static Logger LOGGER = Logger.getLogger(CommentService.class.getName());
