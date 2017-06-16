@@ -29,10 +29,13 @@ import io.swagger.annotations.Api;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 @Path("populardatasets")
 @Stateless
 @Api(value = "/populardatasets", description = "Popular Dataset service")
+@TransactionAttribute(TransactionAttributeType.NEVER)
 public class PopularDatasetsService {
 
   private final static Logger LOGGER = Logger.getLogger(PopularDatasetsService.class.getName());

@@ -29,13 +29,16 @@ import io.hops.site.dto.RegisteredJSON;
 import io.hops.site.controller.HelperFunctions;
 import io.swagger.annotations.Api;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 @Path("cluster")
 @Stateless
 @Api(value = "/cluster", description = "Cluster Register And Ping service")
-public class RegisterAndPingService {
+@TransactionAttribute(TransactionAttributeType.NEVER)
+public class ClusterService {
 
-  private final static Logger LOGGER = Logger.getLogger(RegisterAndPingService.class.getName());
+  private final static Logger LOGGER = Logger.getLogger(ClusterService.class.getName());
   @EJB
   private HelperFunctions helperFunctions;
   @EJB
@@ -51,7 +54,7 @@ public class RegisterAndPingService {
     if (!helperFunctions.ClusterRegisteredWithEmail(registerJson.getEmail())) {
       if (helperFunctions.isValid(registerJson.getCert())) {
         String registeredId = helperFunctions.registerCluster(registerJson.getSearchEndpoint(), registerJson.getEmail(),
-                registerJson.getCert(), registerJson.getGVodEndpoint());
+                registerJson.getCert(), registerJson.getGvodEndpoint());
         if (registeredId != null) {
           return Response.status(Response.Status.OK).entity(new RegisteredJSON(registeredId)).build();
         } else {
@@ -70,7 +73,7 @@ public class RegisterAndPingService {
 
   @PUT
   @Path("ping")
-  @Consumes({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+  @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
   public Response Ping(IdentificationJSON identification) {
     if (!helperFunctions.ClusterRegisteredWithId(identification.getClusterId())) {

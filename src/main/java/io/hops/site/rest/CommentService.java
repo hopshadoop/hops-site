@@ -23,6 +23,8 @@ import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.dao.facade.CommentFacade;
 import io.hops.site.dao.facade.CommentIssueFacade;
 import io.hops.site.dao.facade.DatasetFacade;
+import io.hops.site.dto.CommentDTO;
+import io.hops.site.dto.CommentIssueDTO;
 import io.swagger.annotations.Api;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +32,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -47,6 +51,7 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "/comment",
         description = "Comment service")
+@TransactionAttribute(TransactionAttributeType.NEVER)
 public class CommentService {
 
   private final static Logger LOGGER = Logger.getLogger(CommentService.class.getName());
@@ -59,11 +64,7 @@ public class CommentService {
   @GET
   @Path("{datasetId}")
   public Response getAll(@PathParam("datasetId") Integer datasetId) {
-    Dataset dataset = datasetFacade.find(datasetId);
-    if (dataset == null) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
-    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
+    List<DatasetRating> ratings = commentController.getAllDatasets(datasetId);
     GenericEntity<List<DatasetRating>> datasetRatings
             = new GenericEntity<List<DatasetRating>>(ratings) {
     };
@@ -74,11 +75,7 @@ public class CommentService {
   @GET
   @Path("byPublicId/{publicId}")
   public Response getAllByPublicId(@PathParam("publicId") String publicId) {
-    Dataset dataset = datasetFacade.findByPublicId(publicId);
-    if (dataset == null) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
-    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
+    List<DatasetRating> ratings = commentController.getAllDatasets(publicId);
     GenericEntity<List<DatasetRating>> datasetRatings
             = new GenericEntity<List<DatasetRating>>(ratings) {
     };
@@ -88,24 +85,24 @@ public class CommentService {
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response addComment(Comment comment) {
+  public Response addComment(CommentDTO comment) {
     commentController.addComment(comment);
-    LOGGER.log(Level.INFO, "Add comment for dataset: {0}", comment.getDatasetId().getId());
+    LOGGER.log(Level.INFO, "Add comment for dataset: {0}", comment.getDatasetId());
     return Response.ok().build();
   }
 
   @POST
   @Path("reportAbuse")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response reportAbuse(CommentIssue commentIssue) {
+  public Response reportAbuse(CommentIssueDTO commentIssue) {
     commentController.reportAbuse(commentIssue);
-    LOGGER.log(Level.INFO, "Report abuse for comment: {0}", commentIssue.getCommentId().getId());
+    LOGGER.log(Level.INFO, "Report abuse for comment: {0}", commentIssue.getCommentId());
     return Response.ok().build();
   }
 
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateComment(Comment comment) {
+  public Response updateComment(CommentDTO comment) {
     commentController.updateComment(comment);
     LOGGER.log(Level.INFO, "Update comment with id: {0}", comment.getId());
     return Response.ok().build();

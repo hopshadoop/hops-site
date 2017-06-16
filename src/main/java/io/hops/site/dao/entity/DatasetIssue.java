@@ -33,6 +33,7 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @Table(name = "dataset_issue",
@@ -92,6 +93,13 @@ public class DatasetIssue implements Serializable {
     this.type = type;
   }
 
+  public DatasetIssue(String type, String msg, Users users, Dataset datasetId) {
+    this.type = type;
+    this.msg = msg;
+    this.users = users;
+    this.datasetId = datasetId;
+  }
+
   public Integer getId() {
     return id;
   }
@@ -132,6 +140,7 @@ public class DatasetIssue implements Serializable {
     this.users = users;
   }
 
+  @XmlTransient
   public Dataset getDatasetId() {
     return datasetId;
   }

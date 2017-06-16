@@ -32,6 +32,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @Table(name = "dataset_rating",
@@ -85,6 +86,12 @@ public class DatasetRating implements Serializable {
     this.rating = rating;
   }
 
+  public DatasetRating(int rating, Users users, Dataset datasetId) {
+    this.rating = rating;
+    this.users = users;
+    this.datasetId = datasetId;
+  }
+
   public Integer getId() {
     return id;
   }
@@ -117,6 +124,7 @@ public class DatasetRating implements Serializable {
     this.users = users;
   }
 
+  @XmlTransient
   public Dataset getDatasetId() {
     return datasetId;
   }

@@ -17,11 +17,14 @@ package io.hops.site.rest;
 
 import io.hops.site.controller.UsersController;
 import io.hops.site.dao.entity.Users;
+import io.hops.site.dto.UserDTO;
 import io.swagger.annotations.Api;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
@@ -37,6 +40,7 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "/user",
         description = "User service")
+@TransactionAttribute(TransactionAttributeType.NEVER)
 public class UserService {
 
   private final static Logger LOGGER = Logger.getLogger(UserService.class.getName());
@@ -46,7 +50,7 @@ public class UserService {
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response addUser(Users user) {
+  public Response addUser(UserDTO user) {
     usersController.addNewUser(user);
     LOGGER.log(Level.INFO, "Adding user: {0}", user.getFirstname());
     return Response.ok().build();
@@ -54,7 +58,7 @@ public class UserService {
 
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateUser(Users user) {
+  public Response updateUser(UserDTO user) {
     usersController.updateUser(user);
     LOGGER.log(Level.INFO, "Update user: {0}", user.getFirstname());
     return Response.ok().build();

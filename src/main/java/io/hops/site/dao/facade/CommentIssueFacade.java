@@ -16,12 +16,18 @@
 package io.hops.site.dao.facade;
 
 import io.hops.site.dao.entity.CommentIssue;
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+@Stateless
 public class CommentIssueFacade extends AbstractFacade<CommentIssue>{
   @PersistenceContext(unitName = "hops-sitePU")
   private EntityManager em;
+
+  public CommentIssueFacade() {
+    super(CommentIssue.class);
+  }
 
   public CommentIssueFacade(Class<CommentIssue> entityClass) {
     super(entityClass);

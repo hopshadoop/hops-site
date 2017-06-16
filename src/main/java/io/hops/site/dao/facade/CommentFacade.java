@@ -17,15 +17,21 @@ package io.hops.site.dao.facade;
 
 import io.hops.site.dao.entity.Comment;
 import io.hops.site.dao.entity.Dataset;
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
+@Stateless
 public class CommentFacade extends AbstractFacade<Comment> {
 
   @PersistenceContext(unitName = "hops-sitePU")
   private EntityManager em;
+
+  public CommentFacade() {
+    super(Comment.class);
+  }
 
   public CommentFacade(Class<Comment> entityClass) {
     super(entityClass);

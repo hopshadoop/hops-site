@@ -16,12 +16,18 @@
 package io.hops.site.dao.facade;
 
 import io.hops.site.dao.entity.DatasetRating;
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+@Stateless
 public class DatasetRatingFacade extends AbstractFacade<DatasetRating> {
   @PersistenceContext(unitName = "hops-sitePU")
   private EntityManager em;
+
+  public DatasetRatingFacade() {
+    super(DatasetRating.class);
+  }
 
   public DatasetRatingFacade(Class<DatasetRating> entityClass) {
     super(entityClass);

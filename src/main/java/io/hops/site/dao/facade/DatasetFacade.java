@@ -16,15 +16,21 @@
 package io.hops.site.dao.facade;
 
 import io.hops.site.dao.entity.Dataset;
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
+@Stateless
 public class DatasetFacade extends AbstractFacade<Dataset> {
 
   @PersistenceContext(unitName = "hops-sitePU")
   private EntityManager em;
+
+  public DatasetFacade() {
+    super(Dataset.class);
+  }
 
   public DatasetFacade(Class<Dataset> entityClass) {
     super(entityClass);

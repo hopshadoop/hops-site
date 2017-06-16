@@ -17,8 +17,11 @@ import javax.ejb.Stateless;
 import io.hops.site.dao.facade.PopularDatasetFacade;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dto.AddressJSON;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.NEVER)
 public class HelperFunctions {
 
   @EJB

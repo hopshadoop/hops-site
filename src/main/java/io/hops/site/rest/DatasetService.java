@@ -19,12 +19,16 @@ import io.hops.site.controller.DatasetController;
 import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.DatasetIssue;
 import io.hops.site.dao.facade.DatasetFacade;
+import io.hops.site.dto.DatasetDTO;
+import io.hops.site.dto.DatasetIssueDTO;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -42,6 +46,7 @@ import javax.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "/dataset",
         description = "Dataset service")
+@TransactionAttribute(TransactionAttributeType.NEVER)
 public class DatasetService {
 
   private final static Logger LOGGER = Logger.getLogger(DatasetService.class.getName());
@@ -52,7 +57,7 @@ public class DatasetService {
 
   @GET
   public Response getAll() {
-    List<Dataset> datasets = datasetFacade.findAll();
+    List<Dataset> datasets = datasetController.findAllDatasets();
     GenericEntity<List<Dataset>> datasetList
             = new GenericEntity<List<Dataset>>(datasets) {
     };
@@ -63,7 +68,7 @@ public class DatasetService {
   @GET
   @Path("{datasetId}")
   public Response getADataset(@PathParam("datasetId") Integer datasetId) {
-    Dataset dataset = datasetFacade.find(datasetId);
+    Dataset dataset = datasetController.findDataset(datasetId);
     LOGGER.log(Level.INFO, "Get a dataset with id: {0}", dataset.getId());
     return Response.ok().entity(dataset).build();
   }
@@ -71,31 +76,31 @@ public class DatasetService {
   @GET
   @Path("byPublicId/{publicId}")
   public Response getByPublicId(@PathParam("publicId") String publicId) {
-    Dataset dataset = datasetFacade.findByPublicId(publicId);
+    Dataset dataset = datasetController.findDatasetByPublicId(publicId);
     LOGGER.log(Level.INFO, "Get a dataset with public id: {0}:", dataset.getId());
     return Response.ok().entity(dataset).build();
   }
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response addDatase(Dataset dataset) {
+  public Response addDatase(DatasetDTO dataset) {
     datasetController.addDataset(dataset);
-    LOGGER.log(Level.INFO, "Add rating for dataset: {0}", dataset.getId());
+    LOGGER.log(Level.INFO, "Add new dataset with public id: {0}", dataset.getPublicId());
     return Response.ok().build();
   }
 
   @POST
   @Path("datasetIssue")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response addDatasetIssue(DatasetIssue datasetIssue) {
+  public Response addDatasetIssue(DatasetIssueDTO datasetIssue) {
     datasetController.reportDatasetIssue(datasetIssue);
-    LOGGER.log(Level.INFO, "Add dataset issue for dataset: {0}", datasetIssue.getDatasetId().getId());
+    LOGGER.log(Level.INFO, "Add dataset issue for dataset: {0}", datasetIssue.getDatasetId());
     return Response.ok().build();
   }
 
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateDataset(Dataset dataset) {
+  public Response updateDataset(DatasetDTO dataset) {
     datasetController.updateDataset(dataset);
     LOGGER.log(Level.INFO, "Update rating with id: {0}", dataset.getId());
     return Response.ok().build();
@@ -104,8 +109,8 @@ public class DatasetService {
   @PUT
   @Path("addCategory")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response addCategory(Dataset dataset) {
-    datasetController.addCategory(dataset.getId(), dataset.getCategoryCollection());
+  public Response addCategory(DatasetDTO dataset) {
+    datasetController.addCategory(dataset);
     LOGGER.log(Level.INFO, "Update rating with id: {0}", dataset.getId());
     return Response.ok().build();
   }

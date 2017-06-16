@@ -83,6 +83,13 @@ public class CommentIssue implements Serializable {
   public CommentIssue() {
   }
 
+  public CommentIssue(String type, String msg, Users users, Comment commentId) {
+    this.type = type;
+    this.msg = msg;
+    this.users = users;
+    this.commentId = commentId;
+  }
+
   public CommentIssue(Integer id) {
     this.id = id;
   }

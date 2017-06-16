@@ -18,17 +18,25 @@ package io.hops.site.controller;
 import io.hops.site.dao.entity.Comment;
 import io.hops.site.dao.entity.CommentIssue;
 import io.hops.site.dao.entity.Dataset;
+import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.dao.entity.Users;
 import io.hops.site.dao.facade.CommentFacade;
 import io.hops.site.dao.facade.CommentIssueFacade;
 import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dao.facade.UsersFacade;
+import io.hops.site.dto.CommentDTO;
+import io.hops.site.dto.CommentIssueDTO;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.NEVER)
 public class CommentController {
 
   private final static Logger LOGGER = Logger.getLogger(CommentController.class.getName());
@@ -44,16 +52,17 @@ public class CommentController {
 
   /**
    * Add new comment by comment.user for comment.dataset
-   * @param comment 
+   *
+   * @param comment
    */
-  public void addComment(Comment comment) {
-    if (comment == null || comment.getDatasetId() == null || comment.getUsers() == null) {
+  public void addComment(CommentDTO comment) {
+    if (comment == null || comment.getDatasetId() == null || comment.getUserEmail() == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
-    if (comment.getUsers().getEmail() == null) {
+    if (comment.getUserEmail() == null) {
       throw new IllegalArgumentException("User email not assigned.");
     }
-    if (comment.getDatasetId().getId() == null && comment.getDatasetId().getPublicId() == null) {
+    if (comment.getDatasetId() == null && comment.getPublicId() == null) {
       throw new IllegalArgumentException("Dataset id not assigned.");
     }
     if (comment.getContent().isEmpty()) {
@@ -61,45 +70,45 @@ public class CommentController {
     }
 
     Dataset dataset;
-    if (comment.getDatasetId().getId() == null) {
-      dataset = datasetFacade.findByPublicId(comment.getDatasetId().getPublicId());
+    if (comment.getDatasetId() == null) {
+      dataset = datasetFacade.findByPublicId(comment.getPublicId());
     } else {
-      dataset = datasetFacade.find(comment.getDatasetId().getId());
+      dataset = datasetFacade.find(comment.getDatasetId());
     }
 
     if (dataset == null) {
       throw new IllegalArgumentException("Dataset not found.");
     }
 
-    Users user = userFacade.findByEmail(comment.getUsers().getEmail());
+    Users user = userFacade.findByEmail(comment.getUserEmail());
     if (user == null) {
       throw new IllegalArgumentException("User not found.");
     }
+    Comment newComment = new Comment(comment.getContent(), user, dataset);
+    commentFacade.create(newComment);
     LOGGER.log(Level.INFO, "Adding new comment.");
-    comment.setDatasetId(dataset);
-    comment.setUsers(user);
-    commentFacade.create(comment);
   }
 
   /**
    * Report abuse on commentIssue.comment
-   * @param commentIssue 
+   *
+   * @param commentIssue
    */
-  public void reportAbuse(CommentIssue commentIssue) {
-    if (commentIssue == null || commentIssue.getCommentId() == null || commentIssue.getUsers() == null) {
+  public void reportAbuse(CommentIssueDTO commentIssue) {
+    if (commentIssue == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
-    if (commentIssue.getUsers().getEmail() == null) {
+    if (commentIssue.getUserEmail() == null) {
       throw new IllegalArgumentException("User email not assigned.");
     }
-    if (commentIssue.getCommentId().getId() == null) {
+    if (commentIssue.getCommentId() == null) {
       throw new IllegalArgumentException("Dataset id not assigned.");
     }
     if (commentIssue.getType().isEmpty()) {
       throw new IllegalArgumentException("Issue type not assigned.");
     }
 
-    Comment comment = commentFacade.find(commentIssue.getCommentId().getId());
+    Comment comment = commentFacade.find(commentIssue.getId());
     if (comment == null) {
       throw new IllegalArgumentException("Comment not found.");
     }
@@ -109,15 +118,15 @@ public class CommentController {
       throw new IllegalArgumentException("User not found.");
     }
 
+    CommentIssue newCommentIssue = new CommentIssue(commentIssue.getType(), commentIssue.getMsg(), user, comment);
+    commentIssueFacade.create(newCommentIssue);
     LOGGER.log(Level.INFO, "Adding new issue for comment: {0}.", comment.getId());
-    commentIssue.setCommentId(comment);
-    commentIssue.setUsers(user);
-    commentIssueFacade.create(commentIssue);
   }
 
   /**
    * Remove comment identified by commentId
-   * @param commentId 
+   *
+   * @param commentId
    */
   public void removeComment(Integer commentId) {
     if (commentId == null) {
@@ -133,9 +142,10 @@ public class CommentController {
 
   /**
    * Update comment content
-   * @param comment 
+   *
+   * @param comment
    */
-  public void updateComment(Comment comment) {
+  public void updateComment(CommentDTO comment) {
     if (comment == null || comment.getDatasetId() == null) {
       throw new IllegalArgumentException("Comment id not assigned.");
     }
@@ -152,6 +162,35 @@ public class CommentController {
     LOGGER.log(Level.INFO, "Updating comment: {0}.", comment.getId());
     managedComment.setContent(comment.getContent());
     commentFacade.edit(managedComment);
+  }
+
+  /**
+   * Get all dataset ratings for the given public dataset id
+   *
+   * @param publicId
+   * @return
+   */
+  public List<DatasetRating> getAllDatasets(String publicId) {
+    Dataset dataset = datasetFacade.findByPublicId(publicId);
+    if (dataset == null) {
+      throw new IllegalArgumentException("Dataset not found.");
+    }
+    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
+    return ratings;
+  }
+
+  /**
+   * Get all dataset ratings for the given dataset id
+   * @param datasetId
+   * @return
+   */
+  public List<DatasetRating> getAllDatasets(Integer datasetId) {
+    Dataset dataset = datasetFacade.find(datasetId);
+    if (dataset == null) {
+      throw new IllegalArgumentException("Dataset not found.");
+    }
+    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
+    return ratings;
   }
 
 }

@@ -87,6 +87,12 @@ public class Comment implements Serializable {
   public Comment() {
   }
 
+  public Comment(String content, Users users, Dataset datasetId) {
+    this.content = content;
+    this.users = users;
+    this.datasetId = datasetId;
+  }
+
   public Comment(Integer id) {
     this.id = id;
   }
@@ -129,6 +135,7 @@ public class Comment implements Serializable {
     this.users = users;
   }
 
+  @XmlTransient
   public Dataset getDatasetId() {
     return datasetId;
   }

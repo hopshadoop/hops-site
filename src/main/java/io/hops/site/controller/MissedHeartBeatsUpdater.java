@@ -5,8 +5,11 @@ import io.hops.site.dao.facade.RegisteredClusterFacade;
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 
 @Stateless
+@TransactionAttribute(TransactionAttributeType.NEVER)
 public class MissedHeartBeatsUpdater {
     
     @EJB

@@ -22,6 +22,7 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -100,7 +101,7 @@ public class Dataset implements Serializable {
   private String readme;
   @Column(name = "status")
   private Integer status;
-  @JoinTable(name = "dataset_category",
+  @JoinTable(name = "hops_site.dataset_category",
           joinColumns = {
             @JoinColumn(name = "dataset_id",
                     referencedColumnName = "Id")},
@@ -108,7 +109,7 @@ public class Dataset implements Serializable {
           = {
             @JoinColumn(name = "category_id",
                     referencedColumnName = "id")})
-  @ManyToMany
+  @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   private Collection<Category> categoryCollection;
   @OneToMany(cascade = CascadeType.ALL,
           mappedBy = "datasetId")
@@ -116,14 +117,14 @@ public class Dataset implements Serializable {
   @OneToOne(cascade = CascadeType.ALL,
           mappedBy = "datasetId")
   private PopularDataset popularDataset;
-  @OneToMany(cascade = CascadeType.ALL,
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER,
           mappedBy = "datasetId")
   private Collection<Comment> commentCollection;
   @JoinColumn(name = "cluster_id",
           referencedColumnName = "cluster_id")
   @ManyToOne
   private RegisteredCluster clusterId;
-  @OneToMany(cascade = CascadeType.ALL,
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER,
           mappedBy = "datasetId")
   private Collection<DatasetRating> datasetRatingCollection;
 
@@ -137,6 +138,18 @@ public class Dataset implements Serializable {
   public Dataset(Integer id, String publicId) {
     this.id = id;
     this.publicId = publicId;
+  }
+
+  public Dataset(String publicId, String name, String description, Date madePublicOn, String owner, String readme,
+          Collection<Category> categoryCollection, RegisteredCluster clusterId) {
+    this.publicId = publicId;
+    this.name = name;
+    this.description = description;
+    this.madePublicOn = madePublicOn;
+    this.owner = owner;
+    this.readme = readme;
+    this.categoryCollection = categoryCollection;
+    this.clusterId = clusterId;
   }
 
   public Integer getId() {
@@ -203,7 +216,6 @@ public class Dataset implements Serializable {
     this.status = status;
   }
 
-  @XmlTransient
   public Collection<Category> getCategoryCollection() {
     return categoryCollection;
   }
@@ -212,7 +224,6 @@ public class Dataset implements Serializable {
     this.categoryCollection = categoryCollection;
   }
 
-  @XmlTransient
   public Collection<DatasetIssue> getDatasetIssueCollection() {
     return datasetIssueCollection;
   }
@@ -229,7 +240,6 @@ public class Dataset implements Serializable {
     this.popularDataset = popularDataset;
   }
 
-  @XmlTransient
   public Collection<Comment> getCommentCollection() {
     return commentCollection;
   }
@@ -246,7 +256,6 @@ public class Dataset implements Serializable {
     this.clusterId = clusterId;
   }
 
-  @XmlTransient
   public Collection<DatasetRating> getDatasetRatingCollection() {
     return datasetRatingCollection;
   }

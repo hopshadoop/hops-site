@@ -15,6 +15,7 @@
  */
 package io.hops.site.dao.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Collection;
 import javax.persistence.Basic;
@@ -155,6 +156,8 @@ public class RegisteredCluster implements Serializable {
     this.searchEndpoint = searchEndpoint;
   }
 
+  @XmlTransient
+  @JsonIgnore
   public String getEmail() {
     return email;
   }

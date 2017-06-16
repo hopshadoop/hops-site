@@ -75,9 +75,7 @@ public class Users implements Serializable {
           max = 45)
   @Column(name = "lastname")
   private String lastname;
-  //if the field contains email address consider using this annotation to enforce field validation
-  @Pattern(regexp
-          = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
+  @Pattern(regexp = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
           message = "Invalid email")
   @Basic(optional = false)
   @NotNull
@@ -116,6 +114,13 @@ public class Users implements Serializable {
     this.firstname = firstname;
     this.lastname = lastname;
     this.email = email;
+  }
+
+  public Users(String firstname, String lastname, String email, RegisteredCluster clusterId) {
+    this.firstname = firstname;
+    this.lastname = lastname;
+    this.email = email;
+    this.clusterId = clusterId;
   }
 
   public Integer getId() {
@@ -161,6 +166,7 @@ public class Users implements Serializable {
   }
 
   @XmlTransient
+  @JsonIgnore
   public Collection<DatasetIssue> getDatasetIssueCollection() {
     return datasetIssueCollection;
   }
@@ -170,6 +176,7 @@ public class Users implements Serializable {
   }
 
   @XmlTransient
+  @JsonIgnore
   public Collection<Comment> getCommentCollection() {
     return commentCollection;
   }
@@ -179,6 +186,7 @@ public class Users implements Serializable {
   }
 
   @XmlTransient
+  @JsonIgnore
   public Collection<CommentIssue> getCommentIssueCollection() {
     return commentIssueCollection;
   }
@@ -188,6 +196,7 @@ public class Users implements Serializable {
   }
 
   @XmlTransient
+  @JsonIgnore
   public Collection<DatasetRating> getDatasetRatingCollection() {
     return datasetRatingCollection;
   }
@@ -228,5 +237,5 @@ public class Users implements Serializable {
   public String toString() {
     return "io.hops.site.dao.entity.Users[ id=" + id + " ]";
   }
-  
+
 }

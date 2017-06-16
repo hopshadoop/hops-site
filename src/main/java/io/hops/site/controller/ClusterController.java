@@ -13,16 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.site.rest.exception.mapper;
+package io.hops.site.controller;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-
-public class IllegalArgumentExceptionMapper implements ExceptionMapper<IllegalArgumentException> {
-
-  @Override
-  public Response toResponse(IllegalArgumentException exception) {
-    return Response.status(Response.Status.BAD_REQUEST).entity(exception.getMessage()).build();
-  }
-
+public class ClusterController {
+  
 }

@@ -16,12 +16,18 @@
 package io.hops.site.dao.facade;
 
 import io.hops.site.dao.entity.Category;
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+@Stateless
 public class CategoryFacade extends AbstractFacade<Category>{
   @PersistenceContext(unitName = "hops-sitePU")
   private EntityManager em;
+
+  public CategoryFacade() {
+    super(Category.class);
+  }
 
   public CategoryFacade(Class<Category> entityClass) {
     super(entityClass);
