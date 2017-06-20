@@ -61,8 +61,8 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
     StringBuilder sb = new StringBuilder();
     Set<ConstraintViolation<?>> cvs = cve.getConstraintViolations();
     for (ConstraintViolation<?> cv : cvs) {
-      LOGGER.log(Level.INFO, "Violation: {0}", cv.getMessage());
-      sb.append(cv.getMessage()).append("\n");
+      LOGGER.log(Level.INFO, "Attribute: {0}, {1}", new Object[]{cv.getPropertyPath(), cv.getMessage()});
+      sb.append(cv.getPropertyPath()).append(", ").append(cv.getMessage()).append("\n");
     }
     if (sb.toString().isEmpty()) {
       jsonResponse.setErrorMsg(cve.getMessage());

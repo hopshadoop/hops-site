@@ -5,8 +5,8 @@ CREATE TABLE `registered_cluster` (
   `cert` varchar(1000) NOT NULL,
   `gvod_endpoint` varchar(100) NOT NULL,
   `heartbeats_missed` bigint(20) NOT NULL,
-  `date_registered` varchar(100) NOT NULL,
-  `date_last_ping` varchar(100) NOT NULL,
+  `date_registered` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_last_ping` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`cluster_id`)
 ) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
@@ -28,7 +28,7 @@ CREATE TABLE `dataset` (
   `public_id` varchar(1000) NOT NULL,
   `name` varchar(255) NOT NULL,
   `description` varchar(2000) DEFAULT NULL,
-  `made_public_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `made_public_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `owner` varchar(150) NOT NULL,
   `cluster_id` varchar(200) NOT NULL,
   `readme` mediumtext DEFAULT NULL,

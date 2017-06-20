@@ -18,6 +18,7 @@ package io.hops.site.dao.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Date;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -27,6 +28,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -106,18 +109,12 @@ public class RegisteredCluster implements Serializable {
   @NotNull
   @Column(name = "heartbeats_missed")
   private long heartbeatsMissed;
-  @Basic(optional = false)
-  @NotNull
-  @Size(min = 1,
-          max = 100)
   @Column(name = "date_registered")
-  private String dateRegistered;
-  @Basic(optional = false)
-  @NotNull
-  @Size(min = 1,
-          max = 100)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date dateRegistered;
   @Column(name = "date_last_ping")
-  private String dateLastPing;
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date dateLastPing;
   @OneToMany(mappedBy = "clusterId")
   private Collection<Dataset> datasetCollection;
   @OneToMany(cascade = CascadeType.ALL,
@@ -132,15 +129,13 @@ public class RegisteredCluster implements Serializable {
   }
 
   public RegisteredCluster(String clusterId, String searchEndpoint, String email, String cert, String gvodEndpoint,
-          long heartbeatsMissed, String dateRegistered, String dateLastPing) {
+          long heartbeatsMissed) {
     this.clusterId = clusterId;
     this.searchEndpoint = searchEndpoint;
     this.email = email;
     this.cert = cert;
     this.gvodEndpoint = gvodEndpoint;
     this.heartbeatsMissed = heartbeatsMissed;
-    this.dateRegistered = dateRegistered;
-    this.dateLastPing = dateLastPing;
   }
 
   public String getClusterId() {
@@ -193,19 +188,19 @@ public class RegisteredCluster implements Serializable {
     this.heartbeatsMissed = heartbeatsMissed;
   }
 
-  public String getDateRegistered() {
+  public Date getDateRegistered() {
     return dateRegistered;
   }
 
-  public void setDateRegistered(String dateRegistered) {
+  public void setDateRegistered(Date dateRegistered) {
     this.dateRegistered = dateRegistered;
   }
 
-  public String getDateLastPing() {
+  public Date getDateLastPing() {
     return dateLastPing;
   }
 
-  public void setDateLastPing(String dateLastPing) {
+  public void setDateLastPing(Date dateLastPing) {
     this.dateLastPing = dateLastPing;
   }
 

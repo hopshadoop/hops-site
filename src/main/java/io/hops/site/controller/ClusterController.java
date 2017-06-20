@@ -26,6 +26,7 @@ import io.hops.site.rest.ClusterService;
 import java.io.IOException;
 import java.security.AccessControlException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,6 +44,8 @@ public class ClusterController {
   private HelperFunctions helperFunctions;
   @EJB
   private RegisteredClusterFacade registeredClustersFacade;
+  
+  private final ObjectMapper mapper = new ObjectMapper();
 
   public String registerCluster(RegisterJSON registerJson) {
     if (helperFunctions.ClusterRegisteredWithEmail(registerJson.getEmail())) {
@@ -55,7 +58,7 @@ public class ClusterController {
     }
     String registeredId = helperFunctions.registerCluster(registerJson.getSearchEndpoint(), registerJson.getEmail(),
             registerJson.getCert(), registerJson.getGvodEndpoint());
-    if (registeredId != null) {
+    if (registeredId == null) {
       LOGGER.log(Level.INFO, "Invalid gvodEndpoint.");
       throw new IllegalArgumentException("Invalid gvodEndpoint.");
     }
@@ -68,10 +71,10 @@ public class ClusterController {
     }
     RegisteredCluster registeredCluster = this.registeredClustersFacade.find(identification.getClusterId());
     registeredCluster.setHeartbeatsMissed(0);
+    registeredCluster.setDateLastPing(new Date());
     registeredClustersFacade.edit(registeredCluster);
     List<RegisteredCluster> registeredClusters = helperFunctions.getAllRegisteredClusters();
     List<RegisteredClusterJSON> to_ret = new ArrayList<>();
-    ObjectMapper mapper = new ObjectMapper();
     for (RegisteredCluster r : registeredClusters) {
       try {
         to_ret.add(new RegisteredClusterJSON(r.getClusterId(), mapper.

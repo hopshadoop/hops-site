@@ -4,9 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.hops.site.dao.entity.PopularDataset;
 import io.hops.site.dao.entity.RegisteredCluster;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +21,7 @@ import javax.ejb.TransactionAttributeType;
 @TransactionAttribute(TransactionAttributeType.NEVER)
 public class HelperFunctions {
 
+  private final static Logger LOGGER = Logger.getLogger(HelperFunctions.class.getName());
   @EJB
   private RegisteredClusterFacade registeredClusterFacade;
   @EJB
@@ -42,13 +40,12 @@ public class HelperFunctions {
   public String registerCluster(String search_endpoint, String email, String cert, AddressJSON gvod_endpoint) {
     try {
       String uniqueId = UUID.randomUUID().toString();
-      DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-      Date date = new Date();
-      this.registeredClusterFacade.create(new RegisteredCluster(uniqueId, search_endpoint, email, cert, mapper.
-              writeValueAsString(gvod_endpoint), 0, dateFormat.format(date), dateFormat.format(date)));
+      RegisteredCluster registeredCluster = new RegisteredCluster(uniqueId, search_endpoint, email, cert, mapper.
+              writeValueAsString(gvod_endpoint), 0);
+      this.registeredClusterFacade.create(registeredCluster);
       return uniqueId;
     } catch (JsonProcessingException ex) {
-      Logger.getLogger(HelperFunctions.class.getName()).log(Level.SEVERE, null, ex);
+      LOGGER.log(Level.SEVERE, "JsonProcessingException: ", ex.getMessage());
     }
     return null;
   }

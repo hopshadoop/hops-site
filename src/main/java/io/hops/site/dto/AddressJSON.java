@@ -41,8 +41,5 @@ public class AddressJSON {
     public int getId() {
         return id;
     }
-    
-    
-    
-    
+        
 }

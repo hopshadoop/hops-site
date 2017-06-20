@@ -1,5 +1,6 @@
 package io.hops.site.dto;
 
+import java.util.Date;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -13,12 +14,12 @@ public class RegisteredClusterJSON {
 
   private long heartbeatsMissed;
 
-  private String dateRegistered;
+  private Date dateRegistered;
 
-  private String dateLastPing;
+  private Date dateLastPing;
 
-  public RegisteredClusterJSON(String clusterId, AddressJSON gvodEndpoint, long heartbeatsMissed, String dateRegistered,
-          String dateLastPing, String searchEndpoint) {
+  public RegisteredClusterJSON(String clusterId, AddressJSON gvodEndpoint, long heartbeatsMissed, Date dateRegistered,
+          Date dateLastPing, String searchEndpoint) {
     this.clusterId = clusterId;
     this.gvodEndpoint = gvodEndpoint;
     this.heartbeatsMissed = heartbeatsMissed;
@@ -46,11 +47,11 @@ public class RegisteredClusterJSON {
     this.heartbeatsMissed = heartbeatsMissed;
   }
 
-  public void setDateRegistered(String dateRegistered) {
+  public void setDateRegistered(Date dateRegistered) {
     this.dateRegistered = dateRegistered;
   }
 
-  public void setDateLastPing(String dateLastPing) {
+  public void setDateLastPing(Date dateLastPing) {
     this.dateLastPing = dateLastPing;
   }
 
@@ -70,11 +71,11 @@ public class RegisteredClusterJSON {
     return heartbeatsMissed;
   }
 
-  public String getDateRegistered() {
+  public Date getDateRegistered() {
     return dateRegistered;
   }
 
-  public String getDateLastPing() {
+  public Date getDateLastPing() {
     return dateLastPing;
   }
 
