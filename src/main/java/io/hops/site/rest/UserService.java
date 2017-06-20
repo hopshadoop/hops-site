@@ -16,7 +16,6 @@
 package io.hops.site.rest;
 
 import io.hops.site.controller.UsersController;
-import io.hops.site.dao.entity.Users;
 import io.hops.site.dto.UserDTO;
 import io.swagger.annotations.Api;
 import java.util.logging.Level;

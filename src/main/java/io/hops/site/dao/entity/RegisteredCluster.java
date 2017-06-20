@@ -28,6 +28,7 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -80,7 +81,9 @@ public class RegisteredCluster implements Serializable {
           max = 100)
   @Column(name = "search_endpoint")
   private String searchEndpoint;
-  // @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
+  @Pattern(regexp
+          = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
+          message = "Invalid email")
   @Basic(optional = false)
   @NotNull
   @Size(min = 1,
@@ -238,8 +241,8 @@ public class RegisteredCluster implements Serializable {
       return false;
     }
     RegisteredCluster other = (RegisteredCluster) object;
-    if ((this.clusterId == null && other.clusterId != null) ||
-            (this.clusterId != null && !this.clusterId.equals(other.clusterId))) {
+    if ((this.clusterId == null && other.clusterId != null) || (this.clusterId != null && !this.clusterId.equals(
+            other.clusterId))) {
       return false;
     }
     return true;
@@ -249,5 +252,5 @@ public class RegisteredCluster implements Serializable {
   public String toString() {
     return "io.hops.site.dao.entity.RegisteredCluster[ clusterId=" + clusterId + " ]";
   }
-  
+
 }

@@ -15,6 +15,73 @@
  */
 package io.hops.site.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.hops.site.dao.entity.RegisteredCluster;
+import io.hops.site.dao.facade.RegisteredClusterFacade;
+import io.hops.site.dto.AddressJSON;
+import io.hops.site.dto.IdentificationJSON;
+import io.hops.site.dto.RegisterJSON;
+import io.hops.site.dto.RegisteredClusterJSON;
+import io.hops.site.rest.ClusterService;
+import java.io.IOException;
+import java.security.AccessControlException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.ejb.EJB;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+
+@Stateless
+@TransactionAttribute(TransactionAttributeType.NEVER)
 public class ClusterController {
-  
+
+  private final static Logger LOGGER = Logger.getLogger(ClusterService.class.getName());
+  @EJB
+  private HelperFunctions helperFunctions;
+  @EJB
+  private RegisteredClusterFacade registeredClustersFacade;
+
+  public String registerCluster(RegisterJSON registerJson) {
+    if (helperFunctions.ClusterRegisteredWithEmail(registerJson.getEmail())) {
+      LOGGER.log(Level.INFO, "Already registered.");
+      throw new IllegalArgumentException("Already registered.");
+    }
+    if (!helperFunctions.isValid(registerJson.getCert())) {
+      LOGGER.log(Level.INFO, "Invalid cert.");
+      throw new AccessControlException("Invalid cert.");
+    }
+    String registeredId = helperFunctions.registerCluster(registerJson.getSearchEndpoint(), registerJson.getEmail(),
+            registerJson.getCert(), registerJson.getGvodEndpoint());
+    if (registeredId != null) {
+      LOGGER.log(Level.INFO, "Invalid gvodEndpoint.");
+      throw new IllegalArgumentException("Invalid gvodEndpoint.");
+    }
+    return registeredId;
+  }
+
+  public List<RegisteredClusterJSON> registerPing(IdentificationJSON identification) {
+    if (!helperFunctions.ClusterRegisteredWithId(identification.getClusterId())) {
+      throw new IllegalArgumentException("Invalid id.");
+    }
+    RegisteredCluster registeredCluster = this.registeredClustersFacade.find(identification.getClusterId());
+    registeredCluster.setHeartbeatsMissed(0);
+    registeredClustersFacade.edit(registeredCluster);
+    List<RegisteredCluster> registeredClusters = helperFunctions.getAllRegisteredClusters();
+    List<RegisteredClusterJSON> to_ret = new ArrayList<>();
+    ObjectMapper mapper = new ObjectMapper();
+    for (RegisteredCluster r : registeredClusters) {
+      try {
+        to_ret.add(new RegisteredClusterJSON(r.getClusterId(), mapper.
+                readValue(r.getGvodEndpoint(), AddressJSON.class), r.getHeartbeatsMissed(), r.getDateRegistered(), r.
+                getDateLastPing(), r.getSearchEndpoint()));
+      } catch (IOException ex) {
+        LOGGER.log(Level.SEVERE, null, ex);
+        throw new IllegalArgumentException("Parsing of gvodEndpoint failed.");
+      }
+    }
+    return to_ret;
+  }
 }

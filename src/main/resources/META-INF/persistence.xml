@@ -4,7 +4,6 @@
     <jta-data-source>jdbc/hopsworks</jta-data-source>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
     <shared-cache-mode>NONE</shared-cache-mode>
-    <validation-mode>NONE</validation-mode>
     <properties/>
   </persistence-unit>
 </persistence>
