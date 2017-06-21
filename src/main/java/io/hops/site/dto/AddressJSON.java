@@ -4,42 +4,42 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class AddressJSON {
-    
-    private String ip;
-    private int port;
-    private int id;
 
-    public AddressJSON() {
-    }
-    
-    public AddressJSON(String ip, int port, int id) {
-        this.ip = ip;
-        this.port = port;
-        this.id = id;
-    }
+  private String ip;
+  private int port;
+  private int id;
 
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
+  public AddressJSON() {
+  }
 
-    public void setPort(int port) {
-        this.port = port;
-    }
+  public AddressJSON(String ip, int port, int id) {
+    this.ip = ip;
+    this.port = port;
+    this.id = id;
+  }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-    
-    public String getIp() {
-        return ip;
-    }
+  public void setIp(String ip) {
+    this.ip = ip;
+  }
 
-    public int getPort() {
-        return port;
-    }
+  public void setPort(int port) {
+    this.port = port;
+  }
 
-    public int getId() {
-        return id;
-    }
-        
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public String getIp() {
+    return ip;
+  }
+
+  public int getPort() {
+    return port;
+  }
+
+  public int getId() {
+    return id;
+  }
+
 }

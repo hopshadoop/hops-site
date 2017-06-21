@@ -8,19 +8,13 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class PopularDatasetJSON {
 
   private String datasetId;
-
   private ManifestJSON manifestJson;
-
   private int leeches;
-
   private int seeds;
-
   private List<AddressJSON> gvodEndpoints;
-
   private IdentificationJSON identification;
 
   public PopularDatasetJSON() {
-
   }
 
   public PopularDatasetJSON(ManifestJSON manifestJson, String datasetId, int leeches, int seeds,

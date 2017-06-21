@@ -5,94 +5,83 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class ManifestJSON {
-    
-    private String datasetName;
-    
-    private String datasetDescription;
-    
-    private String creatorEmail;
-    
-    private String creatorDate;
-    
-    private boolean kafkaSupport;
-    
-    private List<FileInfo> fileInfos;
-    
-    private List<String> metaDataJsons;
 
-    public ManifestJSON() {
-    }
+  private String datasetName;
+  private String datasetDescription;
+  private String creatorEmail;
+  private String creatorDate;
+  private boolean kafkaSupport;
+  private List<FileInfo> fileInfos;
+  private List<String> metaDataJsons;
 
-    public ManifestJSON(String datasetName, String datasetDescription, String creatorEmail, String creatorDate, boolean kafkaSupport, List<FileInfo> fileInfos, List<String> metaDataJsons) {
-        this.datasetName = datasetName;
-        this.datasetDescription = datasetDescription;
-        this.creatorEmail = creatorEmail;
-        this.creatorDate = creatorDate;
-        this.kafkaSupport = kafkaSupport;
-        this.fileInfos = fileInfos;
-        this.metaDataJsons = metaDataJsons;
-    }
+  public ManifestJSON() {
+  }
 
-    public String getDatasetName() {
-        return datasetName;
-    }
+  public ManifestJSON(String datasetName, String datasetDescription, String creatorEmail, String creatorDate,
+          boolean kafkaSupport, List<FileInfo> fileInfos, List<String> metaDataJsons) {
+    this.datasetName = datasetName;
+    this.datasetDescription = datasetDescription;
+    this.creatorEmail = creatorEmail;
+    this.creatorDate = creatorDate;
+    this.kafkaSupport = kafkaSupport;
+    this.fileInfos = fileInfos;
+    this.metaDataJsons = metaDataJsons;
+  }
 
-    public void setDatasetName(String datasetName) {
-        this.datasetName = datasetName;
-    }
+  public String getDatasetName() {
+    return datasetName;
+  }
 
-    public String getDatasetDescription() {
-        return datasetDescription;
-    }
+  public void setDatasetName(String datasetName) {
+    this.datasetName = datasetName;
+  }
 
-    public void setDatasetDescription(String datasetDescription) {
-        this.datasetDescription = datasetDescription;
-    }
+  public String getDatasetDescription() {
+    return datasetDescription;
+  }
 
-    public String getCreatorEmail() {
-        return creatorEmail;
-    }
+  public void setDatasetDescription(String datasetDescription) {
+    this.datasetDescription = datasetDescription;
+  }
 
-    public void setCreatorEmail(String creatorEmail) {
-        this.creatorEmail = creatorEmail;
-    }
+  public String getCreatorEmail() {
+    return creatorEmail;
+  }
 
-    public String getCreatorDate() {
-        return creatorDate;
-    }
+  public void setCreatorEmail(String creatorEmail) {
+    this.creatorEmail = creatorEmail;
+  }
 
-    public void setCreatorDate(String creatorDate) {
-        this.creatorDate = creatorDate;
-    }
-    
+  public String getCreatorDate() {
+    return creatorDate;
+  }
 
-    public List<FileInfo> getFileInfos() {
-        return fileInfos;
-    }
+  public void setCreatorDate(String creatorDate) {
+    this.creatorDate = creatorDate;
+  }
 
-    public void setFileInfos(List<FileInfo> fileInfos) {
-        this.fileInfos = fileInfos;
-    }
+  public List<FileInfo> getFileInfos() {
+    return fileInfos;
+  }
 
-    public List<String> getMetaDataJsons() {
-        return metaDataJsons;
-    }
+  public void setFileInfos(List<FileInfo> fileInfos) {
+    this.fileInfos = fileInfos;
+  }
 
-    public void setMetaDataJsons(List<String> metaDataJsons) {
-        this.metaDataJsons = metaDataJsons;
-    }
+  public List<String> getMetaDataJsons() {
+    return metaDataJsons;
+  }
 
-    public boolean isKafkaSupport() {
-        return kafkaSupport;
-    }
+  public void setMetaDataJsons(List<String> metaDataJsons) {
+    this.metaDataJsons = metaDataJsons;
+  }
 
-    public void setKafkaSupport(boolean kafkaSupport) {
-        this.kafkaSupport = kafkaSupport;
-    }
-    
-    
-    
-    
-    
-    
+  public boolean isKafkaSupport() {
+    return kafkaSupport;
+  }
+
+  public void setKafkaSupport(boolean kafkaSupport) {
+    this.kafkaSupport = kafkaSupport;
+  }
+
 }

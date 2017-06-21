@@ -17,6 +17,7 @@ import io.hops.site.dto.PingedJSON;
 import io.hops.site.dto.RegisteredClusterJSON;
 import io.hops.site.dto.RegisterJSON;
 import io.hops.site.dto.RegisteredJSON;
+import io.hops.site.rest.annotation.NoCache;
 import io.swagger.annotations.Api;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -36,16 +37,18 @@ public class ClusterService {
   private ClusterController clusterController;
 
   @POST
+  @NoCache
   @Path("register")
-  public Response Register(RegisterJSON registerJson) {
+  public Response register(RegisterJSON registerJson) {
     String registeredId = clusterController.registerCluster(registerJson);
     LOGGER.log(Level.INFO, "Registering new cluster.");
     return Response.status(Response.Status.OK).entity(new RegisteredJSON(registeredId)).build();
   }
 
   @PUT
+  @NoCache
   @Path("ping")
-  public Response Ping(IdentificationJSON identification) {
+  public Response ping(IdentificationJSON identification) {
     List<RegisteredClusterJSON> to_ret = clusterController.registerPing(identification);
     LOGGER.log(Level.INFO, "Registering ping from cluster id: {0}.", identification.getClusterId());
     return Response.status(Response.Status.OK).entity(new PingedJSON(to_ret)).build();

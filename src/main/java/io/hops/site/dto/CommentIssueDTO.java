@@ -19,7 +19,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class CommentIssueDTO {
-  
+
   private Integer id;
   private Integer commentId;
   private String userEmail;
@@ -68,6 +68,5 @@ public class CommentIssueDTO {
   public void setMsg(String msg) {
     this.msg = msg;
   }
-  
-  
+
 }

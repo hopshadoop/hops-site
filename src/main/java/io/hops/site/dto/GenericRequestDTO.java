@@ -18,38 +18,11 @@ package io.hops.site.dto;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class UserDTO {
-
-  private String firstname;
-  private String lastname;
-  private String email;
+public class GenericRequestDTO {
+  
   private String clusterId;
 
-  public UserDTO() {
-  }
-
-  public String getFirstname() {
-    return firstname;
-  }
-
-  public void setFirstname(String firstname) {
-    this.firstname = firstname;
-  }
-
-  public String getLastname() {
-    return lastname;
-  }
-
-  public void setLastname(String lastname) {
-    this.lastname = lastname;
-  }
-
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
+  public GenericRequestDTO() {
   }
 
   public String getClusterId() {
@@ -59,11 +32,5 @@ public class UserDTO {
   public void setClusterId(String clusterId) {
     this.clusterId = clusterId;
   }
-
-  @Override
-  public String toString() {
-    return "UserDTO{" + "firstname=" + firstname + ", lastname=" + lastname + ", email=" + email + ", clusterId="
-            + clusterId + '}';
-  }
-
+  
 }

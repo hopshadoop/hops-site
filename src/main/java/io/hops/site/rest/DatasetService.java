@@ -17,10 +17,9 @@ package io.hops.site.rest;
 
 import io.hops.site.controller.DatasetController;
 import io.hops.site.dao.entity.Dataset;
-import io.hops.site.dao.entity.DatasetIssue;
-import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dto.DatasetDTO;
 import io.hops.site.dto.DatasetIssueDTO;
+import io.hops.site.rest.annotation.NoCache;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.logging.Level;
@@ -51,11 +50,10 @@ public class DatasetService {
 
   private final static Logger LOGGER = Logger.getLogger(DatasetService.class.getName());
   @EJB
-  private DatasetFacade datasetFacade;
-  @EJB
   private DatasetController datasetController;
 
   @GET
+  @NoCache
   public Response getAll() {
     List<Dataset> datasets = datasetController.findAllDatasets();
     GenericEntity<List<Dataset>> datasetList
@@ -66,6 +64,7 @@ public class DatasetService {
   }
 
   @GET
+  @NoCache
   @Path("{datasetId}")
   public Response getADataset(@PathParam("datasetId") Integer datasetId) {
     Dataset dataset = datasetController.findDataset(datasetId);
@@ -74,6 +73,7 @@ public class DatasetService {
   }
 
   @GET
+  @NoCache
   @Path("byPublicId/{publicId}")
   public Response getByPublicId(@PathParam("publicId") String publicId) {
     Dataset dataset = datasetController.findDatasetByPublicId(publicId);

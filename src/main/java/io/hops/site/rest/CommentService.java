@@ -16,17 +16,11 @@
 package io.hops.site.rest;
 
 import io.hops.site.controller.CommentController;
-import io.hops.site.dao.entity.Comment;
-import io.hops.site.dao.entity.CommentIssue;
-import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.DatasetRating;
-import io.hops.site.dao.facade.CommentFacade;
-import io.hops.site.dao.facade.CommentIssueFacade;
-import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dto.CommentDTO;
 import io.hops.site.dto.CommentIssueDTO;
+import io.hops.site.rest.annotation.NoCache;
 import io.swagger.annotations.Api;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -57,11 +51,10 @@ public class CommentService {
   private final static Logger LOGGER = Logger.getLogger(CommentService.class.getName());
 
   @EJB
-  private DatasetFacade datasetFacade;
-  @EJB
   private CommentController commentController;
 
   @GET
+  @NoCache
   @Path("{datasetId}")
   public Response getAll(@PathParam("datasetId") Integer datasetId) {
     List<DatasetRating> ratings = commentController.getAllDatasets(datasetId);
@@ -73,6 +66,7 @@ public class CommentService {
   }
 
   @GET
+  @NoCache
   @Path("byPublicId/{publicId}")
   public Response getAllByPublicId(@PathParam("publicId") String publicId) {
     List<DatasetRating> ratings = commentController.getAllDatasets(publicId);

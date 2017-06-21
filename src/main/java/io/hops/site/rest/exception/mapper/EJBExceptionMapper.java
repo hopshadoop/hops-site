@@ -21,6 +21,8 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJBException;
+import javax.persistence.PersistenceException;
+import javax.transaction.RollbackException;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.ws.rs.Produces;
@@ -43,8 +45,11 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
       return handleAccessControlException((AccessControlException) exception.getCause());
     } else if (exception.getCause() instanceof ConstraintViolationException) {
       return handleConstraintViolation((ConstraintViolationException) exception.getCause());
-    }
-    
+    } else if (exception.getCause() instanceof RollbackException) {
+      return handleRollbackException((RollbackException) exception.getCause());
+    } 
+
+    LOGGER.log(Level.INFO, "EJBException Caused by: {0}", exception.getCause().toString());
     LOGGER.log(Level.INFO, "EJBException: {0}", exception.getCause().getMessage());
     JsonResponse jsonResponse = new JsonResponse();
     jsonResponse.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase());
@@ -85,9 +90,24 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
   private Response handleIllegalArgumentException(IllegalArgumentException iae) {
     LOGGER.log(Level.INFO, "IllegalArgumentException: {0}", iae.getMessage());
     JsonResponse jsonResponse = new JsonResponse();
+    jsonResponse.setStatus(Response.Status.EXPECTATION_FAILED.getReasonPhrase());
+    jsonResponse.setStatusCode(Response.Status.EXPECTATION_FAILED.getStatusCode());
+    jsonResponse.setErrorMsg(iae.getMessage());
+    return Response.status(Response.Status.EXPECTATION_FAILED).entity(jsonResponse).build();
+  }
+
+  private Response handleRollbackException(RollbackException pe) {
+    LOGGER.log(Level.INFO, "RollbackException: {0}", pe.getMessage());
+    Throwable e = pe;
+    //get to the bottom of this
+    while (e.getCause() != null) {
+      e = e.getCause();
+    }
+    LOGGER.log(Level.INFO, "RollbackException Caused by: {0}", e.getMessage());
+    JsonResponse jsonResponse = new JsonResponse();
     jsonResponse.setStatus(Response.Status.BAD_REQUEST.getReasonPhrase());
     jsonResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
-    jsonResponse.setErrorMsg(iae.getMessage());
+    jsonResponse.setErrorMsg(e.getMessage());
     return Response.status(Response.Status.BAD_REQUEST).entity(jsonResponse).build();
   }
 

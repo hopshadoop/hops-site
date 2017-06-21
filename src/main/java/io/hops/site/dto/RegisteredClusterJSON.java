@@ -7,15 +7,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class RegisteredClusterJSON {
 
   private String clusterId;
-
   private String searchEndpoint;
-
   private AddressJSON gvodEndpoint;
-
   private long heartbeatsMissed;
-
   private Date dateRegistered;
-
   private Date dateLastPing;
 
   public RegisteredClusterJSON(String clusterId, AddressJSON gvodEndpoint, long heartbeatsMissed, Date dateRegistered,

@@ -4,48 +4,41 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class LeechSeedJSON {
-    
-    
-    private IdentificationJSON identity;
-    private String gvodUdpEndpoint;
-    private String datasetId;
 
-    public LeechSeedJSON() {
-    }
+  private IdentificationJSON identity;
+  private String gvodUdpEndpoint;
+  private String datasetId;
 
-    public LeechSeedJSON(IdentificationJSON identity, String gvod_udp_endpoint) {
-        this.identity = identity;
-        this.gvodUdpEndpoint = gvod_udp_endpoint;
-    }
+  public LeechSeedJSON() {
+  }
 
-    public IdentificationJSON getIdentity() {
-        return identity;
-    }
+  public LeechSeedJSON(IdentificationJSON identity, String gvod_udp_endpoint) {
+    this.identity = identity;
+    this.gvodUdpEndpoint = gvod_udp_endpoint;
+  }
 
-    public void setIdentity(IdentificationJSON identity) {
-        this.identity = identity;
-    }
+  public IdentificationJSON getIdentity() {
+    return identity;
+  }
 
-    public String getGvodUdpEndpoint() {
-        return gvodUdpEndpoint;
-    }
+  public void setIdentity(IdentificationJSON identity) {
+    this.identity = identity;
+  }
 
-    public void setGvodUdpEndpoint(String gvodUdpEndpoint) {
-        this.gvodUdpEndpoint = gvodUdpEndpoint;
-    }
+  public String getGvodUdpEndpoint() {
+    return gvodUdpEndpoint;
+  }
 
-    public String getDatasetId() {
-        return datasetId;
-    }
+  public void setGvodUdpEndpoint(String gvodUdpEndpoint) {
+    this.gvodUdpEndpoint = gvodUdpEndpoint;
+  }
 
-    public void setDatasetId(String datasetId) {
-        this.datasetId = datasetId;
-    }
-    
-    
-    
-    
-    
-    
-    
+  public String getDatasetId() {
+    return datasetId;
+  }
+
+  public void setDatasetId(String datasetId) {
+    this.datasetId = datasetId;
+  }
+
 }

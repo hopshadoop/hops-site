@@ -16,13 +16,12 @@
 package io.hops.site.rest;
 
 import io.hops.site.controller.RatingController;
-import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dto.RateDTO;
 import io.hops.site.dto.RatingDTO;
+import io.hops.site.rest.annotation.NoCache;
 import io.swagger.annotations.Api;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -52,11 +51,10 @@ public class RatingService {
   private final static Logger LOGGER = Logger.getLogger(RatingService.class.getName());
 
   @EJB
-  private DatasetFacade datasetFacade;
-  @EJB
   private RatingController ratingController;
 
   @GET
+  @NoCache
   @Path("{datasetId}")
   public Response getRating(@PathParam("datasetId") Integer datasetId) {
     RatingDTO ratingDto = ratingController.getRating(datasetId);
@@ -65,6 +63,7 @@ public class RatingService {
   }
 
   @GET
+  @NoCache
   @Path("byPublicId/{publicId}")
   public Response getRatingByPublicId(@PathParam("publicId") String publicId) {
     RatingDTO ratingDto = ratingController.getRating(publicId);
@@ -73,6 +72,7 @@ public class RatingService {
   }
 
   @GET
+  @NoCache
   @Path("all/{datasetId}")
   public Response getAllRatings(@PathParam("datasetId") Integer datasetId) {
     List<DatasetRating> ratings = ratingController.getAllRatings(datasetId);
@@ -84,6 +84,7 @@ public class RatingService {
   }
 
   @GET
+  @NoCache
   @Path("all/byPublicId/{publicId}")
   public Response getAllRatingsByPublicId(@PathParam("publicId") String publicId) {
     List<DatasetRating> ratings = ratingController.getAllRatings(publicId);

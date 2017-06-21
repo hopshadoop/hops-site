@@ -15,19 +15,29 @@
  */
 package io.hops.site.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.hops.site.dao.entity.Category;
 import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.DatasetIssue;
+import io.hops.site.dao.entity.PopularDataset;
 import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.dao.entity.Users;
 import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dao.facade.DatasetIssueFacade;
+import io.hops.site.dao.facade.PopularDatasetFacade;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dao.facade.UsersFacade;
+import io.hops.site.dto.AddressJSON;
 import io.hops.site.dto.DatasetDTO;
 import io.hops.site.dto.DatasetIssueDTO;
+import io.hops.site.dto.ManifestJSON;
+import io.hops.site.dto.PopularDatasetJSON;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -50,6 +60,14 @@ public class DatasetController {
   private UsersFacade userFacade;
   @EJB
   private RegisteredClusterFacade registeredClusterFacade;
+  @EJB
+  private HelperFunctions helperFunctions;
+  @EJB
+  private DatasetFacade dsFacade;
+  @EJB
+  private PopularDatasetFacade popularDatasetsFacade;
+
+  private final ObjectMapper mapper = new ObjectMapper();
 
   /**
    * Add dataset to table
@@ -239,6 +257,7 @@ public class DatasetController {
 
   /**
    * Get all datasets
+   *
    * @return
    */
   public List<Dataset> findAllDatasets() {
@@ -247,6 +266,7 @@ public class DatasetController {
 
   /**
    * Get dataset with the given id
+   *
    * @param datasetId
    * @return
    */
@@ -256,10 +276,55 @@ public class DatasetController {
 
   /**
    * Get dataset with the given public id
+   *
    * @param publicId
    * @return
    */
   public Dataset findDatasetByPublicId(String publicId) {
     return datasetFacade.findByPublicId(publicId);
+  }
+
+  /**
+   * Get top 10 datasets
+   *
+   * @param clusterId
+   * @return
+   * @throws IOException
+   */
+  public List<PopularDatasetJSON> getPopularDatasets(String clusterId) throws IOException {
+    List<PopularDatasetJSON> popularDatasetsJsons = new LinkedList<>();
+    if (!helperFunctions.ClusterRegisteredWithId(clusterId)) {
+      LOGGER.log(Level.INFO, "Invalid cluster id.");
+      throw new IllegalArgumentException("Invalid cluster id.");
+    }
+    for (PopularDataset pd : helperFunctions.getTopTenDatasets()) {
+      ManifestJSON manifestJson = mapper.readValue(pd.getManifest(), ManifestJSON.class);
+      List<AddressJSON> gvodEndpoints = mapper.readValue(pd.getPartners(), new TypeReference<List<AddressJSON>>() {
+      });
+      popularDatasetsJsons.add(new PopularDatasetJSON(manifestJson, pd.getDatasetId().getPublicId(), pd.getLeeches(),
+              pd.getSeeds(),
+              gvodEndpoints));
+    }
+    return popularDatasetsJsons;
+  }
+
+  public void addPopularDatasets(PopularDatasetJSON popularDatasetsJson) {
+    if (popularDatasetsJson.getIdentification().getClusterId() != null && helperFunctions.ClusterRegisteredWithId(
+            popularDatasetsJson.getIdentification().getClusterId())) {
+      Dataset ds = dsFacade.findByPublicId(popularDatasetsJson.getDatasetId());
+      if (ds == null) {
+        throw new IllegalArgumentException("Invalid id.");
+      }
+      PopularDataset popularDataset;
+      try {
+        popularDataset
+                = new PopularDataset(ds, mapper.writeValueAsString(popularDatasetsJson.
+                        getManifestJson()), mapper.writeValueAsString(popularDatasetsJson.getGvodEndpoints()),
+                        popularDatasetsJson.getLeeches(), popularDatasetsJson.getSeeds());
+      } catch (JsonProcessingException ex) {
+        throw new IllegalArgumentException("Invalid input.");
+      }
+      popularDatasetsFacade.create(popularDataset);
+    }
   }
 }

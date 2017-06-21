@@ -5,25 +5,23 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class PingedJSON {
-    
-    
-    private List<RegisteredClusterJSON> clusters;
-    public PingedJSON(){
-        
-    }
 
-    public PingedJSON(List<RegisteredClusterJSON> clusters) {
-        this.clusters = clusters;
-    }
-    
-    public List<RegisteredClusterJSON> getClusters() {
-        return clusters;
-    }
+  private List<RegisteredClusterJSON> clusters;
 
-    public void setClusters(List<RegisteredClusterJSON> clusters) {
-        this.clusters = clusters;
-    }
-    
-    
-    
+  public PingedJSON() {
+
+  }
+
+  public PingedJSON(List<RegisteredClusterJSON> clusters) {
+    this.clusters = clusters;
+  }
+
+  public List<RegisteredClusterJSON> getClusters() {
+    return clusters;
+  }
+
+  public void setClusters(List<RegisteredClusterJSON> clusters) {
+    this.clusters = clusters;
+  }
+
 }
