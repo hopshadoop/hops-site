@@ -73,6 +73,10 @@ public class ClusterController {
     registeredCluster.setHeartbeatsMissed(0);
     registeredCluster.setDateLastPing(new Date());
     registeredClustersFacade.edit(registeredCluster);
+    return getAll();
+  }
+  
+  public List<RegisteredClusterJSON> getAll() {
     List<RegisteredCluster> registeredClusters = helperFunctions.getAllRegisteredClusters();
     List<RegisteredClusterJSON> to_ret = new ArrayList<>();
     for (RegisteredCluster r : registeredClusters) {

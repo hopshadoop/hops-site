@@ -28,19 +28,26 @@ see implementation details http://jersey.java.net/nonav/documentation/latest/jax
     </init-param>
     <load-on-startup>2</load-on-startup>
   </servlet>
-<!--  <servlet-mapping>
-    <servlet-name>Jersey Web Application</servlet-name>
-    <url-pattern>/webresources/*</url-pattern>
-  </servlet-mapping>-->
   <servlet>
     <servlet-name>ApplicationConfig</servlet-name>
     <servlet-class>rest.application.config.ApplicationConfig</servlet-class>
   </servlet>
-<!--  <security-constraint>
+  <security-role>
+    <description>Clusters Role</description>
+    <role-name>clusters</role-name>
+  </security-role>
+  <security-role>
+    <description>Static manager Role</description>
+    <role-name>manager</role-name>
+  </security-role>
+  <security-constraint>
     <web-resource-collection>
-      <web-resource-name>AllApi</web-resource-name>
+      <web-resource-name>All api</web-resource-name>
       <url-pattern>/api/*</url-pattern>
     </web-resource-collection>
+    <auth-constraint>
+      <role-name>clusters</role-name>
+    </auth-constraint>
     <user-data-constraint>
       <transport-guarantee>CONFIDENTIAL</transport-guarantee>
     </user-data-constraint>
@@ -48,5 +55,5 @@ see implementation details http://jersey.java.net/nonav/documentation/latest/jax
   <login-config>
     <auth-method>CLIENT-CERT</auth-method>
     <realm-name>certificate</realm-name>
-  </login-config>-->
+  </login-config>
 </web-app>

@@ -18,13 +18,15 @@ package io.hops.site.rest.filter;
 import io.hops.site.dto.GenericRequestDTO;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.security.Principal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.security.cert.X509Certificate;
+import java.security.cert.X509Certificate;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.ContainerRequest;
 
@@ -37,14 +39,13 @@ public class AuthRequestFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
-    X509Certificate[] chain = (X509Certificate[]) requestContext.getProperty("javax.servlet.request.X509Certificate");
-    if (chain != null && chain.length > 0) {
-      String subject = chain[0].getSubjectDN().getName();
-      LOGGER.log(Level.SEVERE, "Subject: {0}", subject);
-//      CertificateSecurityContext securityContext = new CertificateSecurityContext(subject, chain);
-//      requestContext.setSecurityContext(securityContext);
+    String clusterId = getCertificateCommonName(requestContext);
+   
+    if (clusterId.isEmpty()) {
+      requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+      return;
     }
-    
+
     String path = requestContext.getUriInfo().getPath();
     Method method = resourceInfo.getResourceMethod();
     LOGGER.log(Level.INFO, "Path: {0}, method: {1}", new Object[]{path, method});
@@ -59,10 +60,34 @@ public class AuthRequestFilter implements ContainerRequestFilter {
       if (reqDTO == null) {
         LOGGER.log(Level.INFO, "No Cluster Id");
       } else {
+        reqDTO.setClusterId(path);
         LOGGER.log(Level.INFO, "Cluster Id: {0}", reqDTO.getClusterId());
-        //check if cluster id matches Certificate.
+        //check if cluster id matches Certificate common name.
       }
     }
+  }
+  
+  private String getCertificateCommonName(ContainerRequestContext requestContext) {
+    X509Certificate[] certs = (X509Certificate[]) requestContext.getProperty("javax.servlet.request.X509Certificate");
+    String tmpName, name = "";
+    if (certs != null && certs.length > 0) {
+      X509Certificate principalCert = certs[0];
+      Principal principal = principalCert.getSubjectDN();
+      // Extract the common name (CN)
+      int start = principal.getName().indexOf("CN");
+      if (start > -1) {
+        tmpName = principal.getName().substring(start + 3);
+        int end = tmpName.indexOf(",");
+        if (end > 0) {
+          name = tmpName.substring(0, end);
+        } else {
+          name = tmpName;
+        }
+      }
+      LOGGER.log(Level.SEVERE, "Request from principal: {0}", principal.getName());
+      LOGGER.log(Level.SEVERE, "CN={0}", name);
+    }
+    return name;
   }
 
 }

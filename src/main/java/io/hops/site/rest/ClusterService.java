@@ -22,6 +22,10 @@ import io.swagger.annotations.Api;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.SecurityContext;
 
 @Path("cluster")
 @Stateless
@@ -36,6 +40,16 @@ public class ClusterService {
   @EJB
   private ClusterController clusterController;
 
+  @GET
+  @NoCache
+  public Response getRegisterd(@Context SecurityContext sc, @Context HttpServletRequest req) {
+    LOGGER.log(Level.INFO, "User Principal: {0}", sc.getUserPrincipal().getName());
+    LOGGER.log(Level.INFO, "is User In Role clusters: {0}", sc.isUserInRole("clusters"));
+    LOGGER.log(Level.INFO, "is User In Role manager: {0}", sc.isUserInRole("manager"));
+    List<RegisteredClusterJSON> to_ret = clusterController.getAll();
+    return Response.status(Response.Status.OK).entity(new PingedJSON(to_ret)).build();
+  }
+  
   @POST
   @NoCache
   @Path("register")

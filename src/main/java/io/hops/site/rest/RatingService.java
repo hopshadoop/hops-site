@@ -17,7 +17,6 @@ package io.hops.site.rest;
 
 import io.hops.site.controller.RatingController;
 import io.hops.site.dao.entity.DatasetRating;
-import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dto.RateDTO;
 import io.hops.site.dto.RatingDTO;
 import io.hops.site.rest.annotation.NoCache;

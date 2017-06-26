@@ -15,7 +15,6 @@
  */
 package io.hops.site.controller;
 
-import static io.hops.site.dao.entity.Comment_.datasetId;
 import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.dao.entity.Users;
