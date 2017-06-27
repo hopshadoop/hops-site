@@ -24,6 +24,7 @@ import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -94,7 +95,7 @@ public class DatasetService {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addDatasetIssue(DatasetIssueDTO datasetIssue) {
     datasetController.reportDatasetIssue(datasetIssue);
-    LOGGER.log(Level.INFO, "Add dataset issue for dataset: {0}", datasetIssue.getDatasetId());
+    LOGGER.log(Level.INFO, "Add dataset issue for dataset: {0}", datasetIssue.getDataset().getPublicId());
     return Response.ok().build();
   }
 
@@ -102,7 +103,7 @@ public class DatasetService {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response updateDataset(DatasetDTO dataset) {
     datasetController.updateDataset(dataset);
-    LOGGER.log(Level.INFO, "Update rating with id: {0}", dataset.getId());
+    LOGGER.log(Level.INFO, "Update rating with id: {0}", dataset.getPublicId());
     return Response.ok().build();
   }
 
@@ -111,12 +112,13 @@ public class DatasetService {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addCategory(DatasetDTO dataset) {
     datasetController.addCategory(dataset);
-    LOGGER.log(Level.INFO, "Update rating with id: {0}", dataset.getId());
+    LOGGER.log(Level.INFO, "Update rating with id: {0}", dataset.getPublicId());
     return Response.ok().build();
   }
 
   @DELETE
   @Path("{datasetId}")
+  @RolesAllowed({"admin"})
   public Response deleteDataset(@PathParam("datasetId") Integer datasetId) {
     datasetController.removeDataset(datasetId);
     LOGGER.log(Level.INFO, "Delete dataset with id: {0}", datasetId);
@@ -125,6 +127,7 @@ public class DatasetService {
 
   @DELETE
   @Path("byPublicId/{publicId}")
+  @RolesAllowed({"admin"})
   public Response deleteDataset(@PathParam("publicId") String publicId) {
     datasetController.removeDataset(publicId);
     LOGGER.log(Level.INFO, "Delete dataset with id: {0}", publicId);

@@ -4,15 +4,15 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class PingedJSON {
+public class PingResponse {
 
   private List<RegisteredClusterJSON> clusters;
 
-  public PingedJSON() {
+  public PingResponse() {
 
   }
 
-  public PingedJSON(List<RegisteredClusterJSON> clusters) {
+  public PingResponse(List<RegisteredClusterJSON> clusters) {
     this.clusters = clusters;
   }
 

@@ -43,7 +43,8 @@ import javax.ws.rs.core.Response;
 @Path("rating")
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/rating", description = "Rating service")
+@Api(value = "/rating",
+        description = "Rating service")
 @TransactionAttribute(TransactionAttributeType.NEVER)
 public class RatingService {
 
@@ -98,14 +99,14 @@ public class RatingService {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addRating(RateDTO datasetRating) {
     ratingController.addRating(datasetRating);
-    LOGGER.log(Level.INFO, "Add rating for dataset: {0}", datasetRating.getDatasetId());
+    LOGGER.log(Level.INFO, "Add rating for dataset: {0}", datasetRating.getDataset().getPublicId());
     return Response.ok().build();
   }
 
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
   public Response updateRating(RateDTO datasetRating) {
-    ratingController.addRating(datasetRating);
+    ratingController.updateRating(datasetRating);
     LOGGER.log(Level.INFO, "Update rating to: {0}", datasetRating.getRating());
     return Response.ok().build();
   }

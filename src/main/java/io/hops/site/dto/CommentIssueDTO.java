@@ -22,9 +22,9 @@ public class CommentIssueDTO {
 
   private Integer id;
   private Integer commentId;
-  private String userEmail;
   private String type;
   private String msg;
+  private UserDTO user;
 
   public CommentIssueDTO() {
   }
@@ -45,12 +45,12 @@ public class CommentIssueDTO {
     this.commentId = commentId;
   }
 
-  public String getUserEmail() {
-    return userEmail;
+  public UserDTO getUser() {
+    return user;
   }
 
-  public void setUserEmail(String userEmail) {
-    this.userEmail = userEmail;
+  public void setUser(UserDTO user) {
+    this.user = user;
   }
 
   public String getType() {

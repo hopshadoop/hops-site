@@ -12,7 +12,7 @@ public class PopularDatasetJSON {
   private int leeches;
   private int seeds;
   private List<AddressJSON> gvodEndpoints;
-  private IdentificationJSON identification;
+  private String clusterId;
 
   public PopularDatasetJSON() {
   }
@@ -26,12 +26,12 @@ public class PopularDatasetJSON {
     this.gvodEndpoints = partners;
   }
 
-  public IdentificationJSON getIdentification() {
-    return identification;
+  public String getClusterId() {
+    return clusterId;
   }
 
-  public void setIdentification(IdentificationJSON identification) {
-    this.identification = identification;
+  public void setClusterId(String clusterId) {
+    this.clusterId = clusterId;
   }
 
   public String getDatasetId() {

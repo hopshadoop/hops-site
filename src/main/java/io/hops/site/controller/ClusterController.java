@@ -44,7 +44,7 @@ public class ClusterController {
   private HelperFunctions helperFunctions;
   @EJB
   private RegisteredClusterFacade registeredClustersFacade;
-  
+
   private final ObjectMapper mapper = new ObjectMapper();
 
   public String registerCluster(RegisterJSON registerJson) {
@@ -56,8 +56,8 @@ public class ClusterController {
       LOGGER.log(Level.INFO, "Invalid cert.");
       throw new AccessControlException("Invalid cert.");
     }
-    String registeredId = helperFunctions.registerCluster(registerJson.getSearchEndpoint(), registerJson.getEmail(),
-            registerJson.getCert(), registerJson.getGvodEndpoint());
+    String registeredId = helperFunctions.registerCluster(registerJson.getSearchEndpoint(), registerJson.getEmail().
+            toLowerCase(), registerJson.getCert(), registerJson.getGvodEndpoint());
     if (registeredId == null) {
       LOGGER.log(Level.INFO, "Invalid gvodEndpoint.");
       throw new IllegalArgumentException("Invalid gvodEndpoint.");
@@ -75,7 +75,7 @@ public class ClusterController {
     registeredClustersFacade.edit(registeredCluster);
     return getAll();
   }
-  
+
   public List<RegisteredClusterJSON> getAll() {
     List<RegisteredCluster> registeredClusters = helperFunctions.getAllRegisteredClusters();
     List<RegisteredClusterJSON> to_ret = new ArrayList<>();
@@ -90,5 +90,13 @@ public class ClusterController {
       }
     }
     return to_ret;
+  }
+
+  public RegisteredCluster getClusterByEmail(String clusterEmail) {
+    return registeredClustersFacade.findByEmail(clusterEmail.toLowerCase());
+  }
+
+  public RegisteredCluster getClusterById(String clusterId) {
+    return registeredClustersFacade.find(clusterId);
   }
 }

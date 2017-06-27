@@ -13,25 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.site.rest.filter;
+package io.hops.site.rest.response.filter;
 
+import io.hops.site.rest.annotation.NoCache;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class CORSFilter implements ContainerResponseFilter {
+@NoCache
+public class CacheControlFilter implements ContainerResponseFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws
           IOException {
-    responseContext.getHeaders().add("Access-Control-Allow-Origin", "*");
-    responseContext.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization");
-    responseContext.getHeaders().add("Access-Control-Allow-Credentials", "true");
-    responseContext.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD");
-    responseContext.getHeaders().add("Access-Control-Max-Age", "1209600");
+    for (Annotation a : responseContext.getEntityAnnotations()) {
+      if (a.annotationType() == NoCache.class) {
+        responseContext.getHeaders().putSingle(HttpHeaders.CACHE_CONTROL, "no-cache");
+        break;
+      }
+    }
   }
 
 }

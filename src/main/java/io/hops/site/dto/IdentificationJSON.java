@@ -18,4 +18,9 @@ public class IdentificationJSON {
     this.clusterId = clusterId;
   }
 
+  @Override
+  public String toString() {
+    return "IdentificationJSON{" + "clusterId=" + clusterId + '}';
+  }
+
 }

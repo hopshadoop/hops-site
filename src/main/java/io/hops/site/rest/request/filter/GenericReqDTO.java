@@ -13,16 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.site.dto;
+package io.hops.site.rest.request.filter;
 
+import io.hops.site.dto.UserDTO;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class GenericRequestDTO {
+public class GenericReqDTO {
   
   private String clusterId;
+  private UserDTO user;
 
-  public GenericRequestDTO() {
+  public GenericReqDTO() {
   }
 
   public String getClusterId() {
@@ -32,5 +34,18 @@ public class GenericRequestDTO {
   public void setClusterId(String clusterId) {
     this.clusterId = clusterId;
   }
-  
+
+  public UserDTO getUser() {
+    return user;
+  }
+
+  public void setUser(UserDTO user) {
+    this.user = user;
+  }
+
+  @Override
+  public String toString() {
+    return "GenericReqUserDTO{" + "clusterId=" + clusterId + ", user=" + user + '}';
+  }
+
 }

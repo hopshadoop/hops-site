@@ -61,7 +61,7 @@ public class UsersController {
       throw new IllegalArgumentException("Cluster not found.");
     }
 
-    Users newUser = new Users(user.getFirstname(), user.getLastname(), user.getEmail(), registeredCluster);
+    Users newUser = new Users(user.getFirstname(), user.getLastname(), user.getEmail().toLowerCase(), registeredCluster);
     userFacade.create(newUser);
     LOGGER.log(Level.INFO, "Adding new user: {0}.", user.getFirstname());
   }
@@ -116,7 +116,8 @@ public class UsersController {
 
   /**
    * Remove user by email
-   * @param userEmail 
+   *
+   * @param userEmail
    */
   public void removeUser(String userEmail) {
     if (userEmail == null) {
@@ -125,6 +126,10 @@ public class UsersController {
     Users managedUser = userFacade.findByEmail(userEmail);
     userFacade.remove(managedUser);
     LOGGER.log(Level.INFO, "Remove user: {0}.", userEmail);
+  }
+
+  public Users findUserByEmail(String email) {
+    return userFacade.findByEmail(email.toLowerCase());
   }
 
 }

@@ -56,13 +56,13 @@ public class CommentController {
    * @param comment
    */
   public void addComment(CommentDTO comment) {
-    if (comment == null || comment.getDatasetId() == null || comment.getUserEmail() == null) {
+    if (comment == null || comment.getDataset() == null || comment.getUser() == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
-    if (comment.getUserEmail() == null) {
+    if (comment.getUser().getEmail() == null) {
       throw new IllegalArgumentException("User email not assigned.");
     }
-    if (comment.getDatasetId() == null && comment.getPublicId() == null) {
+    if (comment.getDataset().getPublicId() == null) {
       throw new IllegalArgumentException("Dataset id not assigned.");
     }
     if (comment.getContent().isEmpty()) {
@@ -70,17 +70,13 @@ public class CommentController {
     }
 
     Dataset dataset;
-    if (comment.getDatasetId() == null) {
-      dataset = datasetFacade.findByPublicId(comment.getPublicId());
-    } else {
-      dataset = datasetFacade.find(comment.getDatasetId());
-    }
+    dataset = datasetFacade.findByPublicId(comment.getDataset().getPublicId());
 
     if (dataset == null) {
       throw new IllegalArgumentException("Dataset not found.");
     }
 
-    Users user = userFacade.findByEmail(comment.getUserEmail());
+    Users user = userFacade.findByEmail(comment.getUser().getEmail());
     if (user == null) {
       throw new IllegalArgumentException("User not found.");
     }
@@ -98,7 +94,7 @@ public class CommentController {
     if (commentIssue == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
-    if (commentIssue.getUserEmail() == null) {
+    if (commentIssue.getUser() == null || commentIssue.getUser().getEmail() == null) {
       throw new IllegalArgumentException("User email not assigned.");
     }
     if (commentIssue.getCommentId() == null) {
@@ -146,12 +142,15 @@ public class CommentController {
    * @param comment
    */
   public void updateComment(CommentDTO comment) {
-    if (comment == null || comment.getDatasetId() == null) {
+    if (comment == null || comment.getId() == null) {
       throw new IllegalArgumentException("Comment id not assigned.");
     }
     Comment managedComment = commentFacade.find(comment.getId());
-    if (comment == null) {
+    if (managedComment == null) {
       throw new IllegalArgumentException("Comment not found.");
+    }
+    if (!managedComment.getUsers().getEmail().equalsIgnoreCase(comment.getUser().getEmail())) {
+      throw new IllegalArgumentException("Comment not found for given user.");
     }
     if (comment.getContent().isEmpty()) {
       throw new IllegalArgumentException("Comment content can not be empty.");
@@ -181,6 +180,7 @@ public class CommentController {
 
   /**
    * Get all dataset ratings for the given dataset id
+   *
    * @param datasetId
    * @return
    */

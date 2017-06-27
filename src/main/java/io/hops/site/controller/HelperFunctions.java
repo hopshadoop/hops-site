@@ -34,7 +34,7 @@ public class HelperFunctions {
   }
 
   public boolean ClusterRegisteredWithEmail(String email) {
-    return !this.registeredClusterFacade.findByEmail(email).isEmpty();
+    return this.registeredClusterFacade.findByEmail(email) != null;
   }
 
   public String registerCluster(String search_endpoint, String email, String cert, AddressJSON gvod_endpoint) {

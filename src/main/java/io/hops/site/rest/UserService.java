@@ -20,6 +20,7 @@ import io.hops.site.dto.UserDTO;
 import io.swagger.annotations.Api;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -65,6 +66,7 @@ public class UserService {
 
   @DELETE
   @Path("{userId}")
+  @RolesAllowed({"admin"})
   public Response deleteUser(@PathParam("userId") Integer userId) {
     usersController.removeUser(userId);
     LOGGER.log(Level.INFO, "Remove user with id: {0}", userId);
@@ -73,6 +75,7 @@ public class UserService {
 
   @DELETE
   @Path("byEmail/{userEmail}")
+  @RolesAllowed({"admin"})
   public Response deleteUserByEmail(@PathParam("userEmail") String userEmail) {
     usersController.removeUser(userEmail);
     LOGGER.log(Level.INFO, "Remove user by email: {0}", userEmail);

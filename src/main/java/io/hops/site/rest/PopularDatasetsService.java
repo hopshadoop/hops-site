@@ -2,6 +2,7 @@ package io.hops.site.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.hops.site.controller.DatasetController;
+import io.hops.site.dto.IdentificationJSON;
 import java.io.IOException;
 import java.util.List;
 import javax.ejb.EJB;
@@ -37,10 +38,9 @@ public class PopularDatasetsService {
 
   @GET
   @NoCache
-  @Path("{clusterId}")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response popularDatasets(String clusterId) throws IOException {
-    List<PopularDatasetJSON> popularDatasetsJsons = datasetController.getPopularDatasets(clusterId);
+  public Response popularDatasets() throws IOException {
+    List<PopularDatasetJSON> popularDatasetsJsons = datasetController.getPopularDatasets();
     GenericEntity<List<PopularDatasetJSON>> searchResults = new GenericEntity<List<PopularDatasetJSON>>(
             popularDatasetsJsons) {
     };

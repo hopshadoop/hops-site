@@ -19,13 +19,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class RateDTO {
-  
+
+  private Integer id;
   private int rating;
-  private String userEmail;
-  private String publicId;
-  private Integer datasetId;
+  private UserDTO user;
+  private DatasetDTO dataset;
 
   public RateDTO() {
+  }
+
+  public Integer getId() {
+    return id;
+  }
+
+  public void setId(Integer id) {
+    this.id = id;
   }
 
   public int getRating() {
@@ -36,30 +44,22 @@ public class RateDTO {
     this.rating = rating;
   }
 
-  public String getUserEmail() {
-    return userEmail;
+  public UserDTO getUser() {
+    return user;
   }
 
-  public void setUserEmail(String userEmail) {
-    this.userEmail = userEmail;
+  public void setUser(UserDTO user) {
+    this.user = user;
   }
 
-  public String getPublicId() {
-    return publicId;
+  public DatasetDTO getDataset() {
+    return dataset;
   }
 
-  public void setPublicId(String publicId) {
-    this.publicId = publicId;
+  public void setDataset(DatasetDTO dataset) {
+    this.dataset = dataset;
   }
 
-  public Integer getDatasetId() {
-    return datasetId;
-  }
-
-  public void setDatasetId(Integer datasetId) {
-    this.datasetId = datasetId;
-  }
   
-  
-  
+
 }

@@ -111,13 +111,13 @@ public class DatasetController {
     if (datasetIssue == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
-    if (datasetIssue.getDatasetId() == null) {
+    if (datasetIssue.getDataset() == null) {
       throw new IllegalArgumentException("Dataset not assigned.");
     }
-    if (datasetIssue.getDatasetId() == null && datasetIssue.getPublicId() == null) {
+    if (datasetIssue.getDataset().getPublicId() == null) {
       throw new IllegalArgumentException("Dataset id not assigned.");
     }
-    if (datasetIssue.getUserEmail() == null) {
+    if (datasetIssue.getUser().getEmail() == null) {
       throw new IllegalArgumentException("User not assigned.");
     }
     if (datasetIssue.getType() == null && datasetIssue.getType().isEmpty()) {
@@ -125,23 +125,21 @@ public class DatasetController {
     }
 
     Dataset dataset;
-    if (datasetIssue.getDatasetId() == null) {
-      dataset = datasetFacade.findByPublicId(datasetIssue.getPublicId());
-    } else {
-      dataset = datasetFacade.find(datasetIssue.getDatasetId());
-    }
+    dataset = datasetFacade.findByPublicId(datasetIssue.getDataset().getPublicId());
+
     if (dataset == null) {
       throw new IllegalArgumentException("Dataset not found.");
     }
 
-    Users user = userFacade.findByEmail(datasetIssue.getUserEmail());
+    Users user = userFacade.findByEmail(datasetIssue.getUser().getEmail());
     if (user == null) {
       throw new IllegalArgumentException("User not found.");
     }
 
     DatasetIssue newDatasetIssue = new DatasetIssue(datasetIssue.getType(), datasetIssue.getMsg(), user, dataset);
     datasetIssueFacade.create(newDatasetIssue);
-    LOGGER.log(Level.INFO, "Adding new dataset issue for dataset with public id: {0}.", datasetIssue.getPublicId());
+    LOGGER.log(Level.INFO, "Adding new dataset issue for dataset with public id: {0}.", datasetIssue.getDataset().
+            getPublicId());
   }
 
   /**
@@ -153,16 +151,12 @@ public class DatasetController {
     if (dataset == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
-    if (dataset.getId() == null && dataset.getPublicId() == null) {
+    if (dataset.getPublicId() == null) {
       throw new IllegalArgumentException("Dataset id not assigned.");
     }
 
     Dataset manageddataset;
-    if (dataset.getId() == null) {
-      manageddataset = datasetFacade.findByPublicId(dataset.getPublicId());
-    } else {
-      manageddataset = datasetFacade.find(dataset.getId());
-    }
+    manageddataset = datasetFacade.findByPublicId(dataset.getPublicId());
     if (manageddataset == null) {
       throw new IllegalArgumentException("Dataset not found.");
     }
@@ -190,16 +184,12 @@ public class DatasetController {
     if (dataset == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
-    if (dataset.getId() == null && dataset.getPublicId() == null) {
+    if (dataset.getPublicId() == null) {
       throw new IllegalArgumentException("Dataset id not assigned.");
     }
 
     Dataset manageddataset;
-    if (dataset.getId() == null) {
-      manageddataset = datasetFacade.findByPublicId(dataset.getPublicId());
-    } else {
-      manageddataset = datasetFacade.find(dataset.getId());
-    }
+    manageddataset = datasetFacade.findByPublicId(dataset.getPublicId());
     if (manageddataset == null) {
       throw new IllegalArgumentException("Dataset not found.");
     }
@@ -287,16 +277,11 @@ public class DatasetController {
   /**
    * Get top 10 datasets
    *
-   * @param clusterId
    * @return
    * @throws IOException
    */
-  public List<PopularDatasetJSON> getPopularDatasets(String clusterId) throws IOException {
+  public List<PopularDatasetJSON> getPopularDatasets() throws IOException {
     List<PopularDatasetJSON> popularDatasetsJsons = new LinkedList<>();
-    if (!helperFunctions.ClusterRegisteredWithId(clusterId)) {
-      LOGGER.log(Level.INFO, "Invalid cluster id.");
-      throw new IllegalArgumentException("Invalid cluster id.");
-    }
     for (PopularDataset pd : helperFunctions.getTopTenDatasets()) {
       ManifestJSON manifestJson = mapper.readValue(pd.getManifest(), ManifestJSON.class);
       List<AddressJSON> gvodEndpoints = mapper.readValue(pd.getPartners(), new TypeReference<List<AddressJSON>>() {
@@ -309,8 +294,8 @@ public class DatasetController {
   }
 
   public void addPopularDatasets(PopularDatasetJSON popularDatasetsJson) {
-    if (popularDatasetsJson.getIdentification().getClusterId() != null && helperFunctions.ClusterRegisteredWithId(
-            popularDatasetsJson.getIdentification().getClusterId())) {
+    if (popularDatasetsJson.getClusterId() != null && helperFunctions.ClusterRegisteredWithId(popularDatasetsJson.
+            getClusterId())) {
       Dataset ds = dsFacade.findByPublicId(popularDatasetsJson.getDatasetId());
       if (ds == null) {
         throw new IllegalArgumentException("Invalid id.");

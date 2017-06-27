@@ -8,9 +8,10 @@ import org.glassfish.jersey.server.ResourceConfig;
 import io.hops.site.rest.ClusterService;
 import io.hops.site.rest.UserService;
 import io.hops.site.rest.exception.mapper.EJBExceptionMapper;
-import io.hops.site.rest.filter.AuthRequestFilter;
-import io.hops.site.rest.filter.CORSFilter;
-import io.hops.site.rest.filter.CacheControlFilter;
+import io.hops.site.rest.request.filter.AddRowsFilter;
+import io.hops.site.rest.request.filter.AuthFilter;
+import io.hops.site.rest.response.filter.CORSFilter;
+import io.hops.site.rest.response.filter.CacheControlFilter;
 import io.swagger.annotations.Api;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
@@ -30,10 +31,12 @@ public class ApplicationConfig extends ResourceConfig {
     //Exception mappers
     register(EJBExceptionMapper.class);
     
-    //filters
+    //response filters
     register(CORSFilter.class);
-    register(AuthRequestFilter.class);
     register(CacheControlFilter.class);
+    //request filters
+    register(AuthFilter.class);
+    register(AddRowsFilter.class);
     
     //swagger
     register(ApiListingResource.class);

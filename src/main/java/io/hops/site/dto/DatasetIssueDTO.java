@@ -19,37 +19,29 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class DatasetIssueDTO {
-  private Integer datasetId;
-  private String publicId;
-  private String userEmail;
+
   private String type;
   private String msg;
+  private UserDTO user;
+  private DatasetDTO dataset;
 
   public DatasetIssueDTO() {
   }
 
-  public Integer getDatasetId() {
-    return datasetId;
+  public UserDTO getUser() {
+    return user;
   }
 
-  public void setDatasetId(Integer datasetId) {
-    this.datasetId = datasetId;
+  public void setUser(UserDTO user) {
+    this.user = user;
   }
 
-  public String getPublicId() {
-    return publicId;
+  public DatasetDTO getDataset() {
+    return dataset;
   }
 
-  public void setPublicId(String publicId) {
-    this.publicId = publicId;
-  }
-
-  public String getUserEmail() {
-    return userEmail;
-  }
-
-  public void setUserEmail(String userEmail) {
-    this.userEmail = userEmail;
+  public void setDataset(DatasetDTO dataset) {
+    this.dataset = dataset;
   }
 
   public String getType() {
@@ -67,6 +59,5 @@ public class DatasetIssueDTO {
   public void setMsg(String msg) {
     this.msg = msg;
   }
-  
-  
+
 }

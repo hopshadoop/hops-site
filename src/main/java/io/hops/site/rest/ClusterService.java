@@ -13,7 +13,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import io.hops.site.dto.IdentificationJSON;
-import io.hops.site.dto.PingedJSON;
+import io.hops.site.dto.PingResponse;
 import io.hops.site.dto.RegisteredClusterJSON;
 import io.hops.site.dto.RegisterJSON;
 import io.hops.site.dto.RegisteredJSON;
@@ -22,7 +22,6 @@ import io.swagger.annotations.Api;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
@@ -42,12 +41,26 @@ public class ClusterService {
 
   @GET
   @NoCache
-  public Response getRegisterd(@Context SecurityContext sc, @Context HttpServletRequest req) {
-    LOGGER.log(Level.INFO, "User Principal: {0}", sc.getUserPrincipal().getName());
-    LOGGER.log(Level.INFO, "is User In Role clusters: {0}", sc.isUserInRole("clusters"));
-    LOGGER.log(Level.INFO, "is User In Role manager: {0}", sc.isUserInRole("manager"));
+  public Response getRegisterd(@Context SecurityContext sc) {
     List<RegisteredClusterJSON> to_ret = clusterController.getAll();
-    return Response.status(Response.Status.OK).entity(new PingedJSON(to_ret)).build();
+    return Response.status(Response.Status.OK).entity(new PingResponse(to_ret)).build();
+  }
+  
+  @GET
+  @NoCache
+  @Path("role")
+  public Response getClusterRole(@Context SecurityContext sc) {
+    LOGGER.log(Level.INFO, "Cluster: {0}", sc.getUserPrincipal().getName());
+    String role;
+    if (sc.isUserInRole("clusters")) {
+      role = "clusters";
+    } else if (sc.isUserInRole("admin")){
+      role = "admin";
+    } else {
+      role = "none";
+    }
+    LOGGER.log(Level.INFO, "Cluster Role: {0}", role);
+    return Response.status(Response.Status.OK).entity(role).build();
   }
   
   @POST
@@ -65,6 +78,6 @@ public class ClusterService {
   public Response ping(IdentificationJSON identification) {
     List<RegisteredClusterJSON> to_ret = clusterController.registerPing(identification);
     LOGGER.log(Level.INFO, "Registering ping from cluster id: {0}.", identification.getClusterId());
-    return Response.status(Response.Status.OK).entity(new PingedJSON(to_ret)).build();
+    return Response.status(Response.Status.OK).entity(new PingResponse(to_ret)).build();
   }
 }

@@ -13,35 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.site.dto;
+package io.hops.site.rest.request.filter;
 
+import io.hops.site.dto.DatasetDTO;
+import io.hops.site.dto.UserDTO;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class CommentDTO {
+public class GenericReqUserDatasetDTO {
 
-  private Integer id;
-  private String content;
   private UserDTO user;
   private DatasetDTO dataset;
 
-  public CommentDTO() {
-  }
-
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public String getContent() {
-    return content;
-  }
-
-  public void setContent(String content) {
-    this.content = content;
+  public GenericReqUserDatasetDTO() {
   }
 
   public UserDTO getUser() {
@@ -58,6 +42,11 @@ public class CommentDTO {
 
   public void setDataset(DatasetDTO dataset) {
     this.dataset = dataset;
+  }
+
+  @Override
+  public String toString() {
+    return "GenericRequestDTO{" + "user=" + user + ", dataset=" + dataset + '}';
   }
 
 }

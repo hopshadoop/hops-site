@@ -68,7 +68,6 @@ public class Comment implements Serializable {
   @Column(name = "content")
   private String content;
   @Basic(optional = false)
-  @NotNull
   @Column(name = "date_published")
   @Temporal(TemporalType.TIMESTAMP)
   private Date datePublished;

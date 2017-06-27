@@ -58,8 +58,7 @@ public class CommentService {
   @Path("{datasetId}")
   public Response getAll(@PathParam("datasetId") Integer datasetId) {
     List<DatasetRating> ratings = commentController.getAllDatasets(datasetId);
-    GenericEntity<List<DatasetRating>> datasetRatings
-            = new GenericEntity<List<DatasetRating>>(ratings) {
+    GenericEntity<List<DatasetRating>> datasetRatings = new GenericEntity<List<DatasetRating>>(ratings) {
     };
     LOGGER.log(Level.INFO, "Get all comments for dataset: {0}", datasetId);
     return Response.ok().entity(datasetRatings).build();
@@ -70,8 +69,7 @@ public class CommentService {
   @Path("byPublicId/{publicId}")
   public Response getAllByPublicId(@PathParam("publicId") String publicId) {
     List<DatasetRating> ratings = commentController.getAllDatasets(publicId);
-    GenericEntity<List<DatasetRating>> datasetRatings
-            = new GenericEntity<List<DatasetRating>>(ratings) {
+    GenericEntity<List<DatasetRating>> datasetRatings = new GenericEntity<List<DatasetRating>>(ratings) {
     };
     LOGGER.log(Level.INFO, "Get all comments for dataset: {0}", publicId);
     return Response.ok().entity(datasetRatings).build();
@@ -81,7 +79,7 @@ public class CommentService {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addComment(CommentDTO comment) {
     commentController.addComment(comment);
-    LOGGER.log(Level.INFO, "Add comment for dataset: {0}", comment.getDatasetId());
+    LOGGER.log(Level.INFO, "Add comment for dataset: {0}", comment.getDataset().getPublicId());
     return Response.ok().build();
   }
 

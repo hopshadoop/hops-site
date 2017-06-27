@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.site.rest.filter;
+package io.hops.site.rest.request.filter;
 
-import io.hops.site.dto.GenericRequestDTO;
+import io.hops.site.controller.ClusterController;
+import io.hops.site.dao.entity.RegisteredCluster;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.security.AccessControlException;
 import java.security.Principal;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.security.cert.X509Certificate;
+import javax.annotation.Priority;
+import javax.ejb.EJB;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
@@ -31,17 +36,20 @@ import javax.ws.rs.ext.Provider;
 import org.glassfish.jersey.server.ContainerRequest;
 
 @Provider
-public class AuthRequestFilter implements ContainerRequestFilter {
+@Priority(Priorities.AUTHORIZATION)
+public class AuthFilter implements ContainerRequestFilter {
 
   private final static Logger LOGGER = Logger.getLogger(ContainerRequestFilter.class.getName());
+  @EJB
+  private ClusterController clusterController;
+
   @Context
   private ResourceInfo resourceInfo;
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
-    String clusterId = getCertificateCommonName(requestContext);
-   
-    if (clusterId.isEmpty()) {
+    String clusterEmail = getCertificateCommonName(requestContext);
+    if (clusterEmail.isEmpty()) { //Common name not set
       requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
       return;
     }
@@ -49,24 +57,23 @@ public class AuthRequestFilter implements ContainerRequestFilter {
     String path = requestContext.getUriInfo().getPath();
     Method method = resourceInfo.getResourceMethod();
     LOGGER.log(Level.INFO, "Path: {0}, method: {1}", new Object[]{path, method});
-    ContainerRequest cr = (ContainerRequest) requestContext;
-    if (cr.bufferEntity()) {
-      GenericRequestDTO reqDTO = null;
-      try {
-        reqDTO = cr.readEntity(GenericRequestDTO.class);
-      } catch (Exception nsme) {
-        //nothing to do. It is not GenericRequestDTO, thus can not be checked.
-      }
-      if (reqDTO == null) {
-        LOGGER.log(Level.INFO, "No Cluster Id");
-      } else {
-        reqDTO.setClusterId(path);
-        LOGGER.log(Level.INFO, "Cluster Id: {0}", reqDTO.getClusterId());
-        //check if cluster id matches Certificate common name.
-      }
+
+    RegisteredCluster clusterFromCert = clusterController.getClusterByEmail(clusterEmail);
+    if (clusterFromCert == null && !"cluster/register".equals(path)) { //not yet registerd
+      requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+      return;
+    }
+
+    RegisteredCluster clusterInReq = getClusterFromReq(requestContext);
+    if (clusterInReq == null) { // not protected 
+      return;
+    }
+
+    if (clusterFromCert != null && !clusterFromCert.equals(clusterInReq)) { // req as different cluster
+      requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
     }
   }
-  
+
   private String getCertificateCommonName(ContainerRequestContext requestContext) {
     X509Certificate[] certs = (X509Certificate[]) requestContext.getProperty("javax.servlet.request.X509Certificate");
     String tmpName, name = "";
@@ -87,7 +94,41 @@ public class AuthRequestFilter implements ContainerRequestFilter {
       LOGGER.log(Level.SEVERE, "Request from principal: {0}", principal.getName());
       LOGGER.log(Level.SEVERE, "CN={0}", name);
     }
-    return name;
+    return name.toLowerCase();
+  }
+
+  private RegisteredCluster getClusterFromReq(ContainerRequestContext requestContext) {
+    ContainerRequest cr = (ContainerRequest) requestContext;
+    if (cr.bufferEntity()) {
+      GenericReqDTO reqDTO = null;
+      try {
+        reqDTO = cr.readEntity(GenericReqDTO.class);
+      } catch (Exception nsme) {
+        //nothing to do. It is not GenericRequestDTO, thus can not be checked.
+      }
+      if (reqDTO == null) {
+        LOGGER.log(Level.INFO, "Not a generic request.");
+        return null;
+      }
+      LOGGER.log(Level.INFO, "Generic request: {0}.", reqDTO.toString());
+      RegisteredCluster registeredCluster;
+      if (reqDTO.getUser() != null) {
+        registeredCluster = clusterController.getClusterById(reqDTO.getUser().getClusterId());
+        if (registeredCluster == null) {
+          throw new AccessControlException("Cluster not registered.");
+        }
+        return registeredCluster;
+      }
+
+      if (reqDTO.getClusterId() != null) {
+        registeredCluster = clusterController.getClusterById(reqDTO.getClusterId());
+        if (registeredCluster == null) {
+          throw new AccessControlException("Cluster not registered.");
+        }
+        return registeredCluster;
+      }
+    }
+    return null;
   }
 
 }

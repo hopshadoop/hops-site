@@ -115,6 +115,11 @@ public class DatasetDTO {
   public void setClusterId(String clusterId) {
     this.clusterId = clusterId;
   }
-  
+
+  @Override
+  public String toString() {
+    return "DatasetDTO{" + "id=" + id + ", publicId=" + publicId + ", name=" + name + ", madePublicOn=" + madePublicOn +
+            ", owner=" + owner + ", status=" + status + ", clusterId=" + clusterId + '}';
+  }
   
 }

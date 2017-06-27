@@ -89,6 +89,7 @@ public class RatingController {
 
   /**
    * Get all ratings by dataset id
+   *
    * @param datasetId
    * @return
    */
@@ -103,6 +104,7 @@ public class RatingController {
 
   /**
    * Get all ratings by public id
+   *
    * @param publicId
    * @return
    */
@@ -124,33 +126,28 @@ public class RatingController {
     if (datasetRating == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
-    if (datasetRating.getUserEmail() == null) {
+    if (datasetRating.getUser() == null || datasetRating.getUser().getEmail() == null) {
       throw new IllegalArgumentException("User email not assigned.");
     }
-    if (datasetRating.getDatasetId() == null && datasetRating.getPublicId() == null) {
+    if (datasetRating.getDataset().getPublicId() == null) {
       throw new IllegalArgumentException("Dataset id not assigned.");
     }
     if (datasetRating.getRating() <= 0) {
       throw new IllegalArgumentException("Rating should be positive int.");
     }
     Dataset dataset;
-    if (datasetRating.getDatasetId() == null) {
-      dataset = datasetFacade.findByPublicId(datasetRating.getPublicId());
-    } else {
-      dataset = datasetFacade.find(datasetRating.getDatasetId());
-    }
+    dataset = datasetFacade.findByPublicId(datasetRating.getDataset().getPublicId());
 
     if (dataset == null) {
       throw new IllegalArgumentException("Dataset not found.");
     }
 
-    Users user = userFacade.findByEmail(datasetRating.getUserEmail());
+    Users user = userFacade.findByEmail(datasetRating.getUser().getEmail());
     if (user == null) {
       throw new IllegalArgumentException("User not found.");
     }
 
     DatasetRating newDatasetRating = new DatasetRating(datasetRating.getRating(), user, dataset);
-    //get by user and ds and update.
     datasetRatingFacade.create(newDatasetRating);
   }
 
@@ -165,5 +162,29 @@ public class RatingController {
     }
     DatasetRating datasetRating = datasetRatingFacade.find(ratingId);
     datasetRatingFacade.remove(datasetRating);
+  }
+
+  public void updateRating(RateDTO datasetRating) {
+    if (datasetRating == null || datasetRating.getId() == null) {
+      throw new IllegalArgumentException("One or more arguments not assigned.");
+    }
+    if (datasetRating.getRating() < 1) {
+      throw new IllegalArgumentException("Rating should be positive int.");
+    }
+    
+    DatasetRating rating = datasetRatingFacade.find(datasetRating.getId());
+    if (rating == null) {
+      throw new IllegalArgumentException("Rating not found.");
+    }
+    
+    if (!rating.getUsers().getEmail().equalsIgnoreCase(datasetRating.getUser().getEmail())) {
+      throw new IllegalArgumentException("Rating not found for given user.");
+    }
+    
+    if (rating.getRating() == datasetRating.getRating()) {
+      return;
+    }
+    rating.setRating(datasetRating.getRating());
+    datasetRatingFacade.edit(rating);
   }
 }
