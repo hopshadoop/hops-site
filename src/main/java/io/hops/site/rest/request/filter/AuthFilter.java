@@ -58,7 +58,7 @@ public class AuthFilter implements ContainerRequestFilter {
     Method method = resourceInfo.getResourceMethod();
     LOGGER.log(Level.INFO, "Path: {0}, method: {1}", new Object[]{path, method});
 
-    RegisteredCluster clusterFromCert = clusterController.getClusterByEmail(clusterEmail + "@gmail.com");
+    RegisteredCluster clusterFromCert = clusterController.getClusterByEmail(clusterEmail);
     if (clusterFromCert == null && !"cluster/register".equals(path)) { //not yet registerd
       requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
       return;
