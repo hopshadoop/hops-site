@@ -77,7 +77,8 @@ public class Users implements Serializable {
           max = 45)
   @Column(name = "lastname")
   private String lastname;
-  @Pattern(regexp = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
+  @Pattern(regexp
+          = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
           message = "Invalid email")
   @Basic(optional = false)
   @NotNull
@@ -207,6 +208,8 @@ public class Users implements Serializable {
     this.datasetRatingCollection = datasetRatingCollection;
   }
 
+  @XmlTransient
+  @JsonIgnore
   public RegisteredCluster getClusterId() {
     return clusterId;
   }

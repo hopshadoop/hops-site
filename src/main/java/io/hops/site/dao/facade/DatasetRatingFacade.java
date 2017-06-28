@@ -15,13 +15,18 @@
  */
 package io.hops.site.dao.facade;
 
+import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.DatasetRating;
+import io.hops.site.dao.entity.Users;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
 @Stateless
 public class DatasetRatingFacade extends AbstractFacade<DatasetRating> {
+
   @PersistenceContext(unitName = "hops-sitePU")
   private EntityManager em;
 
@@ -36,5 +41,15 @@ public class DatasetRatingFacade extends AbstractFacade<DatasetRating> {
   @Override
   protected EntityManager getEntityManager() {
     return em;
+  }
+
+  public DatasetRating findByDatasetAndUser(Dataset dataset, Users user) {
+    TypedQuery<DatasetRating> query = em.createNamedQuery("DatasetRating.findByDatasetAndUser", DatasetRating.class)
+            .setParameter("publicId", dataset.getPublicId()).setParameter("email", user.getEmail());
+    try {
+      return query.getSingleResult();
+    } catch (NoResultException e) {
+      return null;
+    }
   }
 }

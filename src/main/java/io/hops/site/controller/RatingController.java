@@ -148,6 +148,15 @@ public class RatingController {
       throw new IllegalArgumentException("User not found.");
     }
 
+    DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset, user);
+    if (managedRating != null) {
+      if (managedRating.getRating() != datasetRating.getRating()) {
+        managedRating.setRating(datasetRating.getRating());
+        datasetRatingFacade.edit(managedRating);
+      }
+      return;
+    }
+
     DatasetRating newDatasetRating = new DatasetRating(datasetRating.getRating(), user, dataset);
     datasetRatingFacade.create(newDatasetRating);
   }
@@ -166,8 +175,8 @@ public class RatingController {
   }
 
   /**
-   * 
-   * @param datasetRating 
+   *
+   * @param datasetRating
    */
   public void updateRating(RateDTO datasetRating) {
     if (datasetRating == null || datasetRating.getId() == null) {

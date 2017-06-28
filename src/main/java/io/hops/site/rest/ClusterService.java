@@ -63,7 +63,7 @@ public class ClusterService {
       role = "none";
     }
     LOGGER.log(Level.INFO, "Cluster Role: {0}", role);
-    return Response.status(Response.Status.OK).entity(role).build();
+    return Response.ok(role).build();
   }
   
   @POST

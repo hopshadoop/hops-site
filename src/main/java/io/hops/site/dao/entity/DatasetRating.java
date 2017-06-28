@@ -47,6 +47,9 @@ import javax.xml.bind.annotation.XmlTransient;
   @NamedQuery(name = "DatasetRating.findByRating",
           query
           = "SELECT d FROM DatasetRating d WHERE d.rating = :rating"),
+  @NamedQuery(name = "DatasetRating.findByDatasetAndUser",
+          query
+          = "SELECT d FROM DatasetRating d WHERE d.datasetId.publicId = :publicId AND d.users.email = :email"),
   @NamedQuery(name = "DatasetRating.findByDatePublished",
           query
           = "SELECT d FROM DatasetRating d WHERE d.datePublished = :datePublished")})
@@ -62,6 +65,7 @@ public class DatasetRating implements Serializable {
   @NotNull
   @Column(name = "rating")
   private int rating;
+  @Basic(optional = false)
   @Column(name = "date_published")
   @Temporal(TemporalType.TIMESTAMP)
   private Date datePublished;
@@ -157,5 +161,5 @@ public class DatasetRating implements Serializable {
   public String toString() {
     return "io.hops.site.dao.entity.DatasetRating[ id=" + id + " ]";
   }
-  
+
 }

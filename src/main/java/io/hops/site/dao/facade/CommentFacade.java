@@ -17,6 +17,7 @@ package io.hops.site.dao.facade;
 
 import io.hops.site.dao.entity.Comment;
 import io.hops.site.dao.entity.Dataset;
+import io.hops.site.dao.entity.Users;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -42,13 +43,4 @@ public class CommentFacade extends AbstractFacade<Comment> {
     return em;
   }
 
-  public Comment findByPublicId(Dataset datasetId) {
-    TypedQuery<Comment> query = em.createNamedQuery("Comment.findByDataset", Comment.class).setParameter("datasetId",
-            datasetId);
-    try {
-      return query.getSingleResult();
-    } catch (NoResultException e) {
-      return null;
-    }
-  }
 }

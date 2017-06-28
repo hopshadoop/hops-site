@@ -16,6 +16,7 @@
 package io.hops.site.rest;
 
 import io.hops.site.controller.UsersController;
+import io.hops.site.dao.entity.Users;
 import io.hops.site.dto.UserDTO;
 import io.swagger.annotations.Api;
 import java.util.logging.Level;
@@ -27,6 +28,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -47,7 +49,17 @@ public class UserService {
 
   @EJB
   private UsersController usersController;
-
+  
+  @GET
+  @Path("{userEmail}/{clusterId}")
+  public Response getUser(@PathParam("userEmail") String userEmail, @PathParam("clusterId") String clusterId) {
+    Users user = usersController.findUserByEmailAndClusterId(userEmail, clusterId);
+    if (user == null) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
+    return Response.ok(user.getId() + "").build();
+  }
+  
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addUser(UserDTO user) {

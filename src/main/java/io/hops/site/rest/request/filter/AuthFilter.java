@@ -58,7 +58,7 @@ public class AuthFilter implements ContainerRequestFilter {
     Method method = resourceInfo.getResourceMethod();
     LOGGER.log(Level.INFO, "Path: {0}, method: {1}", new Object[]{path, method});
 
-    RegisteredCluster clusterFromCert = clusterController.getClusterByEmail(clusterEmail +"@gmail.com");
+    RegisteredCluster clusterFromCert = clusterController.getClusterByEmail(clusterEmail + "@gmail.com");
     if (clusterFromCert == null && !"cluster/register".equals(path)) { //not yet registerd
       requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
       return;
@@ -98,6 +98,17 @@ public class AuthFilter implements ContainerRequestFilter {
   }
 
   private RegisteredCluster getClusterFromReq(ContainerRequestContext requestContext) {
+    RegisteredCluster registeredCluster;
+    String path = requestContext.getUriInfo().getPath();
+    String[] pathParts = path.split("/");
+    if ("user".equals(pathParts[0]) && pathParts.length == 3) {
+      registeredCluster = clusterController.getClusterById(pathParts[2]);
+      if (registeredCluster == null) {
+        throw new AccessControlException("Cluster not registered.");
+      }
+      return registeredCluster;
+    }
+
     ContainerRequest cr = (ContainerRequest) requestContext;
     if (cr.bufferEntity()) {
       GenericReqDTO reqDTO = null;
@@ -111,7 +122,6 @@ public class AuthFilter implements ContainerRequestFilter {
         return null;
       }
       LOGGER.log(Level.INFO, "Generic request: {0}.", reqDTO.toString());
-      RegisteredCluster registeredCluster;
       if (reqDTO.getUser() != null) {
         registeredCluster = clusterController.getClusterById(reqDTO.getUser().getClusterId());
         if (registeredCluster == null) {
