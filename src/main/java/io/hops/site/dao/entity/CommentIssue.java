@@ -65,6 +65,7 @@ public class CommentIssue implements Serializable {
           max = 45)
   @Column(name = "type")
   private String type;
+  @Basic(optional = false)
   @Column(name = "date_reported")
   @Temporal(TemporalType.TIMESTAMP)
   private Date dateReported;

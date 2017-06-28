@@ -89,7 +89,7 @@ public class UsersController {
     if (registeredCluster == null) {
       throw new IllegalArgumentException("Cluster not found.");
     }
-    Users managedUser = userFacade.findByEmail(user.getEmail());
+    Users managedUser = userFacade.findByEmailAndCluster(user.getEmail(), user.getClusterId());
     if (managedUser == null) {
       throw new IllegalArgumentException("User not found.");
     }
@@ -118,18 +118,28 @@ public class UsersController {
    * Remove user by email
    *
    * @param userEmail
+   * @param clusterId
    */
-  public void removeUser(String userEmail) {
-    if (userEmail == null) {
-      throw new IllegalArgumentException("User email not assigned.");
+  public void removeUser(String userEmail, String clusterId) {
+    if (userEmail == null || clusterId == null) {
+      throw new IllegalArgumentException("User email or cluster id not assigned.");
     }
-    Users managedUser = userFacade.findByEmail(userEmail);
+    Users managedUser = userFacade.findByEmailAndCluster(userEmail, clusterId);
     userFacade.remove(managedUser);
     LOGGER.log(Level.INFO, "Remove user: {0}.", userEmail);
   }
 
-  public Users findUserByEmail(String email) {
-    return userFacade.findByEmail(email.toLowerCase());
+  /**
+   * 
+   * @param email
+   * @param clusterId
+   * @return 
+   */
+  public Users findUserByEmailAndClusterId(String email, String clusterId) {
+    if (email == null || clusterId == null) {
+      throw new IllegalArgumentException("User email or cluster id not assigned.");
+    }
+    return userFacade.findByEmailAndCluster(email.toLowerCase(), clusterId);
   }
 
 }

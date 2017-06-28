@@ -85,7 +85,7 @@ public class AddRowsFilter implements ContainerRequestFilter {
     if (userDTO.getEmail() == null) {
       return;
     }
-    Users user = usersController.findUserByEmail(userDTO.getEmail());
+    Users user = usersController.findUserByEmailAndClusterId(userDTO.getEmail(), userDTO.getClusterId());
     if (user != null) {
       return;
     }

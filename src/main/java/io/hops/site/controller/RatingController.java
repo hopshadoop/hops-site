@@ -142,7 +142,8 @@ public class RatingController {
       throw new IllegalArgumentException("Dataset not found.");
     }
 
-    Users user = userFacade.findByEmail(datasetRating.getUser().getEmail());
+    Users user = userFacade.findByEmailAndCluster(datasetRating.getUser().getEmail(), datasetRating.getUser().
+            getClusterId());
     if (user == null) {
       throw new IllegalArgumentException("User not found.");
     }
@@ -164,6 +165,10 @@ public class RatingController {
     datasetRatingFacade.remove(datasetRating);
   }
 
+  /**
+   * 
+   * @param datasetRating 
+   */
   public void updateRating(RateDTO datasetRating) {
     if (datasetRating == null || datasetRating.getId() == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
@@ -171,16 +176,16 @@ public class RatingController {
     if (datasetRating.getRating() < 1) {
       throw new IllegalArgumentException("Rating should be positive int.");
     }
-    
+
     DatasetRating rating = datasetRatingFacade.find(datasetRating.getId());
     if (rating == null) {
       throw new IllegalArgumentException("Rating not found.");
     }
-    
+
     if (!rating.getUsers().getEmail().equalsIgnoreCase(datasetRating.getUser().getEmail())) {
       throw new IllegalArgumentException("Rating not found for given user.");
     }
-    
+
     if (rating.getRating() == datasetRating.getRating()) {
       return;
     }

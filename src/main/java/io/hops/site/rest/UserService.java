@@ -74,11 +74,11 @@ public class UserService {
   }
 
   @DELETE
-  @Path("byEmail/{userEmail}")
+  @Path("byEmail")
   @RolesAllowed({"admin"})
-  public Response deleteUserByEmail(@PathParam("userEmail") String userEmail) {
-    usersController.removeUser(userEmail);
-    LOGGER.log(Level.INFO, "Remove user by email: {0}", userEmail);
+  public Response deleteUserByEmail(UserDTO userDTO) {
+    usersController.removeUser(userDTO.getEmail(), userDTO.getClusterId());
+    LOGGER.log(Level.INFO, "Remove user by email: {0}", userDTO.getEmail());
     return Response.ok().build();
   }
 

@@ -19,10 +19,13 @@ import io.hops.site.dto.RegisterJSON;
 import io.hops.site.dto.RegisteredJSON;
 import io.hops.site.rest.annotation.NoCache;
 import io.swagger.annotations.Api;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.SecurityContext;
 
@@ -79,5 +82,14 @@ public class ClusterService {
     List<RegisteredClusterJSON> to_ret = clusterController.registerPing(identification);
     LOGGER.log(Level.INFO, "Registering ping from cluster id: {0}.", identification.getClusterId());
     return Response.status(Response.Status.OK).entity(new PingResponse(to_ret)).build();
+  }
+  
+  @DELETE
+  @Path("{clusterId}")
+  @RolesAllowed({"admin"})
+  public Response removeRegisterdCluster(@PathParam("clusterId") String clusterId) {
+    clusterController.removeCluster(clusterId);
+    LOGGER.log(Level.INFO, "Registered cluster with id: {0} removed.", clusterId);
+    return Response.status(Response.Status.OK).build();
   }
 }

@@ -16,6 +16,7 @@
 package io.hops.site.rest;
 
 import io.hops.site.controller.CommentController;
+import io.hops.site.dao.entity.Comment;
 import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.dto.CommentDTO;
 import io.hops.site.dto.CommentIssueDTO;
@@ -24,6 +25,7 @@ import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -57,8 +59,8 @@ public class CommentService {
   @NoCache
   @Path("{datasetId}")
   public Response getAll(@PathParam("datasetId") Integer datasetId) {
-    List<DatasetRating> ratings = commentController.getAllDatasets(datasetId);
-    GenericEntity<List<DatasetRating>> datasetRatings = new GenericEntity<List<DatasetRating>>(ratings) {
+    List<Comment> ratings = commentController.getAllComments(datasetId);
+    GenericEntity<List<Comment>> datasetRatings = new GenericEntity<List<Comment>>(ratings) {
     };
     LOGGER.log(Level.INFO, "Get all comments for dataset: {0}", datasetId);
     return Response.ok().entity(datasetRatings).build();
@@ -68,8 +70,8 @@ public class CommentService {
   @NoCache
   @Path("byPublicId/{publicId}")
   public Response getAllByPublicId(@PathParam("publicId") String publicId) {
-    List<DatasetRating> ratings = commentController.getAllDatasets(publicId);
-    GenericEntity<List<DatasetRating>> datasetRatings = new GenericEntity<List<DatasetRating>>(ratings) {
+    List<Comment> ratings = commentController.getAllComments(publicId);
+    GenericEntity<List<Comment>> datasetRatings = new GenericEntity<List<Comment>>(ratings) {
     };
     LOGGER.log(Level.INFO, "Get all comments for dataset: {0}", publicId);
     return Response.ok().entity(datasetRatings).build();
@@ -101,8 +103,17 @@ public class CommentService {
   }
 
   @DELETE
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response deleteComment(CommentDTO comment) {
+    commentController.removeOwnComment(comment);
+    LOGGER.log(Level.INFO, "Delete comment with id: {0}", comment.getId());
+    return Response.ok().build();
+  }
+
+  @DELETE
   @Path("{commentId}")
-  public Response deleteComment(@PathParam("commentId") Integer commentId) {
+  @RolesAllowed({"admin"})
+  public Response deleteCommentById(@PathParam("commentId") Integer commentId) {
     commentController.removeComment(commentId);
     LOGGER.log(Level.INFO, "Delete comment with id: {0}", commentId);
     return Response.ok().build();

@@ -57,7 +57,7 @@ CREATE TABLE `comment_issue` (
   `comment_id` int(11) NOT NULL,
   `users` int(11) NOT NULL,
   `type` varchar(45) NOT NULL,
-  `date_reported` timestamp NULL DEFAULT NULL,
+  `date_reported` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `msg` varchar(2000) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_comment_issue_1_idx` (`comment_id`),

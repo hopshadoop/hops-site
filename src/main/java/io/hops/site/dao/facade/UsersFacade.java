@@ -37,9 +37,10 @@ public class UsersFacade extends AbstractFacade<Users> {
     super(Users.class);
   }
 
-  public Users findByEmail(String email) {
-    TypedQuery<Users> query = em.createNamedQuery("Users.findByEmail", Users.class).setParameter("email",
-            email);
+  public Users findByEmailAndCluster(String email, String clusterId) {
+    TypedQuery<Users> query = em.createNamedQuery("Users.findByEmailAndClusterId", Users.class)
+            .setParameter("email", email)
+            .setParameter("clusterId", clusterId);
     try {
       return query.getSingleResult();
     } catch (NoResultException e) {

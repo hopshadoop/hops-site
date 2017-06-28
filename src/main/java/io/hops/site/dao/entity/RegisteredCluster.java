@@ -164,6 +164,8 @@ public class RegisteredCluster implements Serializable {
     this.email = email;
   }
 
+  @XmlTransient
+  @JsonIgnore
   public String getCert() {
     return cert;
   }

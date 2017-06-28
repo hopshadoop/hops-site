@@ -47,6 +47,12 @@ public class ClusterController {
 
   private final ObjectMapper mapper = new ObjectMapper();
 
+  /**
+   * Register a new cluster
+   *
+   * @param registerJson
+   * @return
+   */
   public String registerCluster(RegisterJSON registerJson) {
     if (helperFunctions.ClusterRegisteredWithEmail(registerJson.getEmail())) {
       LOGGER.log(Level.INFO, "Already registered.");
@@ -65,6 +71,12 @@ public class ClusterController {
     return registeredId;
   }
 
+  /**
+   * Register heartbeat from cluster
+   *
+   * @param identification
+   * @return list of RegisteredClusterJSON
+   */
   public List<RegisteredClusterJSON> registerPing(IdentificationJSON identification) {
     if (!helperFunctions.ClusterRegisteredWithId(identification.getClusterId())) {
       throw new IllegalArgumentException("Invalid id.");
@@ -76,6 +88,11 @@ public class ClusterController {
     return getAll();
   }
 
+  /**
+   * Gets all registered clusters
+   *
+   * @return list of RegisteredClusterJSON
+   */
   public List<RegisteredClusterJSON> getAll() {
     List<RegisteredCluster> registeredClusters = helperFunctions.getAllRegisteredClusters();
     List<RegisteredClusterJSON> to_ret = new ArrayList<>();
@@ -92,11 +109,39 @@ public class ClusterController {
     return to_ret;
   }
 
+  /**
+   *
+   * @param clusterEmail
+   * @return
+   */
   public RegisteredCluster getClusterByEmail(String clusterEmail) {
+    if (clusterEmail == null || clusterEmail.isEmpty()) {
+      throw new IllegalArgumentException("Cluster email not assigned.");
+    }
     return registeredClustersFacade.findByEmail(clusterEmail.toLowerCase());
   }
 
+  /**
+   *
+   * @param clusterId
+   * @return
+   */
   public RegisteredCluster getClusterById(String clusterId) {
+    if (clusterId == null || clusterId.isEmpty()) {
+      throw new IllegalArgumentException("Cluster id not assigned.");
+    }
     return registeredClustersFacade.find(clusterId);
+  }
+
+  /**
+   *
+   * @param clusterId
+   */
+  public void removeCluster(String clusterId) {
+    if (clusterId == null || clusterId.isEmpty()) {
+      throw new IllegalArgumentException("Cluster id not assigned.");
+    }
+    RegisteredCluster cluster = registeredClustersFacade.find(clusterId);
+    registeredClustersFacade.remove(cluster);
   }
 }

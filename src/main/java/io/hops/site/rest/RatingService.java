@@ -24,6 +24,7 @@ import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -113,6 +114,7 @@ public class RatingService {
 
   @DELETE
   @Path("{ratingId}")
+  @RolesAllowed({"admin"})
   public Response deleteRating(@PathParam("ratingId") Integer ratingId) {
     ratingController.deleteRating(ratingId);
     LOGGER.log(Level.INFO, "Delete rating with id: {0}", ratingId);

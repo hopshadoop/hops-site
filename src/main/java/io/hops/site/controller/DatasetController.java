@@ -131,7 +131,8 @@ public class DatasetController {
       throw new IllegalArgumentException("Dataset not found.");
     }
 
-    Users user = userFacade.findByEmail(datasetIssue.getUser().getEmail());
+    Users user = userFacade.findByEmailAndCluster(datasetIssue.getUser().getEmail(), datasetIssue.getUser().
+            getClusterId());
     if (user == null) {
       throw new IllegalArgumentException("User not found.");
     }
@@ -293,6 +294,10 @@ public class DatasetController {
     return popularDatasetsJsons;
   }
 
+  /**
+   * 
+   * @param popularDatasetsJson 
+   */
   public void addPopularDatasets(PopularDatasetJSON popularDatasetsJson) {
     if (popularDatasetsJson.getClusterId() != null && helperFunctions.ClusterRegisteredWithId(popularDatasetsJson.
             getClusterId())) {

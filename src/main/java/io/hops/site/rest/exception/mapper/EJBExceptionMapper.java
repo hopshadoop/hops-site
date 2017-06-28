@@ -20,6 +20,7 @@ import java.security.AccessControlException;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ejb.AccessLocalException;
 import javax.ejb.EJBException;
 import javax.transaction.RollbackException;
 import javax.validation.ConstraintViolation;
@@ -46,7 +47,9 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
       return handleConstraintViolation((ConstraintViolationException) exception.getCause());
     } else if (exception.getCause() instanceof RollbackException) {
       return handleRollbackException((RollbackException) exception.getCause());
-    } 
+    } else if (exception.getCause() instanceof AccessLocalException) {
+      return handleAccessLocalException((AccessLocalException) exception.getCause());
+    }
 
     LOGGER.log(Level.INFO, "EJBException Caused by: {0}", exception.getCause().toString());
     LOGGER.log(Level.INFO, "EJBException: {0}", exception.getCause().getMessage());
@@ -108,6 +111,15 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
     jsonResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
     jsonResponse.setErrorMsg(e.getMessage());
     return Response.status(Response.Status.BAD_REQUEST).entity(jsonResponse).build();
+  }
+
+  private Response handleAccessLocalException(AccessLocalException accessLocalException) {
+    LOGGER.log(Level.INFO, "AccessLocalException: {0}", accessLocalException.getMessage());
+    JsonResponse jsonResponse = new JsonResponse();
+    jsonResponse.setStatus(Response.Status.UNAUTHORIZED.getReasonPhrase());
+    jsonResponse.setStatusCode(Response.Status.UNAUTHORIZED.getStatusCode());
+    jsonResponse.setErrorMsg(accessLocalException.getMessage());
+    return Response.status(Response.Status.UNAUTHORIZED).entity(jsonResponse).build();
   }
 
 }

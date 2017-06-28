@@ -76,7 +76,7 @@ public class CommentController {
       throw new IllegalArgumentException("Dataset not found.");
     }
 
-    Users user = userFacade.findByEmail(comment.getUser().getEmail());
+    Users user = userFacade.findByEmailAndCluster(comment.getUser().getEmail(), comment.getUser().getClusterId());
     if (user == null) {
       throw new IllegalArgumentException("User not found.");
     }
@@ -104,12 +104,13 @@ public class CommentController {
       throw new IllegalArgumentException("Issue type not assigned.");
     }
 
-    Comment comment = commentFacade.find(commentIssue.getId());
+    Comment comment = commentFacade.find(commentIssue.getCommentId());
     if (comment == null) {
       throw new IllegalArgumentException("Comment not found.");
     }
 
-    Users user = userFacade.findByEmail(comment.getUsers().getEmail());
+    Users user = userFacade.findByEmailAndCluster(comment.getUsers().getEmail(), comment.getUsers().getClusterId().
+            getClusterId());
     if (user == null) {
       throw new IllegalArgumentException("User not found.");
     }
@@ -117,6 +118,29 @@ public class CommentController {
     CommentIssue newCommentIssue = new CommentIssue(commentIssue.getType(), commentIssue.getMsg(), user, comment);
     commentIssueFacade.create(newCommentIssue);
     LOGGER.log(Level.INFO, "Adding new issue for comment: {0}.", comment.getId());
+  }
+
+  /**
+   * Remove comment by the author
+   * @param comment 
+   */
+  public void removeOwnComment(CommentDTO comment) {
+    if (comment == null || comment.getId() == null || comment.getUser() == null) {
+      throw new IllegalArgumentException("One or more arguments not assigned.");
+    }
+    if (comment.getUser().getEmail() == null) {
+      throw new IllegalArgumentException("User email not assigned.");
+    }
+
+    Comment managedComment = commentFacade.find(comment.getId());
+    if (managedComment == null) {
+      throw new IllegalArgumentException("Comment not found.");
+    }
+    if (!managedComment.getUsers().getEmail().equalsIgnoreCase(comment.getUser().getEmail())) {
+      throw new IllegalArgumentException("Comment not found for given user.");
+    }
+    LOGGER.log(Level.INFO, "Removing comment with id: {0} by the author.", comment.getId());
+    commentFacade.remove(managedComment);
   }
 
   /**
@@ -145,6 +169,9 @@ public class CommentController {
     if (comment == null || comment.getId() == null) {
       throw new IllegalArgumentException("Comment id not assigned.");
     }
+    if (comment.getUser().getEmail() == null) {
+      throw new IllegalArgumentException("User email not assigned.");
+    }
     Comment managedComment = commentFacade.find(comment.getId());
     if (managedComment == null) {
       throw new IllegalArgumentException("Comment not found.");
@@ -164,33 +191,33 @@ public class CommentController {
   }
 
   /**
-   * Get all dataset ratings for the given public dataset id
+   * Get all dataset comments for the given public dataset id
    *
    * @param publicId
    * @return
    */
-  public List<DatasetRating> getAllDatasets(String publicId) {
+  public List<Comment> getAllComments(String publicId) {
     Dataset dataset = datasetFacade.findByPublicId(publicId);
     if (dataset == null) {
       throw new IllegalArgumentException("Dataset not found.");
     }
-    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
-    return ratings;
+    List<Comment> comments = new ArrayList(dataset.getCommentCollection());
+    return comments;
   }
 
   /**
-   * Get all dataset ratings for the given dataset id
+   * Get all dataset comments for the given dataset id
    *
    * @param datasetId
    * @return
    */
-  public List<DatasetRating> getAllDatasets(Integer datasetId) {
+  public List<Comment> getAllComments(Integer datasetId) {
     Dataset dataset = datasetFacade.find(datasetId);
     if (dataset == null) {
       throw new IllegalArgumentException("Dataset not found.");
     }
-    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
-    return ratings;
+    List<Comment> comments = new ArrayList(dataset.getCommentCollection());
+    return comments;
   }
 
 }
