@@ -17,7 +17,6 @@ package io.hops.site.rest;
 
 import io.hops.site.controller.CommentController;
 import io.hops.site.dao.entity.Comment;
-import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.dto.CommentDTO;
 import io.hops.site.dto.CommentIssueDTO;
 import io.hops.site.rest.annotation.NoCache;

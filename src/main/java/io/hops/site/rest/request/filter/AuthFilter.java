@@ -63,6 +63,11 @@ public class AuthFilter implements ContainerRequestFilter {
       requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
       return;
     }
+    
+    if (clusterFromCert != null && "cluster/register".equals(path)) { //already registered
+      requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+      return;
+    }
 
     RegisteredCluster clusterInReq = getClusterFromReq(requestContext);
     if (clusterInReq == null) { // not protected 
@@ -76,8 +81,12 @@ public class AuthFilter implements ContainerRequestFilter {
 
   private String getCertificateCommonName(ContainerRequestContext requestContext) {
     X509Certificate[] certs = (X509Certificate[]) requestContext.getProperty("javax.servlet.request.X509Certificate");
+    if (certs == null) {
+      LOGGER.log(Level.SEVERE, "No certs found!");
+      return "";
+    }
     String tmpName, name = "";
-    if (certs != null && certs.length > 0) {
+    if (certs.length > 0) {
       X509Certificate principalCert = certs[0];
       Principal principal = principalCert.getSubjectDN();
       // Extract the common name (CN)

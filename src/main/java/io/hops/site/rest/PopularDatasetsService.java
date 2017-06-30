@@ -2,7 +2,6 @@ package io.hops.site.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.hops.site.controller.DatasetController;
-import io.hops.site.dto.IdentificationJSON;
 import java.io.IOException;
 import java.util.List;
 import javax.ejb.EJB;
