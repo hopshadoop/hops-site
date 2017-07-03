@@ -50,22 +50,15 @@ public class UserService {
   @EJB
   private UsersController usersController;
   
-  @GET
-  @Path("{userEmail}/{clusterId}")
-  public Response getUser(@PathParam("userEmail") String userEmail, @PathParam("clusterId") String clusterId) {
-    Users user = usersController.findUserByEmailAndClusterId(userEmail, clusterId);
-    if (user == null) {
-      return Response.status(Response.Status.NOT_FOUND).build();
-    }
-    return Response.ok(user.getId() + "").build();
-  }
-  
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response addUser(UserDTO user) {
-    usersController.addNewUser(user);
-    LOGGER.log(Level.INFO, "Adding user: {0}", user.getFirstname());
-    return Response.ok().build();
+  public Response getUser(UserDTO userDTO) {
+    Users user = usersController.findUserByEmailAndClusterId(userDTO.getEmail(), userDTO.getClusterId());
+    if (user == null) {
+      usersController.addNewUser(userDTO);
+      user = usersController.findUserByEmailAndClusterId(userDTO.getEmail(), userDTO.getClusterId());
+    }
+    return Response.ok().entity(user).build();
   }
 
   @PUT

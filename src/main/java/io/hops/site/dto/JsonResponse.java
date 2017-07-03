@@ -21,14 +21,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class JsonResponse {
 
-  private static final float VERSION = 1.0f;
-
   private String status;
   private Integer statusCode;
   private String errorMsg;
   private String successMessage;
-  private Object data;
-  private String sessionID;
 
   public JsonResponse() {
   }
@@ -47,11 +43,6 @@ public class JsonResponse {
 
   public void setStatusCode(Integer statusCode) {
     this.statusCode = statusCode;
-  }
-
-  @XmlElement
-  public float getVersion() {
-    return JsonResponse.VERSION;
   }
 
   public String getStatus() {
@@ -77,23 +68,6 @@ public class JsonResponse {
 
   public void setSuccessMessage(String successMessage) {
     this.successMessage = successMessage;
-  }
-
-  public Object getData() {
-    return data;
-  }
-
-  public void setData(Object data) {
-    this.data = data;
-  }
-
-  @XmlElement
-  public String getSessionID() {
-    return sessionID;
-  }
-
-  public void setSessionID(String sessionID) {
-    this.sessionID = sessionID;
   }
 
 }

@@ -17,6 +17,7 @@ package io.hops.site.rest.request.filter;
 
 import io.hops.site.controller.ClusterController;
 import io.hops.site.dao.entity.RegisteredCluster;
+import io.hops.site.dto.JsonResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.AccessControlException;
@@ -50,7 +51,7 @@ public class AuthFilter implements ContainerRequestFilter {
   public void filter(ContainerRequestContext requestContext) throws IOException {
     String clusterEmail = getCertificateCommonName(requestContext);
     if (clusterEmail.isEmpty()) { //Common name not set
-      requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+      requestContext.abortWith(buildResponse("Common name not set.", Response.Status.UNAUTHORIZED));
       return;
     }
 
@@ -60,12 +61,12 @@ public class AuthFilter implements ContainerRequestFilter {
 
     RegisteredCluster clusterFromCert = clusterController.getClusterByEmail(clusterEmail);
     if (clusterFromCert == null && !"cluster/register".equals(path)) { //not yet registerd
-      requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+      requestContext.abortWith(buildResponse("Cluster not registerd.", Response.Status.FORBIDDEN));
       return;
     }
-    
+
     if (clusterFromCert != null && "cluster/register".equals(path)) { //already registered
-      requestContext.abortWith(Response.status(Response.Status.FORBIDDEN).build());
+      requestContext.abortWith(buildResponse("Cluster already registered.", Response.Status.FORBIDDEN));
       return;
     }
 
@@ -75,7 +76,7 @@ public class AuthFilter implements ContainerRequestFilter {
     }
 
     if (clusterFromCert != null && !clusterFromCert.equals(clusterInReq)) { // req as different cluster
-      requestContext.abortWith(Response.status(Response.Status.UNAUTHORIZED).build());
+      requestContext.abortWith(buildResponse("Cluster in request do not match certificat.", Response.Status.FORBIDDEN));
     }
   }
 
@@ -108,15 +109,6 @@ public class AuthFilter implements ContainerRequestFilter {
 
   private RegisteredCluster getClusterFromReq(ContainerRequestContext requestContext) {
     RegisteredCluster registeredCluster;
-    String path = requestContext.getUriInfo().getPath();
-    String[] pathParts = path.split("/");
-    if ("user".equals(pathParts[0]) && pathParts.length == 3) {
-      registeredCluster = clusterController.getClusterById(pathParts[2]);
-      if (registeredCluster == null) {
-        throw new AccessControlException("Cluster not registered.");
-      }
-      return registeredCluster;
-    }
 
     ContainerRequest cr = (ContainerRequest) requestContext;
     if (cr.bufferEntity()) {
@@ -148,6 +140,14 @@ public class AuthFilter implements ContainerRequestFilter {
       }
     }
     return null;
+  }
+
+  private Response buildResponse(String message, Response.Status status) {
+    JsonResponse json = new JsonResponse();
+    json.setStatus(status.getReasonPhrase());
+    json.setStatusCode(status.getStatusCode());
+    json.setErrorMsg(message);
+    return Response.status(status).entity(json).build();
   }
 
 }
