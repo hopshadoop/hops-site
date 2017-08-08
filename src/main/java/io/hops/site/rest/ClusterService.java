@@ -19,10 +19,13 @@ import io.hops.site.dto.RegisterJSON;
 import io.hops.site.dto.RegisteredJSON;
 import io.hops.site.rest.annotation.NoCache;
 import io.swagger.annotations.Api;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.PathParam;
@@ -37,11 +40,11 @@ import javax.ws.rs.core.SecurityContext;
 @Produces(MediaType.APPLICATION_JSON)
 @TransactionAttribute(TransactionAttributeType.NEVER)
 public class ClusterService {
-
+  
   private final static Logger LOGGER = Logger.getLogger(ClusterService.class.getName());
   @EJB
   private ClusterController clusterController;
-
+  
   @GET
   @NoCache
   public Response getRegisterd(@Context SecurityContext sc) {
@@ -57,7 +60,7 @@ public class ClusterService {
     String role;
     if (sc.isUserInRole("clusters")) {
       role = "clusters";
-    } else if (sc.isUserInRole("admin")){
+    } else if (sc.isUserInRole("admin")) {
       role = "admin";
     } else {
       role = "none";
@@ -69,12 +72,17 @@ public class ClusterService {
   @POST
   @NoCache
   @Path("register")
-  public Response register(RegisterJSON registerJson) {
+  public Response register(RegisterJSON registerJson, @Context HttpServletRequest req) throws
+          CertificateEncodingException {
+    X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
+    X509Certificate clientCert = certs[0];
+    registerJson.setDerCert(clientCert.getEncoded());
+    //TODO:check if cert email == registerJson.getEmail()
     String registeredId = clusterController.registerCluster(registerJson);
     LOGGER.log(Level.INFO, "Registering new cluster.");
     return Response.status(Response.Status.OK).entity(new RegisteredJSON(registeredId)).build();
   }
-
+  
   @PUT
   @NoCache
   @Path("ping")

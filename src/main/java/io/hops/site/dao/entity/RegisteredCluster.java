@@ -24,6 +24,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -95,14 +96,12 @@ public class RegisteredCluster implements Serializable {
   private String email;
   @Basic(optional = false)
   @NotNull
-  @Size(min = 1,
-          max = 1000)
+  @Lob
   @Column(name = "cert")
-  private String cert;
+  private byte[] cert;
   @Basic(optional = false)
   @NotNull
-  @Size(min = 1,
-          max = 100)
+  @Size(min = 1, max = 100)
   @Column(name = "gvod_endpoint")
   private String gvodEndpoint;
   @Basic(optional = false)
@@ -128,7 +127,7 @@ public class RegisteredCluster implements Serializable {
     this.clusterId = clusterId;
   }
 
-  public RegisteredCluster(String clusterId, String searchEndpoint, String email, String cert, String gvodEndpoint,
+  public RegisteredCluster(String clusterId, String searchEndpoint, String email, byte[] cert, String gvodEndpoint,
           long heartbeatsMissed) {
     this.clusterId = clusterId;
     this.searchEndpoint = searchEndpoint;
@@ -164,16 +163,14 @@ public class RegisteredCluster implements Serializable {
     this.email = email;
   }
 
-  @XmlTransient
-  @JsonIgnore
-  public String getCert() {
+  public byte[] getCert() {
     return cert;
   }
 
-  public void setCert(String cert) {
+  public void setCert(byte[] cert) {
     this.cert = cert;
   }
-
+  
   public String getGvodEndpoint() {
     return gvodEndpoint;
   }

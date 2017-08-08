@@ -106,6 +106,9 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
       e = e.getCause();
     }
     LOGGER.log(Level.INFO, "RollbackException Caused by: {0}", e.getMessage());
+    if (e instanceof ConstraintViolationException) {
+      return handleConstraintViolation((ConstraintViolationException) e);      
+    }
     JsonResponse jsonResponse = new JsonResponse();
     jsonResponse.setStatus(Response.Status.BAD_REQUEST.getReasonPhrase());
     jsonResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());

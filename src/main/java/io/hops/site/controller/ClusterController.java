@@ -63,7 +63,7 @@ public class ClusterController {
       throw new AccessControlException("Invalid cert.");
     }
     String registeredId = helperFunctions.registerCluster(registerJson.getSearchEndpoint(), registerJson.getEmail().
-            toLowerCase(), registerJson.getCert(), registerJson.getGvodEndpoint());
+            toLowerCase(), registerJson.getDerCert(), registerJson.getGvodEndpoint());
     if (registeredId == null) {
       LOGGER.log(Level.INFO, "Invalid gvodEndpoint.");
       throw new IllegalArgumentException("Invalid gvodEndpoint.");

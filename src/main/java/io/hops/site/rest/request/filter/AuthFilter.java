@@ -18,13 +18,19 @@ package io.hops.site.rest.request.filter;
 import io.hops.site.controller.ClusterController;
 import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.dto.JsonResponse;
+import io.hops.site.dto.RegisterJSON;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.security.AccessControlException;
 import java.security.Principal;
+import java.security.cert.CertificateEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
+import java.util.logging.Handler;
 import javax.annotation.Priority;
 import javax.ejb.EJB;
 import javax.ws.rs.Priorities;
@@ -41,6 +47,8 @@ import org.glassfish.jersey.server.ContainerRequest;
 public class AuthFilter implements ContainerRequestFilter {
 
   private final static Logger LOGGER = Logger.getLogger(ContainerRequestFilter.class.getName());
+  private Handler fh;
+
   @EJB
   private ClusterController clusterController;
 
@@ -49,7 +57,13 @@ public class AuthFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
-    String clusterEmail = getCertificateCommonName(requestContext);
+    X509Certificate[] certs = (X509Certificate[]) requestContext.getProperty("javax.servlet.request.X509Certificate");
+    if (certs == null || certs.length < 1) {
+      requestContext.abortWith(buildResponse("No cert found.", Response.Status.UNAUTHORIZED));
+      return;
+    }
+    X509Certificate principalCert = certs[0];
+    String clusterEmail = getCertificateCommonName(principalCert);
     if (clusterEmail.isEmpty()) { //Common name not set
       requestContext.abortWith(buildResponse("Common name not set.", Response.Status.UNAUTHORIZED));
       return;
@@ -71,35 +85,27 @@ public class AuthFilter implements ContainerRequestFilter {
     }
 
     RegisteredCluster clusterInReq = getClusterFromReq(requestContext);
-    if (clusterInReq == null) { // not protected 
+    if (clusterInReq == null) { // not protected ex. getRole
       return;
     }
 
-    if (clusterFromCert != null && !clusterFromCert.equals(clusterInReq)) { // req as different cluster
+    if (!matchCerts(clusterInReq.getCert(), principalCert)) { // req as different cluster
       requestContext.abortWith(buildResponse("Cluster in request do not match certificat.", Response.Status.FORBIDDEN));
     }
   }
 
-  private String getCertificateCommonName(ContainerRequestContext requestContext) {
-    X509Certificate[] certs = (X509Certificate[]) requestContext.getProperty("javax.servlet.request.X509Certificate");
-    if (certs == null) {
-      LOGGER.log(Level.SEVERE, "No certs found!");
-      return "";
-    }
+  private String getCertificateCommonName(X509Certificate principalCert) {
     String tmpName, name = "";
-    if (certs.length > 0) {
-      X509Certificate principalCert = certs[0];
-      Principal principal = principalCert.getSubjectDN();
-      // Extract the common name (CN)
-      int start = principal.getName().indexOf("CN");
-      if (start > -1) {
-        tmpName = principal.getName().substring(start + 3);
-        int end = tmpName.indexOf(",");
-        if (end > 0) {
-          name = tmpName.substring(0, end);
-        } else {
-          name = tmpName;
-        }
+    Principal principal = principalCert.getSubjectDN();
+    // Extract the common name (CN)
+    int start = principal.getName().indexOf("CN");
+    if (start > -1) {
+      tmpName = principal.getName().substring(start + 3);
+      int end = tmpName.indexOf(",");
+      if (end > 0) {
+        name = tmpName.substring(0, end);
+      } else {
+        name = tmpName;
       }
       LOGGER.log(Level.SEVERE, "Request from principal: {0}", principal.getName());
       LOGGER.log(Level.SEVERE, "CN={0}", name);
@@ -134,7 +140,7 @@ public class AuthFilter implements ContainerRequestFilter {
       if (reqDTO.getClusterId() != null) {
         registeredCluster = clusterController.getClusterById(reqDTO.getClusterId());
         if (registeredCluster == null) {
-          throw new AccessControlException("Cluster not registered.");
+          throw new AccessControlException("Cluster not yet registered.");
         }
         return registeredCluster;
       }
@@ -148,6 +154,15 @@ public class AuthFilter implements ContainerRequestFilter {
     json.setStatusCode(status.getStatusCode());
     json.setErrorMsg(message);
     return Response.status(status).entity(json).build();
+  }
+
+  private boolean matchCerts(byte[] cert, X509Certificate principalCert) {
+    try {
+      return Arrays.equals(principalCert.getEncoded(), cert);
+    } catch (CertificateEncodingException ex) {
+      LOGGER.log(Level.SEVERE, null, ex);
+      return false;
+    }
   }
 
 }

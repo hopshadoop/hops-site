@@ -2,7 +2,7 @@ CREATE TABLE `registered_cluster` (
   `cluster_id` varchar(200) NOT NULL,
   `search_endpoint` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `cert` varchar(1000) NOT NULL,
+  `cert` blob NOT NULL,
   `gvod_endpoint` varchar(100) NOT NULL,
   `heartbeats_missed` bigint(20) NOT NULL,
   `date_registered` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

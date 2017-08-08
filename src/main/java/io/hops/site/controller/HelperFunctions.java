@@ -37,7 +37,7 @@ public class HelperFunctions {
     return this.registeredClusterFacade.findByEmail(email) != null;
   }
 
-  public String registerCluster(String search_endpoint, String email, String cert, AddressJSON gvod_endpoint) {
+  public String registerCluster(String search_endpoint, String email, byte[] cert, AddressJSON gvod_endpoint) {
     try {
       String uniqueId = UUID.randomUUID().toString();
       RegisteredCluster registeredCluster = new RegisteredCluster(uniqueId, search_endpoint, email, cert, mapper.

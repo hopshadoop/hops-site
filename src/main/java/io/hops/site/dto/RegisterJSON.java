@@ -9,6 +9,7 @@ public class RegisterJSON {
   private AddressJSON gvodEndpoint;
   private String email;
   private String cert;
+  private byte[] derCert;
 
   public RegisterJSON() {
   }
@@ -43,6 +44,20 @@ public class RegisterJSON {
 
   public void setCert(String cert) {
     this.cert = cert;
+  }
+
+  public byte[] getDerCert() {
+    return derCert;
+  }
+
+  public void setDerCert(byte[] derCert) {
+    this.derCert = derCert;
+  }
+
+  @Override
+  public String toString() {
+    return "RegisterJSON{" + "searchEndpoint=" + searchEndpoint + ", gvodEndpoint=" + gvodEndpoint + ", email=" + email +
+            ", cert=" + cert + '}';
   }
 
 
