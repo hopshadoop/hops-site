@@ -87,16 +87,16 @@ public class DatasetService {
   public Response addDatase(DatasetDTO dataset) {
     datasetController.addDataset(dataset);
     LOGGER.log(Level.INFO, "Add new dataset with public id: {0}", dataset.getPublicId());
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @POST
-  @Path("datasetIssue")
+  @Path("issue")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addDatasetIssue(DatasetIssueDTO datasetIssue) {
     datasetController.reportDatasetIssue(datasetIssue);
     LOGGER.log(Level.INFO, "Add dataset issue for dataset: {0}", datasetIssue.getDataset().getPublicId());
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @PUT
@@ -104,16 +104,16 @@ public class DatasetService {
   public Response updateDataset(DatasetDTO dataset) {
     datasetController.updateDataset(dataset);
     LOGGER.log(Level.INFO, "Update rating with id: {0}", dataset.getPublicId());
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @PUT
-  @Path("addCategory")
+  @Path("category")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addCategory(DatasetDTO dataset) {
     datasetController.addCategory(dataset);
     LOGGER.log(Level.INFO, "Update rating with id: {0}", dataset.getPublicId());
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @DELETE
@@ -122,7 +122,7 @@ public class DatasetService {
   public Response deleteDataset(@PathParam("datasetId") Integer datasetId) {
     datasetController.removeDataset(datasetId);
     LOGGER.log(Level.INFO, "Delete dataset with id: {0}", datasetId);
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @DELETE
@@ -131,6 +131,6 @@ public class DatasetService {
   public Response deleteDataset(@PathParam("publicId") String publicId) {
     datasetController.removeDataset(publicId);
     LOGGER.log(Level.INFO, "Delete dataset with id: {0}", publicId);
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 }

@@ -65,7 +65,7 @@ public class UserService {
   public Response updateUser(UserDTO user) {
     usersController.updateUser(user);
     LOGGER.log(Level.INFO, "Update user: {0}", user.getFirstname());
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @DELETE
@@ -74,16 +74,15 @@ public class UserService {
   public Response deleteUser(@PathParam("userId") Integer userId) {
     usersController.removeUser(userId);
     LOGGER.log(Level.INFO, "Remove user with id: {0}", userId);
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @DELETE
-  @Path("byEmail")
   @RolesAllowed({"admin"})
   public Response deleteUserByEmail(UserDTO userDTO) {
     usersController.removeUser(userDTO.getEmail(), userDTO.getClusterId());
     LOGGER.log(Level.INFO, "Remove user by email: {0}", userDTO.getEmail());
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
 }

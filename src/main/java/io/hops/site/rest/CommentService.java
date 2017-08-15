@@ -58,22 +58,20 @@ public class CommentService {
   @NoCache
   @Path("{datasetId}")
   public Response getAll(@PathParam("datasetId") Integer datasetId) {
-    List<Comment> ratings = commentController.getAllComments(datasetId);
-    GenericEntity<List<Comment>> datasetRatings = new GenericEntity<List<Comment>>(ratings) {
-    };
+    List<Comment> comments = commentController.getAllComments(datasetId);
+    GenericEntity<List<Comment>> datasetComments = new GenericEntity<List<Comment>>(comments) {};
     LOGGER.log(Level.INFO, "Get all comments for dataset: {0}", datasetId);
-    return Response.ok().entity(datasetRatings).build();
+    return Response.ok().entity(datasetComments).build();
   }
 
   @GET
   @NoCache
   @Path("byPublicId/{publicId}")
   public Response getAllByPublicId(@PathParam("publicId") String publicId) {
-    List<Comment> ratings = commentController.getAllComments(publicId);
-    GenericEntity<List<Comment>> datasetRatings = new GenericEntity<List<Comment>>(ratings) {
-    };
+    List<Comment> comments = commentController.getAllComments(publicId);
+    GenericEntity<List<Comment>> datasetComments = new GenericEntity<List<Comment>>(comments) {};
     LOGGER.log(Level.INFO, "Get all comments for dataset: {0}", publicId);
-    return Response.ok().entity(datasetRatings).build();
+    return Response.ok().entity(datasetComments).build();
   }
 
   @POST
@@ -81,7 +79,7 @@ public class CommentService {
   public Response addComment(CommentDTO comment) {
     commentController.addComment(comment);
     LOGGER.log(Level.INFO, "Add comment for dataset: {0}", comment.getDataset().getPublicId());
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @POST
@@ -90,7 +88,7 @@ public class CommentService {
   public Response reportAbuse(CommentIssueDTO commentIssue) {
     commentController.reportAbuse(commentIssue);
     LOGGER.log(Level.INFO, "Report abuse for comment: {0}", commentIssue.getCommentId());
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @PUT
@@ -98,7 +96,7 @@ public class CommentService {
   public Response updateComment(CommentDTO comment) {
     commentController.updateComment(comment);
     LOGGER.log(Level.INFO, "Update comment with id: {0}", comment.getId());
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @DELETE
@@ -106,7 +104,7 @@ public class CommentService {
   public Response deleteComment(CommentDTO comment) {
     commentController.removeOwnComment(comment);
     LOGGER.log(Level.INFO, "Delete comment with id: {0}", comment.getId());
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @DELETE
@@ -115,7 +113,7 @@ public class CommentService {
   public Response deleteCommentById(@PathParam("commentId") Integer commentId) {
     commentController.removeComment(commentId);
     LOGGER.log(Level.INFO, "Delete comment with id: {0}", commentId);
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
 }

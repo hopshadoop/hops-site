@@ -18,10 +18,7 @@ package io.hops.site.rest.request.filter;
 import io.hops.site.controller.ClusterController;
 import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.dto.JsonResponse;
-import io.hops.site.dto.RegisterJSON;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.security.AccessControlException;
 import java.security.Principal;
@@ -30,7 +27,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.logging.FileHandler;
 import java.util.logging.Handler;
+import java.util.logging.SimpleFormatter;
+import javax.annotation.PostConstruct;
 import javax.annotation.Priority;
 import javax.ejb.EJB;
 import javax.ws.rs.Priorities;
@@ -54,6 +54,20 @@ public class AuthFilter implements ContainerRequestFilter {
 
   @Context
   private ResourceInfo resourceInfo;
+  
+  @PostConstruct
+  private void init() {
+    try {
+      //path, size in bytes and, number of log files to use
+      fh = new FileHandler("../logs/hops-site%g.log", 2000000, 50);
+      LOGGER.addHandler(fh);
+      SimpleFormatter formatter = new SimpleFormatter();  
+      fh.setFormatter(formatter);
+    } catch (IOException | SecurityException ex) {
+      LOGGER.log(Level.SEVERE, null, ex.getMessage());
+    }
+    LOGGER.log(Level.INFO, "Hops-site auth filter log.");
+  }
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -107,8 +121,7 @@ public class AuthFilter implements ContainerRequestFilter {
       } else {
         name = tmpName;
       }
-      LOGGER.log(Level.SEVERE, "Request from principal: {0}", principal.getName());
-      LOGGER.log(Level.SEVERE, "CN={0}", name);
+      LOGGER.log(Level.INFO, "Request from principal: {0}", principal.getName());
     }
     return name.toLowerCase();
   }

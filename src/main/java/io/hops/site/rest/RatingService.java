@@ -77,9 +77,7 @@ public class RatingService {
   @Path("all/{datasetId}")
   public Response getAllRatings(@PathParam("datasetId") Integer datasetId) {
     List<DatasetRating> ratings = ratingController.getAllRatings(datasetId);
-    GenericEntity<List<DatasetRating>> datasetRatings
-            = new GenericEntity<List<DatasetRating>>(ratings) {
-    };
+    GenericEntity<List<DatasetRating>> datasetRatings = new GenericEntity<List<DatasetRating>>(ratings) {};
     LOGGER.log(Level.INFO, "Get all rating for dataset: {0}", datasetId);
     return Response.ok().entity(datasetRatings).build();
   }
@@ -89,9 +87,7 @@ public class RatingService {
   @Path("all/byPublicId/{publicId}")
   public Response getAllRatingsByPublicId(@PathParam("publicId") String publicId) {
     List<DatasetRating> ratings = ratingController.getAllRatings(publicId);
-    GenericEntity<List<DatasetRating>> datasetRatings
-            = new GenericEntity<List<DatasetRating>>(ratings) {
-    };
+    GenericEntity<List<DatasetRating>> datasetRatings = new GenericEntity<List<DatasetRating>>(ratings) {};
     LOGGER.log(Level.INFO, "Get all rating for dataset: {0}", publicId);
     return Response.ok().entity(datasetRatings).build();
   }
@@ -101,7 +97,7 @@ public class RatingService {
   public Response addRating(RateDTO datasetRating) {
     ratingController.addRating(datasetRating);
     LOGGER.log(Level.INFO, "Add rating for dataset: {0}", datasetRating.getDataset().getPublicId());
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @PUT
@@ -109,7 +105,7 @@ public class RatingService {
   public Response updateRating(RateDTO datasetRating) {
     ratingController.updateRating(datasetRating);
     LOGGER.log(Level.INFO, "Update rating to: {0}", datasetRating.getRating());
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 
   @DELETE
@@ -118,6 +114,6 @@ public class RatingService {
   public Response deleteRating(@PathParam("ratingId") Integer ratingId) {
     ratingController.deleteRating(ratingId);
     LOGGER.log(Level.INFO, "Delete rating with id: {0}", ratingId);
-    return Response.ok().build();
+    return Response.ok("OK").build();
   }
 }
