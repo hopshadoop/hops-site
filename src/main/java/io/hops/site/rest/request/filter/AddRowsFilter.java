@@ -58,10 +58,6 @@ public class AddRowsFilter implements ContainerRequestFilter {
         return;
       }
 
-      if (reqDTO.getDataset() != null) {
-        addDatasetIfNotExist(reqDTO.getDataset());
-      }
-
       if (reqDTO.getUser() != null) {
         addUserIfNotExist(reqDTO.getUser());
       }
