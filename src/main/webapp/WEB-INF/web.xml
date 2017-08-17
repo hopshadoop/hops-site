@@ -32,7 +32,7 @@ see implementation details http://jersey.java.net/nonav/documentation/latest/jax
     <servlet-name>ApplicationConfig</servlet-name>
     <servlet-class>rest.application.config.ApplicationConfig</servlet-class>
   </servlet>
-  <security-role>
+<!--  <security-role>
     <description>All Clusters Role</description>
     <role-name>clusters</role-name>
   </security-role>
@@ -55,5 +55,5 @@ see implementation details http://jersey.java.net/nonav/documentation/latest/jax
   <login-config>
     <auth-method>CLIENT-CERT</auth-method>
     <realm-name>certificate</realm-name>
-  </login-config>
+  </login-config>-->
 </web-app>

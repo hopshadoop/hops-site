@@ -11,7 +11,6 @@ import io.hops.site.dto.RegisteredJSON;
 import io.hops.site.rest.annotation.NoCache;
 import io.swagger.annotations.Api;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -87,10 +86,11 @@ public class ClusterService {
   @Path("register")
   public Response register(RegisterDTO.Req registerJson, @Context HttpServletRequest req) throws
     CertificateEncodingException {
-    X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
-    X509Certificate clientCert = certs[0];
+//    X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
+//    X509Certificate clientCert = certs[0];
     //TODO:check if cert email == registerJson.getEmail()
-    String registeredId = clusterController.registerCluster(clientCert.getEncoded(), registerJson);
+//    String registeredId = clusterController.registerCluster(clientCert.getEncoded(), registerJson);
+    String registeredId = clusterController.registerCluster(new byte[]{}, registerJson);
     LOGGER.log(Level.INFO, "Registering new cluster.");
     return Response.status(Response.Status.OK).entity(new RegisteredJSON(registeredId)).build();
   }
