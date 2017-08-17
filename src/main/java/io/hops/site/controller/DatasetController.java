@@ -15,36 +15,47 @@
  */
 package io.hops.site.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.hops.site.common.AppException;
+import io.hops.site.common.Settings;
+import io.hops.site.controller.HopsSiteController.Session;
 import io.hops.site.dao.entity.Category;
 import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.DatasetIssue;
-import io.hops.site.dao.entity.PopularDataset;
+import io.hops.site.dao.entity.LiveDataset;
 import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.dao.entity.Users;
+import io.hops.site.dao.facade.CategoryFacade;
 import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dao.facade.DatasetIssueFacade;
-import io.hops.site.dao.facade.PopularDatasetFacade;
+import io.hops.site.dao.facade.LiveDatasetFacade;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dao.facade.UsersFacade;
 import io.hops.site.dto.AddressJSON;
 import io.hops.site.dto.DatasetDTO;
 import io.hops.site.dto.DatasetIssueDTO;
-import io.hops.site.dto.ManifestJSON;
-import io.hops.site.dto.PopularDatasetJSON;
-import java.io.IOException;
-import java.util.ArrayList;
+import io.hops.site.dto.ElasticDatasetDTO;
+import io.hops.site.dto.PublishDatasetDTO;
+import io.hops.site.dto.SearchDTO;
 import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.ws.rs.core.Response;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.NEVER)
@@ -53,53 +64,220 @@ public class DatasetController {
   private final static Logger LOGGER = Logger.getLogger(DatasetController.class.getName());
 
   @EJB
+  private Settings settings;
+  @EJB
   private DatasetFacade datasetFacade;
   @EJB
   private DatasetIssueFacade datasetIssueFacade;
   @EJB
   private UsersFacade userFacade;
   @EJB
-  private RegisteredClusterFacade registeredClusterFacade;
+  private RegisteredClusterFacade clusterFacade;
   @EJB
   private HelperFunctions helperFunctions;
   @EJB
-  private DatasetFacade dsFacade;
+  private ElasticController elasticCtrl;
   @EJB
-  private PopularDatasetFacade popularDatasetsFacade;
+  private HopsSiteController sessionCtrl;
+  @EJB
+  private LiveDatasetFacade liveDatasetFacade;
+  @EJB
+  private CategoryFacade categoryFacade;
 
+  private final Random rand = new Random();
   private final ObjectMapper mapper = new ObjectMapper();
 
-  /**
-   * Add dataset to table
-   *
-   * @param dataset
-   */
-  public void addDataset(DatasetDTO dataset) {
-    if (dataset == null) {
-      throw new IllegalArgumentException("One or more arguments not assigned.");
+  public SearchDTO.BaseResult search(SearchDTO.Params searchParams) throws AppException {
+    String sessionId = settings.getSessionId();
+    QueryBuilder qb = DatasetElasticHelper.getNameDescriptionMetadataQuery(searchParams.getSearchTerm());
+    SearchHits elasticResult = elasticCtrl.search(settings.DELA_DOC_INDEX, new String[]{settings.DELA_DOC_TYPE}, qb);
+    SearchSession session = SearchSession.create(searchParams, elasticResult);
+    sessionCtrl.put(sessionId, session);
+    return new SearchDTO.BaseResult(sessionId, session.cachedItems.size());
+  }
+
+  public SearchDTO.Page getSearchPage(String sessionId, int startItem, int nrItems) throws AppException {
+    Optional<SearchSession> session;
+    try {
+      session = (Optional) sessionCtrl.get(sessionId);
+    } catch (ExecutionException ex) {
+      throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "cache issue");
     }
-    if (dataset.getPublicId() == null || dataset.getPublicId().isEmpty()) {
-      throw new IllegalArgumentException("Public id not assigned.");
-    }
-    if (dataset.getName() == null || dataset.getName().isEmpty()) {
-      throw new IllegalArgumentException("Dataset name not assigned.");
-    }
-    if (dataset.getOwner() == null || dataset.getOwner().isEmpty()) {
-      throw new IllegalArgumentException("Dataset owner not assigned.");
-    }
-    if (dataset.getClusterId() == null || dataset.getClusterId().isEmpty()) {
-      throw new IllegalArgumentException("Cluster id not assigned.");
-    }
-    RegisteredCluster registeredCluster = registeredClusterFacade.find(dataset.getClusterId());
-    if (registeredCluster == null) {
-      throw new IllegalArgumentException("Cluster not found.");
+    if (!session.isPresent()) {
+      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "session expired");
     }
 
-    Dataset newDataset = new Dataset(dataset.getPublicId(), dataset.getName(), dataset.getDescription(), dataset.
-            getMadePublicOn(), dataset.getOwner(), dataset.getReadme(), createCategoryCollection(dataset.
-                    getCategoryCollection()), registeredCluster);
-    datasetFacade.create(newDataset);
-    LOGGER.log(Level.INFO, "Adding new dataset with public id: {0}.", dataset.getPublicId());
+    List<SearchDTO.Item> elem = new LinkedList<>();
+    for (CachedItem e : session.get().getElem(startItem, nrItems)) {
+      if (!e.hasPeers()) {
+        e.setPeers(liveDatasetFacade.datasetPeers(e.datasetId, settings.LIVE_DATASET_BOOTSTRAP_PEERS));
+      }
+      if (e.complete()) {
+        elem.add(e.build());
+      }
+    }
+    return new SearchDTO.Page(startItem, elem);
+  }
+
+  public String publishDataset(PublishDatasetDTO.Request req) throws AppException {
+    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(req.getClusterId());
+    if (!cluster.isPresent()) {
+      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "cluster not registered");
+    }
+    LOGGER.log(Level.FINE, "cluster:<{0},{1}>", new Object[]{cluster.get().getId(), cluster.get().getPublicId()});
+    String datasetPublicId = settings.getDatasetPublicId();
+    Date publishedOn = settings.getDateNow();
+    Collection<Category> categories = categoryFacade.getAndStoreCategories(req.getCategoryCollection());
+    //TODO Readme
+    String readmePath = "";
+    Dataset dataset = datasetFacade.createDataset(datasetPublicId, req.getName(), req.getDescription(), publishedOn,
+      readmePath, categories, cluster.get());
+    LOGGER.log(Level.FINE, "cluster:<{0},{1}> dataset:<{2},{3}>", 
+      new Object[]{cluster.get().getId(), cluster.get().getPublicId(), dataset.getId(), dataset.getPublicId()});
+    liveDatasetFacade
+      .create(new LiveDataset(dataset.getId(), cluster.get().getId(), settings.LIVE_DATASET_UPLOAD_STATUS));
+    elasticCtrl.
+      add(settings.DELA_DOC_INDEX, settings.DELA_DOC_TYPE, datasetPublicId, ElasticDatasetDTO.from(req).json());
+    return datasetPublicId;
+  }
+
+  public void unpublishDataset(String datasetPublicId, String clusterPublicId) throws AppException {
+    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(clusterPublicId);
+    if (!cluster.isPresent()) {
+      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "cluster not registered");
+    }
+    Optional<Dataset> d = datasetFacade.findByPublicId(datasetPublicId);
+    if (!d.isPresent()) {
+      return;
+    }
+    Dataset dataset = d.get();
+    if (dataset.getOwnerCluster().getId() != cluster.get().getId()) {
+      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "only owner can unpublish");
+    }
+    datasetFacade.remove(dataset);
+    elasticCtrl.delete(settings.DELA_DOC_INDEX, settings.DELA_DOC_TYPE, datasetPublicId);
+  }
+
+  public void download(String datasetPublicId, String clusterPublicId) throws AppException {
+    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(clusterPublicId);
+    if (!cluster.isPresent()) {
+      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "cluster not registered");
+    }
+    Optional<Dataset> dataset = datasetFacade.findByPublicId(datasetPublicId);
+    if (!dataset.isPresent()) {
+      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "dataset not registered");
+    }
+    liveDatasetFacade.create(new LiveDataset(dataset.get().getId(), cluster.get().getId(),
+      settings.LIVE_DATASET_DOWNLOAD_STATUS));
+  }
+
+  public void remove(String datasetPublicId, String clusterPublicId) throws AppException {
+    Optional<LiveDataset> c = liveDatasetFacade.connection(datasetPublicId, clusterPublicId);
+    if (c.isPresent()) {
+      liveDatasetFacade.remove(c.get());
+    }
+  }
+
+  public void downloadComplete(String datasetPublicId, String clusterPublicId) throws AppException {
+    Optional<LiveDataset> c = liveDatasetFacade.connection(datasetPublicId, clusterPublicId);
+    if (c.isPresent()) {
+      LiveDataset connection = c.get();
+      connection.setStatus(settings.LIVE_DATASET_UPLOAD_STATUS);
+      liveDatasetFacade.edit(connection);
+    }
+  }
+
+  public static class SearchSession implements Session {
+
+    public final SearchDTO.Params searchParams;
+    public final List<CachedItem> cachedItems;
+
+    private SearchSession(SearchDTO.Params searchParams, List<CachedItem> cachedItems) {
+      this.searchParams = searchParams;
+      this.cachedItems = cachedItems;
+    }
+
+    public static SearchSession create(SearchDTO.Params searchParams, SearchHits searchHits) {
+      List<CachedItem> cachedHits = new LinkedList<>();
+      for (SearchHit hit : searchHits) {
+        String datasetId = hit.getId();
+        DatasetDTO dataset = DatasetDTO.parse(hit.getSourceAsString());
+        cachedHits.add(new CachedItem(datasetId, dataset, hit.getScore()));
+      }
+      return new SearchSession(searchParams, cachedHits);
+    }
+
+    public List<CachedItem> getElem(int startElem, int nrElem) {
+      List<CachedItem> result = new LinkedList<>();
+      int page = 0;
+      Iterator<CachedItem> it = cachedItems.iterator();
+      while (it.hasNext() && page < startElem) {
+        it.next();
+        page++;
+      }
+      while (it.hasNext() && page < startElem + nrElem) {
+        result.add(it.next());
+        page++;
+      }
+      return result;
+    }
+  }
+
+  public static class CachedItem {
+
+    public final String datasetId;
+    private final DatasetDTO dataset;
+    private final float score;
+    private Optional<List<AddressJSON>> peers;
+
+    public CachedItem(String datasetId, DatasetDTO dataset, float score) {
+      this.datasetId = datasetId;
+      this.dataset = dataset;
+      this.score = score;
+      this.peers = Optional.empty();
+    }
+
+    public boolean hasPeers() {
+      return peers.isPresent();
+    }
+
+    public void setPeers(List<AddressJSON> peers) {
+      this.peers = Optional.of(peers);
+    }
+
+    public boolean complete() {
+      return peers.isPresent();
+    }
+
+    public SearchDTO.Item build() {
+      return new SearchDTO.Item(datasetId, dataset, score, peers.get());
+    }
+  }
+
+  public static class DatasetElasticHelper {
+
+    public static QueryBuilder getNameDescriptionMetadataQuery(String searchTerm) {
+      return QueryBuilders.boolQuery()
+        .should(getNameQuery(searchTerm))
+        .should(getDescriptionQuery(searchTerm));
+    }
+
+    public static QueryBuilder getNameQuery(String searchTerm) {
+      return QueryBuilders.boolQuery()
+        .should(QueryBuilders.prefixQuery(Settings.DELA_DOC_NAME_FIELD, searchTerm))
+        .should(QueryBuilders.matchPhraseQuery(Settings.DELA_DOC_NAME_FIELD, searchTerm))
+        .should(QueryBuilders.fuzzyQuery(Settings.DELA_DOC_NAME_FIELD, searchTerm))
+        .should(QueryBuilders.wildcardQuery(Settings.DELA_DOC_NAME_FIELD, String.format("*%s*", searchTerm)));
+    }
+
+    public static QueryBuilder getDescriptionQuery(String searchTerm) {
+      return QueryBuilders.boolQuery()
+        .should(QueryBuilders.prefixQuery(Settings.DELA_DOC_DESCRIPTION_FIELD, searchTerm))
+        .should(QueryBuilders.termsQuery(Settings.DELA_DOC_DESCRIPTION_FIELD, searchTerm))
+        .should(QueryBuilders.matchPhraseQuery(Settings.DELA_DOC_DESCRIPTION_FIELD, searchTerm))
+        .should(QueryBuilders.fuzzyQuery(Settings.DELA_DOC_DESCRIPTION_FIELD, searchTerm))
+        .should(QueryBuilders.wildcardQuery(Settings.DELA_DOC_DESCRIPTION_FIELD, String.format("*%s*", searchTerm)));
+    }
   }
 
   /**
@@ -108,13 +286,29 @@ public class DatasetController {
    * @param datasetIssue
    */
   public void reportDatasetIssue(DatasetIssueDTO datasetIssue) {
+    datasetIssueDTOSanityCheck(datasetIssue);
+    String datasetPublicId = datasetIssue.getDatasetId();
+    Optional<Dataset> dataset = datasetFacade.findByPublicId(datasetPublicId);
+    if (!dataset.isPresent()) {
+      throw new IllegalArgumentException("Dataset not found.");
+    }
+    Optional<Users> user = userFacade.
+      findByEmailAndPublicClusterId(datasetIssue.getUser().getEmail(), datasetPublicId);
+    if (!user.isPresent()) {
+      throw new IllegalArgumentException("User not found.");
+    }
+
+    DatasetIssue newDatasetIssue
+      = new DatasetIssue(datasetIssue.getType(), datasetIssue.getMsg(), user.get(), dataset.get());
+    datasetIssueFacade.create(newDatasetIssue);
+    LOGGER.log(Level.INFO, "Adding new dataset issue for dataset with public id: {0}.", datasetPublicId);
+  }
+
+  private void datasetIssueDTOSanityCheck(DatasetIssueDTO datasetIssue) {
     if (datasetIssue == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
-    if (datasetIssue.getDataset() == null) {
-      throw new IllegalArgumentException("Dataset not assigned.");
-    }
-    if (datasetIssue.getDataset().getPublicId() == null) {
+    if (datasetIssue.getDatasetId() == null) {
       throw new IllegalArgumentException("Dataset id not assigned.");
     }
     if (datasetIssue.getUser().getEmail() == null) {
@@ -123,127 +317,6 @@ public class DatasetController {
     if (datasetIssue.getType() == null && datasetIssue.getType().isEmpty()) {
       throw new IllegalArgumentException("Issue type not assigned.");
     }
-
-    Dataset dataset;
-    dataset = datasetFacade.findByPublicId(datasetIssue.getDataset().getPublicId());
-
-    if (dataset == null) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
-
-    Users user = userFacade.findByEmailAndCluster(datasetIssue.getUser().getEmail(), datasetIssue.getUser().
-            getClusterId());
-    if (user == null) {
-      throw new IllegalArgumentException("User not found.");
-    }
-
-    DatasetIssue newDatasetIssue = new DatasetIssue(datasetIssue.getType(), datasetIssue.getMsg(), user, dataset);
-    datasetIssueFacade.create(newDatasetIssue);
-    LOGGER.log(Level.INFO, "Adding new dataset issue for dataset with public id: {0}.", datasetIssue.getDataset().
-            getPublicId());
-  }
-
-  /**
-   * Update dataset. Will overwrite categories, use addCategory to append.
-   *
-   * @param dataset
-   */
-  public void updateDataset(DatasetDTO dataset) {
-    if (dataset == null) {
-      throw new IllegalArgumentException("One or more arguments not assigned.");
-    }
-    if (dataset.getPublicId() == null) {
-      throw new IllegalArgumentException("Dataset id not assigned.");
-    }
-
-    Dataset manageddataset;
-    manageddataset = datasetFacade.findByPublicId(dataset.getPublicId());
-    if (manageddataset == null) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
-
-    if (dataset.getDescription() != null && !dataset.getDescription().equals(manageddataset.getDescription())) {
-      manageddataset.setDescription(dataset.getDescription());
-    }
-    if (dataset.getReadme() != null && !dataset.getReadme().equals(manageddataset.getDescription())) {
-      manageddataset.setReadme(dataset.getReadme());
-    }
-    if (dataset.getCategoryCollection() != null && !dataset.getCategoryCollection().isEmpty()) {
-      manageddataset.setCategoryCollection(createCategoryCollection(dataset.getCategoryCollection()));
-    }
-
-    datasetFacade.edit(manageddataset);
-    LOGGER.log(Level.INFO, "Update dataset with public id: {0}.", dataset.getPublicId());
-  }
-
-  /**
-   * Add categories to dataset.
-   *
-   * @param dataset
-   */
-  public void addCategory(DatasetDTO dataset) {
-    if (dataset == null) {
-      throw new IllegalArgumentException("One or more arguments not assigned.");
-    }
-    if (dataset.getPublicId() == null) {
-      throw new IllegalArgumentException("Dataset id not assigned.");
-    }
-
-    Dataset manageddataset;
-    manageddataset = datasetFacade.findByPublicId(dataset.getPublicId());
-    if (manageddataset == null) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
-    if (manageddataset.getCategoryCollection() == null || manageddataset.getCategoryCollection().isEmpty()) {
-      manageddataset.setCategoryCollection(createCategoryCollection(dataset.getCategoryCollection()));
-    } else {
-      List<Category> categorysList = new ArrayList<>(manageddataset.getCategoryCollection());
-      categorysList.addAll(createCategoryCollection(dataset.getCategoryCollection()));
-      manageddataset.setCategoryCollection(categorysList);
-    }
-    datasetFacade.edit(manageddataset);
-    LOGGER.log(Level.INFO, "Add category to dataset: {0}.", manageddataset.getId());
-  }
-
-  /**
-   * Remove a dataset by id
-   *
-   * @param datasetId
-   */
-  public void removeDataset(Integer datasetId) {
-    if (datasetId == null) {
-      throw new IllegalArgumentException("Dataset id not assigned.");
-    }
-    Dataset manageddataset = datasetFacade.find(datasetId);
-    datasetFacade.remove(manageddataset);
-    LOGGER.log(Level.INFO, "Remove dataset with id: {0}.", datasetId);
-  }
-
-  /**
-   * Remove a dataset by public id
-   *
-   * @param publicId
-   */
-  public void removeDataset(String publicId) {
-    if (publicId == null) {
-      throw new IllegalArgumentException("Dataset public id not assigned.");
-    }
-    Dataset manageddataset = datasetFacade.findByPublicId(publicId);
-    datasetFacade.remove(manageddataset);
-    LOGGER.log(Level.INFO, "Remove dataset with public id: {0}.", publicId);
-  }
-
-  private Collection<Category> createCategoryCollection(Collection<String> categoryCollection) {
-    ArrayList<Category> categories = new ArrayList<>();
-    if (categoryCollection == null || categoryCollection.isEmpty()) {
-      return categories;
-    }
-
-    for (String c : categoryCollection) {
-      categories.add(new Category(c));
-    }
-
-    return categories;
   }
 
   /**
@@ -261,60 +334,17 @@ public class DatasetController {
    * @param datasetId
    * @return
    */
-  public Dataset findDataset(Integer datasetId) {
+  public Dataset findDataset(int datasetId) {
     return datasetFacade.find(datasetId);
   }
 
   /**
    * Get dataset with the given public id
    *
-   * @param publicId
+   * @param datasetPublicId
    * @return
    */
-  public Dataset findDatasetByPublicId(String publicId) {
-    return datasetFacade.findByPublicId(publicId);
-  }
-
-  /**
-   * Get top 10 datasets
-   *
-   * @return
-   * @throws IOException
-   */
-  public List<PopularDatasetJSON> getPopularDatasets() throws IOException {
-    List<PopularDatasetJSON> popularDatasetsJsons = new LinkedList<>();
-    for (PopularDataset pd : helperFunctions.getTopTenDatasets()) {
-      ManifestJSON manifestJson = mapper.readValue(pd.getManifest(), ManifestJSON.class);
-      List<AddressJSON> gvodEndpoints = mapper.readValue(pd.getPartners(), new TypeReference<List<AddressJSON>>() {
-      });
-      popularDatasetsJsons.add(new PopularDatasetJSON(manifestJson, pd.getDatasetId().getPublicId(), pd.getLeeches(),
-              pd.getSeeds(),
-              gvodEndpoints));
-    }
-    return popularDatasetsJsons;
-  }
-
-  /**
-   * 
-   * @param popularDatasetsJson 
-   */
-  public void addPopularDatasets(PopularDatasetJSON popularDatasetsJson) {
-    if (popularDatasetsJson.getClusterId() != null && helperFunctions.ClusterRegisteredWithId(popularDatasetsJson.
-            getClusterId())) {
-      Dataset ds = dsFacade.findByPublicId(popularDatasetsJson.getDatasetId());
-      if (ds == null) {
-        throw new IllegalArgumentException("Invalid id.");
-      }
-      PopularDataset popularDataset;
-      try {
-        popularDataset
-                = new PopularDataset(ds, mapper.writeValueAsString(popularDatasetsJson.
-                        getManifestJson()), mapper.writeValueAsString(popularDatasetsJson.getGvodEndpoints()),
-                        popularDatasetsJson.getLeeches(), popularDatasetsJson.getSeeds());
-      } catch (JsonProcessingException ex) {
-        throw new IllegalArgumentException("Invalid input.");
-      }
-      popularDatasetsFacade.create(popularDataset);
-    }
+  public Optional<Dataset> findDatasetByPublicId(String datasetPublicId) {
+    return datasetFacade.findByPublicId(datasetPublicId);
   }
 }

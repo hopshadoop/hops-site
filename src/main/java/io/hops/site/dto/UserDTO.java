@@ -59,10 +59,10 @@ public class UserDTO {
   public void setClusterId(String clusterId) {
     this.clusterId = clusterId;
   }
-
+  
   @Override
   public String toString() {
-    return "UserDTO{" + "firstname=" + firstname + ", lastname=" + lastname + ", email=" + email + ", clusterId="
+    return "UserDTO{" + "firstname=" + firstname + ", lastname=" + lastname + ", email=" + email + ", clusterPublicId="
             + clusterId + '}';
   }
 

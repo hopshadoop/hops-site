@@ -5,8 +5,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class RegisterJSON {
 
-  private String searchEndpoint;
-  private AddressJSON gvodEndpoint;
+  private String httpEndpoint;
+  private String delaEndpoint;
   private String email;
   private String cert;
   private byte[] derCert;
@@ -14,20 +14,20 @@ public class RegisterJSON {
   public RegisterJSON() {
   }
 
-  public String getSearchEndpoint() {
-    return searchEndpoint;
+  public String getHttpEndpoint() {
+    return httpEndpoint;
   }
 
-  public void setSearchEndpoint(String searchEndpoint) {
-    this.searchEndpoint = searchEndpoint;
+  public void setHttpEndpoint(String httpEndpoint) {
+    this.httpEndpoint = httpEndpoint;
   }
 
-  public AddressJSON getGvodEndpoint() {
-    return gvodEndpoint;
+  public String getDelaEndpoint() {
+    return delaEndpoint;
   }
 
-  public void setGvodEndpoint(AddressJSON gvodEndpoint) {
-    this.gvodEndpoint = gvodEndpoint;
+  public void setDelaEndpoint(String delaEndpoint) {
+    this.delaEndpoint = delaEndpoint;
   }
 
   public String getEmail() {
@@ -56,7 +56,7 @@ public class RegisterJSON {
 
   @Override
   public String toString() {
-    return "RegisterJSON{" + "searchEndpoint=" + searchEndpoint + ", gvodEndpoint=" + gvodEndpoint + ", email=" + email +
+    return "RegisterJSON{" + "delaEndpoint=" + httpEndpoint + ", delaEndpoint=" + delaEndpoint + ", email=" + email +
             ", cert=" + cert + '}';
   }
 

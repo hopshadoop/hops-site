@@ -5,41 +5,40 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class AddressJSON {
 
-  private String ip;
-  private int port;
-  private int id;
+  private String clusterId;
+  private String delaAddress;
+  private String httpAddress;
 
   public AddressJSON() {
   }
 
-  public AddressJSON(String ip, int port, int id) {
-    this.ip = ip;
-    this.port = port;
-    this.id = id;
+  public AddressJSON(String clusterId, String delaAddress, String httpAddress) {
+    this.delaAddress = delaAddress;
+    this.httpAddress = httpAddress;
+    this.clusterId = clusterId;
   }
 
-  public void setIp(String ip) {
-    this.ip = ip;
+  public String getClusterId() {
+    return clusterId;
   }
 
-  public void setPort(int port) {
-    this.port = port;
+  public void setClusterId(String clusterId) {
+    this.clusterId = clusterId;
+  }
+  
+  public String getDelaAddress() {
+    return delaAddress;
   }
 
-  public void setId(int id) {
-    this.id = id;
+  public void setDelaAddress(String delaAddress) {
+    this.delaAddress = delaAddress;
   }
 
-  public String getIp() {
-    return ip;
+  public String getHttpAddress() {
+    return httpAddress;
   }
 
-  public int getPort() {
-    return port;
+  public void setHttpAddress(String httpAddress) {
+    this.httpAddress = httpAddress;
   }
-
-  public int getId() {
-    return id;
-  }
-
 }

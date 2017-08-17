@@ -19,6 +19,7 @@ import io.hops.site.controller.UsersController;
 import io.hops.site.dao.entity.Users;
 import io.hops.site.dto.UserDTO;
 import io.swagger.annotations.Api;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.security.RolesAllowed;
@@ -52,8 +53,8 @@ public class UserService {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   public Response getUser(UserDTO userDTO) {
-    Users user = usersController.findUserByEmailAndClusterId(userDTO.getEmail(), userDTO.getClusterId());
-    if (user == null) {
+    Optional<Users> user = usersController.findUserByEmailAndClusterId(userDTO.getEmail(), userDTO.getClusterId());
+    if (!user.isPresent()) {
       usersController.addNewUser(userDTO);
       user = usersController.findUserByEmailAndClusterId(userDTO.getEmail(), userDTO.getClusterId());
     }

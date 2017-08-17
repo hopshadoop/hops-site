@@ -42,16 +42,19 @@ import javax.xml.bind.annotation.XmlTransient;
           query = "SELECT c FROM Category c"),
   @NamedQuery(name = "Category.findById",
           query = "SELECT c FROM Category c WHERE c.id = :id"),
-  @NamedQuery(name = "Category.findByName",
-          query = "SELECT c FROM Category c WHERE c.name = :name")})
+  @NamedQuery(name = Category.FIND_BY_NAME,
+          query = "SELECT c FROM Category c WHERE c.name = :" + Category.NAME)})
 public class Category implements Serializable {
-
+  public static final String FIND_BY_NAME = "Category.findByName";
+  public static final String NAME = "name";
+  
   private static final long serialVersionUID = 1L;
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Basic(optional = false)
   @Column(name = "id")
   private Integer id;
+  
   @Basic(optional = false)
   @NotNull
   @Size(min = 1,

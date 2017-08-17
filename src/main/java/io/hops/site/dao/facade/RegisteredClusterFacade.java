@@ -1,6 +1,7 @@
 package io.hops.site.dao.facade;
 
 import io.hops.site.dao.entity.RegisteredCluster;
+import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -21,13 +22,33 @@ public class RegisteredClusterFacade extends AbstractFacade<RegisteredCluster> {
     super(RegisteredCluster.class);
   }
 
-  public RegisteredCluster findByEmail(String email) {
+  public Optional<RegisteredCluster> findByEmail(String email) {
     try {
-      return em.createNamedQuery("RegisteredCluster.findByEmail", RegisteredCluster.class).setParameter("email", email).
-              getSingleResult();
+      RegisteredCluster cluster = em.createNamedQuery("RegisteredCluster.findByEmail", RegisteredCluster.class)
+        .setParameter("email", email).getSingleResult();
+      return Optional.of(cluster);
     } catch (NoResultException nre) {
-      return null;
+      return Optional.empty();
     }
   }
 
+  public Optional<RegisteredCluster> findByPublicId(String publicId) {
+    try {
+      RegisteredCluster cluster = em.createNamedQuery("RegisteredCluster.findByPublicId", RegisteredCluster.class)
+        .setParameter("publicId", publicId).getSingleResult();
+      return Optional.of(cluster);
+    } catch (NoResultException nre) {
+      return Optional.empty();
+    }
+  }
+
+  public Optional<RegisteredCluster> findById(int clusterId) {
+    try {
+      RegisteredCluster cluster =  em.createNamedQuery("RegisteredCluster.findById", RegisteredCluster.class)
+        .setParameter("id", clusterId).getSingleResult();
+      return Optional.of(cluster);
+    } catch (NoResultException nre) {
+      return Optional.empty();
+    }
+  }
 }
