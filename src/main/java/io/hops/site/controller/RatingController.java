@@ -20,11 +20,13 @@ import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.dao.entity.Users;
 import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dao.facade.DatasetRatingFacade;
+import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dao.facade.UsersFacade;
 import io.hops.site.dto.RateDTO;
 import io.hops.site.dto.RatingDTO;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -35,6 +37,8 @@ import javax.ejb.TransactionAttributeType;
 public class RatingController {
 
   @EJB
+  private RegisteredClusterFacade clusterFacade;
+  @EJB
   private DatasetFacade datasetFacade;
   @EJB
   private UsersFacade userFacade;
@@ -42,49 +46,26 @@ public class RatingController {
   private DatasetRatingFacade datasetRatingFacade;
 
   /**
-   * Calculates the rating for the given dataset
-   *
-   * @param datasetId
-   * @return
-   */
-  public RatingDTO getRating(Integer datasetId) {
-    Dataset dataset = datasetFacade.find(datasetId);
-    if (dataset == null) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
-    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
-    if (ratings.isEmpty()) {
-      return new RatingDTO(dataset.getId(), 0, 0);
-    }
-    int rated = 0;
-    for (DatasetRating rate : ratings) {
-      rated += rate.getRating();
-    }
-    rated /= ratings.size();
-    return new RatingDTO(dataset.getId(), rated, ratings.size());
-  }
-
-  /**
    * Calculates the rating for the given public id
    *
-   * @param publicId
+   * @param datasetPublicId
    * @return
    */
-  public RatingDTO getRating(String publicId) {
-    Dataset dataset = datasetFacade.findByPublicId(publicId);
-    if (dataset == null) {
+  public RatingDTO getRating(String datasetPublicId) {
+    Optional<Dataset> dataset = datasetFacade.findByPublicId(datasetPublicId);
+    if (!dataset.isPresent()) {
       throw new IllegalArgumentException("Dataset not found.");
     }
-    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
+    List<DatasetRating> ratings = new ArrayList(dataset.get().getDatasetRatingCollection());
     if (ratings.isEmpty()) {
-      return new RatingDTO(dataset.getId(), 0, 0);
+      return new RatingDTO(datasetPublicId, 0, 0);
     }
     int rated = 0;
     for (DatasetRating rate : ratings) {
       rated += rate.getRating();
     }
     rated /= ratings.size();
-    return new RatingDTO(dataset.getId(), rated, ratings.size());
+    return new RatingDTO(datasetPublicId, rated, ratings.size());
   }
 
   /**
@@ -123,32 +104,17 @@ public class RatingController {
    * @param datasetRating
    */
   public void addRating(RateDTO datasetRating) {
-    if (datasetRating == null) {
-      throw new IllegalArgumentException("One or more arguments not assigned.");
-    }
-    if (datasetRating.getUser() == null || datasetRating.getUser().getEmail() == null) {
-      throw new IllegalArgumentException("User email not assigned.");
-    }
-    if (datasetRating.getDataset().getPublicId() == null) {
-      throw new IllegalArgumentException("Dataset id not assigned.");
-    }
-    if (datasetRating.getRating() <= 0) {
-      throw new IllegalArgumentException("Rating should be positive int.");
-    }
-    Dataset dataset;
-    dataset = datasetFacade.findByPublicId(datasetRating.getDataset().getPublicId());
-
-    if (dataset == null) {
+    rateDTOSanityCheck(datasetRating);
+    Optional<Dataset> dataset = datasetFacade.findByPublicId(datasetRating.getDatasetId());
+    if (!dataset.isPresent()) {
       throw new IllegalArgumentException("Dataset not found.");
     }
-
-    Users user = userFacade.findByEmailAndCluster(datasetRating.getUser().getEmail(), datasetRating.getUser().
-            getClusterId());
-    if (user == null) {
+    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(datasetRating.getUser().getEmail(), 
+      datasetRating.getUser().getClusterId());
+    if (!user.isPresent()) {
       throw new IllegalArgumentException("User not found.");
     }
-
-    DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset, user);
+    DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset.get(), user.get());
     if (managedRating != null) {
       if (managedRating.getRating() != datasetRating.getRating()) {
         managedRating.setRating(datasetRating.getRating());
@@ -156,9 +122,23 @@ public class RatingController {
       }
       return;
     }
-
-    DatasetRating newDatasetRating = new DatasetRating(datasetRating.getRating(), user, dataset);
+    DatasetRating newDatasetRating = new DatasetRating(datasetRating.getRating(), user.get(), dataset.get());
     datasetRatingFacade.create(newDatasetRating);
+  }
+  
+  private void rateDTOSanityCheck(RateDTO rateDTO) {
+    if (rateDTO == null) {
+      throw new IllegalArgumentException("One or more arguments not assigned.");
+    }
+    if (rateDTO.getUser() == null || rateDTO.getUser().getEmail() == null) {
+      throw new IllegalArgumentException("User email not assigned.");
+    }
+    if (rateDTO.getDatasetId() == null) {
+      throw new IllegalArgumentException("Dataset id not assigned.");
+    }
+    if (rateDTO.getRating() <= 0) {
+      throw new IllegalArgumentException("Rating should be positive int.");
+    }
   }
 
   /**

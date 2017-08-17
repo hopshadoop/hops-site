@@ -21,24 +21,24 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class RatingDTO {
 
-  private Integer datasetId;
+  private String datasetId;
   private int rate;
   private int ratedBy;
 
-  public RatingDTO(Integer datasetId, int rate, int ratedBy) {
+  public RatingDTO(String datasetId, int rate, int ratedBy) {
     this.datasetId = datasetId;
     this.rate = rate;
     this.ratedBy = ratedBy;
   }
 
-  public Integer getDatasetId() {
+  public String getDatasetId() {
     return datasetId;
   }
 
-  public void setDatasetId(Integer datasetId) {
+  public void setDatasetId(String datasetId) {
     this.datasetId = datasetId;
   }
-
+  
   public int getRate() {
     return rate;
   }

@@ -23,12 +23,13 @@ import java.lang.reflect.Method;
 import java.security.AccessControlException;
 import java.security.Principal;
 import java.security.cert.CertificateEncodingException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import javax.annotation.PostConstruct;
 import javax.annotation.Priority;
@@ -127,36 +128,30 @@ public class AuthFilter implements ContainerRequestFilter {
   }
 
   private RegisteredCluster getClusterFromReq(ContainerRequestContext requestContext) {
-    RegisteredCluster registeredCluster;
-
     ContainerRequest cr = (ContainerRequest) requestContext;
     if (cr.bufferEntity()) {
-      GenericReqDTO reqDTO = null;
+      GenericReqDTO reqDTO;
       try {
         reqDTO = cr.readEntity(GenericReqDTO.class);
       } catch (Exception nsme) {
         //nothing to do. It is not GenericRequestDTO, thus can not be checked.
-      }
-      if (reqDTO == null) {
         LOGGER.log(Level.INFO, "Not a generic request.");
         return null;
       }
       LOGGER.log(Level.INFO, "Generic request: {0}.", reqDTO.toString());
+      String clusterPublicId;
       if (reqDTO.getUser() != null) {
-        registeredCluster = clusterController.getClusterById(reqDTO.getUser().getClusterId());
-        if (registeredCluster == null) {
-          throw new AccessControlException("Cluster not registered.");
-        }
-        return registeredCluster;
+        clusterPublicId = reqDTO.getUser().getClusterId();
+      } else if (reqDTO.getClusterId() != null) {
+        clusterPublicId = reqDTO.getClusterId();
+      } else {
+        throw new AccessControlException("update logic for GenericReqDTO");
       }
-
-      if (reqDTO.getClusterId() != null) {
-        registeredCluster = clusterController.getClusterById(reqDTO.getClusterId());
-        if (registeredCluster == null) {
-          throw new AccessControlException("Cluster not yet registered.");
-        }
-        return registeredCluster;
+      Optional<RegisteredCluster> cluster = clusterController.getClusterByPublicId(clusterPublicId);
+      if (!cluster.isPresent()) {
+        throw new AccessControlException("Cluster not registered.");
       }
+      return cluster.get();
     }
     return null;
   }

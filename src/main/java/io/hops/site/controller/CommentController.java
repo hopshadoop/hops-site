@@ -18,16 +18,17 @@ package io.hops.site.controller;
 import io.hops.site.dao.entity.Comment;
 import io.hops.site.dao.entity.CommentIssue;
 import io.hops.site.dao.entity.Dataset;
-import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.dao.entity.Users;
 import io.hops.site.dao.facade.CommentFacade;
 import io.hops.site.dao.facade.CommentIssueFacade;
 import io.hops.site.dao.facade.DatasetFacade;
+import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dao.facade.UsersFacade;
 import io.hops.site.dto.CommentDTO;
 import io.hops.site.dto.CommentIssueDTO;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -41,6 +42,8 @@ public class CommentController {
 
   private final static Logger LOGGER = Logger.getLogger(CommentController.class.getName());
 
+  @EJB
+  private RegisteredClusterFacade clusterFacade;
   @EJB
   private DatasetFacade datasetFacade;
   @EJB
@@ -56,33 +59,31 @@ public class CommentController {
    * @param comment
    */
   public void addComment(CommentDTO comment) {
-    if (comment == null || comment.getDataset() == null || comment.getUser() == null) {
+    commentDTOSanityCheck(comment);
+    Optional<Dataset> dataset = datasetFacade.findByPublicId(comment.getDatasetId());
+    if (!dataset.isPresent()) {
+      throw new IllegalArgumentException("Dataset not found.");
+    }
+    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(comment.getUser().getEmail(),
+      comment.getDatasetId());
+    if (user.isPresent()) {
+      throw new IllegalArgumentException("User not found.");
+    }
+    Comment newComment = new Comment(comment.getContent(), user.get(), dataset.get());
+    commentFacade.create(newComment);
+    LOGGER.log(Level.INFO, "Adding new comment.");
+  }
+
+  private void commentDTOSanityCheck(CommentDTO comment) {
+    if (comment == null || comment.getDatasetId() == null || comment.getUser() == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
     if (comment.getUser().getEmail() == null) {
       throw new IllegalArgumentException("User email not assigned.");
     }
-    if (comment.getDataset().getPublicId() == null) {
-      throw new IllegalArgumentException("Dataset id not assigned.");
-    }
     if (comment.getContent().isEmpty()) {
       throw new IllegalArgumentException("Comment content can not be empty.");
     }
-
-    Dataset dataset;
-    dataset = datasetFacade.findByPublicId(comment.getDataset().getPublicId());
-
-    if (dataset == null) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
-
-    Users user = userFacade.findByEmailAndCluster(comment.getUser().getEmail(), comment.getUser().getClusterId());
-    if (user == null) {
-      throw new IllegalArgumentException("User not found.");
-    }
-    Comment newComment = new Comment(comment.getContent(), user, dataset);
-    commentFacade.create(newComment);
-    LOGGER.log(Level.INFO, "Adding new comment.");
   }
 
   /**
@@ -91,6 +92,18 @@ public class CommentController {
    * @param commentIssue
    */
   public void reportAbuse(CommentIssueDTO commentIssue) {
+    commentIssueDTOSanityCheck(commentIssue);
+    Comment comment = commentFacade.find(commentIssue.getCommentId());
+    if (comment == null) {
+      throw new IllegalArgumentException("Comment not found.");
+    }
+    CommentIssue newCommentIssue = new CommentIssue(commentIssue.getType(), commentIssue.getMsg(), comment.getUsers(),
+      comment);
+    commentIssueFacade.create(newCommentIssue);
+    LOGGER.log(Level.INFO, "Adding new issue for comment: {0}.", comment.getId());
+  }
+  
+  private void commentIssueDTOSanityCheck(CommentIssueDTO commentIssue) {
     if (commentIssue == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
@@ -103,35 +116,15 @@ public class CommentController {
     if (commentIssue.getType().isEmpty()) {
       throw new IllegalArgumentException("Issue type not assigned.");
     }
-
-    Comment comment = commentFacade.find(commentIssue.getCommentId());
-    if (comment == null) {
-      throw new IllegalArgumentException("Comment not found.");
-    }
-
-    Users user = userFacade.findByEmailAndCluster(comment.getUsers().getEmail(), comment.getUsers().getClusterId().
-            getClusterId());
-    if (user == null) {
-      throw new IllegalArgumentException("User not found.");
-    }
-
-    CommentIssue newCommentIssue = new CommentIssue(commentIssue.getType(), commentIssue.getMsg(), user, comment);
-    commentIssueFacade.create(newCommentIssue);
-    LOGGER.log(Level.INFO, "Adding new issue for comment: {0}.", comment.getId());
   }
 
   /**
    * Remove comment by the author
-   * @param comment 
+   * <p>
+   * @param comment
    */
   public void removeOwnComment(CommentDTO comment) {
-    if (comment == null || comment.getId() == null || comment.getUser() == null) {
-      throw new IllegalArgumentException("One or more arguments not assigned.");
-    }
-    if (comment.getUser().getEmail() == null) {
-      throw new IllegalArgumentException("User email not assigned.");
-    }
-
+    commentDTOSanityCheck(comment);
     Comment managedComment = commentFacade.find(comment.getId());
     if (managedComment == null) {
       throw new IllegalArgumentException("Comment not found.");
@@ -166,12 +159,7 @@ public class CommentController {
    * @param comment
    */
   public void updateComment(CommentDTO comment) {
-    if (comment == null || comment.getId() == null) {
-      throw new IllegalArgumentException("Comment id not assigned.");
-    }
-    if (comment.getUser().getEmail() == null) {
-      throw new IllegalArgumentException("User email not assigned.");
-    }
+    commentDTOSanityCheck(comment);
     Comment managedComment = commentFacade.find(comment.getId());
     if (managedComment == null) {
       throw new IllegalArgumentException("Comment not found.");
@@ -197,11 +185,11 @@ public class CommentController {
    * @return
    */
   public List<Comment> getAllComments(String publicId) {
-    Dataset dataset = datasetFacade.findByPublicId(publicId);
-    if (dataset == null) {
+    Optional<Dataset> dataset = datasetFacade.findByPublicId(publicId);
+    if (dataset.isPresent()) {
       throw new IllegalArgumentException("Dataset not found.");
     }
-    List<Comment> comments = new ArrayList(dataset.getCommentCollection());
+    List<Comment> comments = new ArrayList(dataset.get().getCommentCollection());
     return comments;
   }
 

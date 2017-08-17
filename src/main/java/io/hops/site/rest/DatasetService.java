@@ -15,29 +15,29 @@
  */
 package io.hops.site.rest;
 
+import io.hops.site.common.AppException;
 import io.hops.site.controller.DatasetController;
-import io.hops.site.dao.entity.Dataset;
-import io.hops.site.dto.DatasetDTO;
+import io.hops.site.dto.BasicIdentifyDTO;
 import io.hops.site.dto.DatasetIssueDTO;
+import io.hops.site.dto.JsonResponse;
+import io.hops.site.dto.PublishDatasetDTO;
+import io.hops.site.dto.SearchDTO;
 import io.hops.site.rest.annotation.NoCache;
 import io.swagger.annotations.Api;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.GenericEntity;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -51,86 +51,118 @@ public class DatasetService {
 
   private final static Logger LOGGER = Logger.getLogger(DatasetService.class.getName());
   @EJB
-  private DatasetController datasetController;
+  private DatasetController datasetCtrl;
 
-  @GET
+  @POST
   @NoCache
-  public Response getAll() {
-    List<Dataset> datasets = datasetController.findAllDatasets();
-    GenericEntity<List<Dataset>> datasetList
-            = new GenericEntity<List<Dataset>>(datasets) {
-    };
-    LOGGER.log(Level.INFO, "Get all datasets");
-    return Response.ok().entity(datasetList).build();
+  @Path("search")
+  public Response search(SearchDTO.Params searchParams,
+    @Context HttpServletRequest req) {
+    searchDTOParamsSanityCheck(searchParams);
+    try {
+      SearchDTO.BaseResult searchResult = datasetCtrl.search(searchParams);
+      return Response.ok().entity(searchResult).build();
+    } catch (AppException ex) {
+      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
+    }
+  }
+  
+  private void searchDTOParamsSanityCheck(SearchDTO.Params searchParams) {
+  }
+  
+  @POST
+  @NoCache
+  @Path("page")
+  public Response getPage(@QueryParam("sessionId") String sessionId, @QueryParam("startItem") int startItem,
+    @QueryParam("nrElem") int nrElem) {
+    try {
+      SearchDTO.Page result = datasetCtrl.getSearchPage(sessionId, startItem, nrElem);
+      return Response.ok().entity(result).build();
+    } catch (AppException ex) {
+      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
+    }
+  }
+  
+  @PUT
+  @NoCache
+  @Path("publish")
+  public Response publish(PublishDatasetDTO.Request msg) {
+    publishDatasetSanityCheck(msg);
+    try {
+      String datasetPublicId = datasetCtrl.publishDataset(msg);
+      LOGGER.log(Level.INFO, "published dataset:{}", msg.getName());
+      return Response.ok().entity(new PublishDatasetDTO.Response(datasetPublicId)).build();
+    } catch (AppException ex) {
+      LOGGER.log(Level.WARNING, "could not publish dataset - {}", ex.getMessage());
+      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
+    }
   }
 
-  @GET
-  @NoCache
-  @Path("{datasetId}")
-  public Response getADataset(@PathParam("datasetId") Integer datasetId) {
-    Dataset dataset = datasetController.findDataset(datasetId);
-    LOGGER.log(Level.INFO, "Get a dataset with id: {0}", dataset.getId());
-    return Response.ok().entity(dataset).build();
+  private void publishDatasetSanityCheck(PublishDatasetDTO.Request publishDataset) {
   }
-
-  @GET
+  
+  @POST
   @NoCache
-  @Path("byPublicId/{publicId}")
-  public Response getByPublicId(@PathParam("publicId") String publicId) {
-    Dataset dataset = datasetController.findDatasetByPublicId(publicId);
-    LOGGER.log(Level.INFO, "Get a dataset with public id: {0}:", dataset.getId());
-    return Response.ok().entity(dataset).build();
+  @Path("unpublish")
+  public Response unpublish(BasicIdentifyDTO msg) {
+    try {
+      datasetCtrl.unpublishDataset(msg.getDatasetId(), msg.getClusterId());
+      LOGGER.log(Level.INFO, "unpublished dataset:{}", msg.getDatasetId());
+      return Response.ok().build();
+    } catch (AppException ex) {
+      LOGGER.log(Level.WARNING, "could not unpublish dataset - {}", ex.getMessage());
+      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
+    }
+  }
+  
+  @POST
+  @NoCache
+  @Path("download")
+  public Response download(BasicIdentifyDTO msg) {
+    try {
+      datasetCtrl.download(msg.getDatasetId(), msg.getClusterId());
+      LOGGER.log(Level.INFO, "download dataset:{}", msg.getDatasetId());
+      return Response.ok().build();
+    } catch (AppException ex) {
+      LOGGER.log(Level.WARNING, "could not download dataset - {}", ex.getMessage());
+      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
+    }
   }
 
   @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response addDatase(DatasetDTO dataset) {
-    datasetController.addDataset(dataset);
-    LOGGER.log(Level.INFO, "Add new dataset with public id: {0}", dataset.getPublicId());
-    return Response.ok("OK").build();
+  @NoCache
+  @Path("downloadComplete")
+  public Response downloadComplete(BasicIdentifyDTO msg) {
+    try {
+      datasetCtrl.downloadComplete(msg.getDatasetId(), msg.getClusterId());
+      LOGGER.log(Level.INFO, "download complete dataset:{}", msg.getDatasetId());
+      return Response.ok().build();
+    } catch (AppException ex) {
+      LOGGER.log(Level.WARNING, "could not complete download dataset - {}", ex.getMessage());
+      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
+    }
   }
 
   @POST
-  @Path("issue")
+  @NoCache
+  @Path("remove")
+  public Response downloadAbort(BasicIdentifyDTO msg) {
+    try {
+      datasetCtrl.remove(msg.getDatasetId(), msg.getClusterId());
+      LOGGER.log(Level.INFO, "remove conn dataset:{}", msg.getDatasetId());
+      return Response.ok().build();
+    } catch (AppException ex) {
+      LOGGER.log(Level.WARNING, "could not remove conn dataset - {}", ex.getMessage());
+      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
+    }
+  }
+  
+  @POST
+  @Path("datasetIssue")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addDatasetIssue(DatasetIssueDTO datasetIssue) {
-    datasetController.reportDatasetIssue(datasetIssue);
-    LOGGER.log(Level.INFO, "Add dataset issue for dataset: {0}", datasetIssue.getDataset().getPublicId());
-    return Response.ok("OK").build();
-  }
-
-  @PUT
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateDataset(DatasetDTO dataset) {
-    datasetController.updateDataset(dataset);
-    LOGGER.log(Level.INFO, "Update rating with id: {0}", dataset.getPublicId());
-    return Response.ok("OK").build();
-  }
-
-  @PUT
-  @Path("category")
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response addCategory(DatasetDTO dataset) {
-    datasetController.addCategory(dataset);
-    LOGGER.log(Level.INFO, "Update rating with id: {0}", dataset.getPublicId());
-    return Response.ok("OK").build();
-  }
-
-  @DELETE
-  @Path("{datasetId}")
-  @RolesAllowed({"admin"})
-  public Response deleteDataset(@PathParam("datasetId") Integer datasetId) {
-    datasetController.removeDataset(datasetId);
-    LOGGER.log(Level.INFO, "Delete dataset with id: {0}", datasetId);
-    return Response.ok("OK").build();
-  }
-
-  @DELETE
-  @Path("byPublicId/{publicId}")
-  @RolesAllowed({"admin"})
-  public Response deleteDataset(@PathParam("publicId") String publicId) {
-    datasetController.removeDataset(publicId);
-    LOGGER.log(Level.INFO, "Delete dataset with id: {0}", publicId);
-    return Response.ok("OK").build();
+    datasetCtrl.reportDatasetIssue(datasetIssue);
+    LOGGER.log(Level.INFO, "Add dataset issue for dataset: {0}", datasetIssue.getDatasetId());
+    return Response.ok().build();
   }
 }

@@ -1,7 +1,5 @@
 package io.hops.site.dto;
 
-import java.util.List;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -11,19 +9,16 @@ public class PopularDatasetJSON {
   private ManifestJSON manifestJson;
   private int leeches;
   private int seeds;
-  private List<AddressJSON> gvodEndpoints;
   private String clusterId;
 
   public PopularDatasetJSON() {
   }
 
-  public PopularDatasetJSON(ManifestJSON manifestJson, String datasetId, int leeches, int seeds,
-          List<AddressJSON> partners) {
+  public PopularDatasetJSON(ManifestJSON manifestJson, String datasetId, int leeches, int seeds) {
     this.manifestJson = manifestJson;
     this.datasetId = datasetId;
     this.leeches = leeches;
     this.seeds = seeds;
-    this.gvodEndpoints = partners;
   }
 
   public String getClusterId() {
@@ -56,15 +51,6 @@ public class PopularDatasetJSON {
 
   public void setSeeds(int seeds) {
     this.seeds = seeds;
-  }
-
-  @XmlElement(name = "gvodEndpoints")
-  public List<AddressJSON> getGvodEndpoints() {
-    return gvodEndpoints;
-  }
-
-  public void setGvodEndpoints(List<AddressJSON> gvodEndpoints) {
-    this.gvodEndpoints = gvodEndpoints;
   }
 
   public ManifestJSON getManifestJson() {

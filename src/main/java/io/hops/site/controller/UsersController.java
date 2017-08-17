@@ -20,6 +20,7 @@ import io.hops.site.dao.entity.Users;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dao.facade.UsersFacade;
 import io.hops.site.dto.UserDTO;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -35,7 +36,7 @@ public class UsersController {
   @EJB
   private UsersFacade userFacade;
   @EJB
-  private RegisteredClusterFacade registeredClusterFacade;
+  private RegisteredClusterFacade clusterFacade;
 
   /**
    * Creates new hops-site user
@@ -43,25 +44,12 @@ public class UsersController {
    * @param user
    */
   public void addNewUser(UserDTO user) {
-    if (user == null) {
-      throw new IllegalArgumentException("One or more arguments not assigned.");
-    }
-    if (user.getEmail() == null || user.getEmail().isEmpty()) {
-      throw new IllegalArgumentException("User email not assigned.");
-    }
-    if (user.getClusterId() == null || user.getClusterId().isEmpty()) {
-      throw new IllegalArgumentException("Cluster is not assigned.");
-    }
-    if ((user.getFirstname() == null || user.getFirstname().isEmpty()) && (user.getLastname() == null || user.
-            getLastname().isEmpty())) {
-      throw new IllegalArgumentException("User name is not assigned.");
-    }
-    RegisteredCluster registeredCluster = registeredClusterFacade.find(user.getClusterId());
-    if (registeredCluster == null) {
+    userDTOSanityCheck(user);
+    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(user.getClusterId());
+    if (!cluster.isPresent()) {
       throw new IllegalArgumentException("Cluster not found.");
     }
-
-    Users newUser = new Users(user.getFirstname(), user.getLastname(), user.getEmail().toLowerCase(), registeredCluster);
+    Users newUser = new Users(user.getFirstname(), user.getLastname(), user.getEmail().toLowerCase(), cluster.get());
     userFacade.create(newUser);
     LOGGER.log(Level.INFO, "Adding new user: {0}.", user.getFirstname());
   }
@@ -69,11 +57,24 @@ public class UsersController {
   /**
    * Update user first and/or last name
    *
-   * @param user
+   * @param updateUser
    */
-  public void updateUser(UserDTO user) {
+  public void updateUser(UserDTO updateUser) {
+    userDTOSanityCheck(updateUser);
+    Optional<Users> userAux = userFacade.findByEmailAndPublicClusterId(updateUser.getEmail(), updateUser.getClusterId());
+    if (!userAux.isPresent()) {
+      throw new IllegalArgumentException("User not found.");
+    }
+    Users user = userAux.get();
+    user.setFirstname(updateUser.getFirstname());
+    user.setLastname(updateUser.getLastname());
+    userFacade.edit(user);
+    LOGGER.log(Level.INFO, "Updating user: {0}.", user.getId());
+  }
+
+  private void userDTOSanityCheck(UserDTO user) {
     if (user == null) {
-      throw new IllegalArgumentException("One or more arguments not assigned.");
+      throw new IllegalArgumentException("User is not assigned.");
     }
     if (user.getEmail() == null || user.getEmail().isEmpty()) {
       throw new IllegalArgumentException("User email not assigned.");
@@ -82,22 +83,9 @@ public class UsersController {
       throw new IllegalArgumentException("Cluster is not assigned.");
     }
     if ((user.getFirstname() == null || user.getFirstname().isEmpty()) && (user.getLastname() == null || user.
-            getLastname().isEmpty())) {
+      getLastname().isEmpty())) {
       throw new IllegalArgumentException("User name is not assigned.");
     }
-    RegisteredCluster registeredCluster = registeredClusterFacade.find(user.getClusterId());
-    if (registeredCluster == null) {
-      throw new IllegalArgumentException("Cluster not found.");
-    }
-    Users managedUser = userFacade.findByEmailAndCluster(user.getEmail(), user.getClusterId());
-    if (managedUser == null) {
-      throw new IllegalArgumentException("User not found.");
-    }
-
-    managedUser.setFirstname(user.getFirstname());
-    managedUser.setLastname(user.getLastname());
-    userFacade.edit(managedUser);
-    LOGGER.log(Level.INFO, "Updating user: {0}.", user.getFirstname());
   }
 
   /**
@@ -118,28 +106,31 @@ public class UsersController {
    * Remove user by email
    *
    * @param userEmail
-   * @param clusterId
+   * @param clusterPublicId
    */
-  public void removeUser(String userEmail, String clusterId) {
-    if (userEmail == null || clusterId == null) {
+  public void removeUser(String userEmail, String clusterPublicId) {
+    if (userEmail == null || clusterPublicId == null) {
       throw new IllegalArgumentException("User email or cluster id not assigned.");
     }
-    Users managedUser = userFacade.findByEmailAndCluster(userEmail, clusterId);
-    userFacade.remove(managedUser);
+    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(userEmail, clusterPublicId);
+    if (user.isPresent()) {
+      userFacade.remove(user.get());
+    }
     LOGGER.log(Level.INFO, "Remove user: {0}.", userEmail);
   }
 
   /**
-   * 
+   *
    * @param email
-   * @param clusterId
-   * @return 
+   * @param clusterPublicId
+   * @return
    */
-  public Users findUserByEmailAndClusterId(String email, String clusterId) {
-    if (email == null || clusterId == null) {
+  public Optional<Users> findUserByEmailAndClusterId(String email, String clusterPublicId) {
+    if (email == null || clusterPublicId == null) {
       throw new IllegalArgumentException("User email or cluster id not assigned.");
     }
-    return userFacade.findByEmailAndCluster(email.toLowerCase(), clusterId);
+    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(email.toLowerCase(), clusterPublicId);
+    return user;
   }
 
 }

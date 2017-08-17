@@ -16,18 +16,20 @@
 package io.hops.site.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.hops.site.common.Settings;
+import io.hops.site.dao.entity.Heartbeat;
 import io.hops.site.dao.entity.RegisteredCluster;
+import io.hops.site.dao.facade.DatasetFacade;
+import io.hops.site.dao.facade.HeartbeatFacade;
+import io.hops.site.dao.facade.LiveDatasetFacade;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
-import io.hops.site.dto.AddressJSON;
-import io.hops.site.dto.IdentificationJSON;
 import io.hops.site.dto.RegisterJSON;
 import io.hops.site.dto.RegisteredClusterJSON;
 import io.hops.site.rest.ClusterService;
-import java.io.IOException;
 import java.security.AccessControlException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -41,51 +43,78 @@ public class ClusterController {
 
   private final static Logger LOGGER = Logger.getLogger(ClusterService.class.getName());
   @EJB
-  private HelperFunctions helperFunctions;
+  private Settings settings;
   @EJB
-  private RegisteredClusterFacade registeredClustersFacade;
+  private RegisteredClusterFacade clusterFacade;
+  @EJB
+  private DatasetFacade datasetFacade;
+  @EJB
+  private HeartbeatFacade heartbeatFacade;
+  @EJB
+  private LiveDatasetFacade liveDatasetFacade;
+  @EJB
+  private HelperFunctions helperFunctions;
+
 
   private final ObjectMapper mapper = new ObjectMapper();
 
   /**
    * Register a new cluster
    *
-   * @param registerJson
+   * @param msg
    * @return
    */
-  public String registerCluster(RegisterJSON registerJson) {
-    if (helperFunctions.ClusterRegisteredWithEmail(registerJson.getEmail())) {
+  public String registerCluster(RegisterJSON msg) {
+    Optional<RegisteredCluster> c = clusterFacade.findByEmail(msg.getEmail());
+    if(c.isPresent()) {
       LOGGER.log(Level.INFO, "Already registered.");
       throw new IllegalArgumentException("Already registered.");
     }
-    if (!helperFunctions.isValid(registerJson.getCert())) {
+    if (!helperFunctions.isValid(msg.getCert())) {
       LOGGER.log(Level.INFO, "Invalid cert.");
       throw new AccessControlException("Invalid cert.");
     }
-    String registeredId = helperFunctions.registerCluster(registerJson.getSearchEndpoint(), registerJson.getEmail().
-            toLowerCase(), registerJson.getDerCert(), registerJson.getGvodEndpoint());
-    if (registeredId == null) {
-      LOGGER.log(Level.INFO, "Invalid gvodEndpoint.");
-      throw new IllegalArgumentException("Invalid gvodEndpoint.");
+    String clusterPublicId = settings.getClusterId();
+    RegisteredCluster cluster = new RegisteredCluster(clusterPublicId, msg.getHttpEndpoint(), msg.getEmail().toLowerCase(), 
+      msg.getDerCert(), msg.getDelaEndpoint());
+    clusterFacade.create(cluster);
+    return clusterPublicId;
+  }
+ 
+
+  public Action ping(String clusterPublicId) {
+    Optional<RegisteredCluster> cluster = this.clusterFacade.findByPublicId(clusterPublicId);
+    if (cluster.isPresent()) {
+      Optional<Heartbeat> h = heartbeatFacade.findByClusterId(cluster.get().getId());
+      if (h.isPresent()) {
+        Heartbeat heartbeat = h.get();
+        heartbeat.setLastPinged(settings.getDateNow());
+        heartbeatFacade.edit(heartbeat);
+        return Action.PING;
+      } else {
+        return Action.HEAVY_PING;
+      }
+    } else {
+      throw new IllegalStateException("Authentication Filter - operations performed from unregistered cluster");
     }
-    return registeredId;
   }
 
-  /**
-   * Register heartbeat from cluster
-   *
-   * @param identification
-   * @return list of RegisteredClusterJSON
-   */
-  public List<RegisteredClusterJSON> registerPing(IdentificationJSON identification) {
-    if (!helperFunctions.ClusterRegisteredWithId(identification.getClusterId())) {
-      throw new IllegalArgumentException("Invalid id.");
+  public Action heavyPing(String clusterPublicId, List<String> upldDSPublicIds, List<String> dwnlDSPublicIds) {
+    Optional<RegisteredCluster> cluster = this.clusterFacade.findByPublicId(clusterPublicId);
+    if (cluster.isPresent()) {
+      Heartbeat heartbeat = new Heartbeat(cluster.get().getId(), settings.getDateNow());
+      heartbeatFacade.create(heartbeat);
+      liveDatasetFacade.downloadDatasets(cluster.get().getId(), datasetFacade.findIds(upldDSPublicIds));
+      liveDatasetFacade.uploadDatasets(cluster.get().getId(), datasetFacade.findIds(dwnlDSPublicIds));
+      return Action.HEAVY_PING;
+    } else {
+      throw new IllegalStateException("Authentication Filter - operations performed from unregistered cluster");
     }
-    RegisteredCluster registeredCluster = this.registeredClustersFacade.find(identification.getClusterId());
-    registeredCluster.setHeartbeatsMissed(0);
-    registeredCluster.setDateLastPing(new Date());
-    registeredClustersFacade.edit(registeredCluster);
-    return getAll();
+  }
+
+  public static enum Action {
+    HEAVY_PING,
+    PING,
   }
 
   /**
@@ -94,17 +123,11 @@ public class ClusterController {
    * @return list of RegisteredClusterJSON
    */
   public List<RegisteredClusterJSON> getAll() {
-    List<RegisteredCluster> registeredClusters = helperFunctions.getAllRegisteredClusters();
+    List<RegisteredCluster> registeredClusters = clusterFacade.findAll();
     List<RegisteredClusterJSON> to_ret = new ArrayList<>();
     for (RegisteredCluster r : registeredClusters) {
-      try {
-        to_ret.add(new RegisteredClusterJSON(r.getClusterId(), mapper.
-                readValue(r.getGvodEndpoint(), AddressJSON.class), r.getHeartbeatsMissed(), r.getDateRegistered(), r.
-                getDateLastPing(), r.getSearchEndpoint()));
-      } catch (IOException ex) {
-        LOGGER.log(Level.SEVERE, null, ex);
-        throw new IllegalArgumentException("Parsing of gvodEndpoint failed.");
-      }
+      to_ret.add(new RegisteredClusterJSON(r.getPublicId(), r.getDelaEndpoint(), r.getDateRegistered(),
+        r.getHttpEndpoint()));
     }
     return to_ret;
   }
@@ -118,7 +141,11 @@ public class ClusterController {
     if (clusterEmail == null || clusterEmail.isEmpty()) {
       throw new IllegalArgumentException("Cluster email not assigned.");
     }
-    return registeredClustersFacade.findByEmail(clusterEmail.toLowerCase());
+    Optional<RegisteredCluster> cluster = clusterFacade.findByEmail(clusterEmail.toLowerCase());
+    if (!cluster.isPresent()) {
+      throw new IllegalArgumentException("Cluster email not assigned.");
+    }
+    return cluster.get();
   }
 
   /**
@@ -126,22 +153,25 @@ public class ClusterController {
    * @param clusterId
    * @return
    */
-  public RegisteredCluster getClusterById(String clusterId) {
+  public Optional<RegisteredCluster> getClusterByPublicId(String clusterId) {
     if (clusterId == null || clusterId.isEmpty()) {
       throw new IllegalArgumentException("Cluster id not assigned.");
     }
-    return registeredClustersFacade.find(clusterId);
+    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(clusterId);
+    return cluster;
   }
 
   /**
    *
    * @param clusterId
    */
-  public void removeCluster(String clusterId) {
+  public void removeClusterByPublicId(String clusterId) {
     if (clusterId == null || clusterId.isEmpty()) {
       throw new IllegalArgumentException("Cluster id not assigned.");
     }
-    RegisteredCluster cluster = registeredClustersFacade.find(clusterId);
-    registeredClustersFacade.remove(cluster);
+    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(clusterId);
+    if (cluster.isPresent()) {
+      clusterFacade.remove(cluster.get());
+    }
   }
 }

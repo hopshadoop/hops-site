@@ -78,7 +78,7 @@ public class CommentService {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addComment(CommentDTO comment) {
     commentController.addComment(comment);
-    LOGGER.log(Level.INFO, "Add comment for dataset: {0}", comment.getDataset().getPublicId());
+    LOGGER.log(Level.INFO, "Add comment for dataset: {0}", comment.getDatasetId());
     return Response.ok("OK").build();
   }
 
