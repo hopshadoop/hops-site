@@ -8,18 +8,14 @@ public class RegisteredClusterJSON {
 
   private String clusterId;
   private String searchEndpoint;
-  private AddressJSON gvodEndpoint;
-  private long heartbeatsMissed;
+  private String delaEndpoint;
   private Date dateRegistered;
-  private Date dateLastPing;
 
-  public RegisteredClusterJSON(String clusterId, AddressJSON gvodEndpoint, long heartbeatsMissed, Date dateRegistered,
-          Date dateLastPing, String searchEndpoint) {
+  public RegisteredClusterJSON(String clusterId, String delaEndpoint, Date dateRegistered,
+    String searchEndpoint) {
     this.clusterId = clusterId;
-    this.gvodEndpoint = gvodEndpoint;
-    this.heartbeatsMissed = heartbeatsMissed;
+    this.delaEndpoint = delaEndpoint;
     this.dateRegistered = dateRegistered;
-    this.dateLastPing = dateLastPing;
     this.searchEndpoint = searchEndpoint;
   }
 
@@ -34,20 +30,12 @@ public class RegisteredClusterJSON {
     this.searchEndpoint = searchEndpoint;
   }
 
-  public void setGvodEndpoint(AddressJSON gvodEndpoint) {
-    this.gvodEndpoint = gvodEndpoint;
-  }
-
-  public void setHeartbeatsMissed(long heartbeatsMissed) {
-    this.heartbeatsMissed = heartbeatsMissed;
+  public void setDelaEndpoint(String delaEndpoint) {
+    this.delaEndpoint = delaEndpoint;
   }
 
   public void setDateRegistered(Date dateRegistered) {
     this.dateRegistered = dateRegistered;
-  }
-
-  public void setDateLastPing(Date dateLastPing) {
-    this.dateLastPing = dateLastPing;
   }
 
   public String getSearchEndpoint() {
@@ -58,20 +46,11 @@ public class RegisteredClusterJSON {
     return clusterId;
   }
 
-  public AddressJSON getGvodEndpoint() {
-    return gvodEndpoint;
-  }
-
-  public long getHeartbeatsMissed() {
-    return heartbeatsMissed;
+  public String getDelaEndpoint() {
+    return delaEndpoint;
   }
 
   public Date getDateRegistered() {
     return dateRegistered;
   }
-
-  public Date getDateLastPing() {
-    return dateLastPing;
-  }
-
 }

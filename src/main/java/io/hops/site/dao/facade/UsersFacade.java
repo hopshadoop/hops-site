@@ -15,7 +15,10 @@
  */
 package io.hops.site.dao.facade;
 
+import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.dao.entity.Users;
+import java.util.Optional;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -27,6 +30,9 @@ public class UsersFacade extends AbstractFacade<Users> {
 
   @PersistenceContext(unitName = "hops-sitePU")
   private EntityManager em;
+  
+  @EJB
+  private RegisteredClusterFacade clusterFacade;
 
   @Override
   protected EntityManager getEntityManager() {
@@ -37,15 +43,18 @@ public class UsersFacade extends AbstractFacade<Users> {
     super(Users.class);
   }
 
-  public Users findByEmailAndCluster(String email, String clusterId) {
+  public Optional<Users> findByEmailAndPublicClusterId(String email, String clusterPublicId) {
+    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(clusterPublicId);
+    if(!cluster.isPresent()) {
+      throw new IllegalArgumentException("Cluster not found.");
+    }
     TypedQuery<Users> query = em.createNamedQuery("Users.findByEmailAndClusterId", Users.class)
             .setParameter("email", email)
-            .setParameter("clusterId", clusterId);
+            .setParameter("clusterId", cluster.get().getId());
     try {
-      return query.getSingleResult();
+      return Optional.of(query.getSingleResult());
     } catch (NoResultException e) {
-      return null;
+      return Optional.empty();
     }
   }
-
 }

@@ -23,7 +23,7 @@ public class DatasetIssueDTO {
   private String type;
   private String msg;
   private UserDTO user;
-  private DatasetDTO dataset;
+  private String datasetId;
 
   public DatasetIssueDTO() {
   }
@@ -36,12 +36,12 @@ public class DatasetIssueDTO {
     this.user = user;
   }
 
-  public DatasetDTO getDataset() {
-    return dataset;
+  public String getDatasetId() {
+    return datasetId;
   }
 
-  public void setDataset(DatasetDTO dataset) {
-    this.dataset = dataset;
+  public void setDatasetId(String datasetId) {
+    this.datasetId = datasetId;
   }
 
   public String getType() {

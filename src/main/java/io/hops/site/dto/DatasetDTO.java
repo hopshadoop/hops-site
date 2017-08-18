@@ -15,41 +15,22 @@
  */
 package io.hops.site.dto;
 
+import com.google.gson.Gson;
 import java.util.Collection;
 import java.util.Date;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class DatasetDTO {
-  
-  private Integer id;
-  private String publicId;
+
   private String name;
   private String description;
-  private Date madePublicOn;
-  private String owner;
-  private String readme;
+  private Date publishedOn;
+  private String ownerClusterPublicId;
   private int status;
   private Collection<String> categoryCollection;
-  private String clusterId;
 
   public DatasetDTO() {
-  }
-
-  public Integer getId() {
-    return id;
-  }
-
-  public void setId(Integer id) {
-    this.id = id;
-  }
-
-  public String getPublicId() {
-    return publicId;
-  }
-
-  public void setPublicId(String publicId) {
-    this.publicId = publicId;
   }
 
   public String getName() {
@@ -68,30 +49,6 @@ public class DatasetDTO {
     this.description = description;
   }
 
-  public Date getMadePublicOn() {
-    return madePublicOn;
-  }
-
-  public void setMadePublicOn(Date madePublicOn) {
-    this.madePublicOn = madePublicOn;
-  }
-
-  public String getOwner() {
-    return owner;
-  }
-
-  public void setOwner(String owner) {
-    this.owner = owner;
-  }
-
-  public String getReadme() {
-    return readme;
-  }
-
-  public void setReadme(String readme) {
-    this.readme = readme;
-  }
-
   public int getStatus() {
     return status;
   }
@@ -108,18 +65,30 @@ public class DatasetDTO {
     this.categoryCollection = categoryCollection;
   }
 
-  public String getClusterId() {
-    return clusterId;
+  public Date getPublishedOn() {
+    return publishedOn;
   }
 
-  public void setClusterId(String clusterId) {
-    this.clusterId = clusterId;
+  public void setPublishedOn(Date publishedOn) {
+    this.publishedOn = publishedOn;
+  }
+
+  public String getOwnerClusterPublicId() {
+    return ownerClusterPublicId;
+  }
+
+  public void setOwnerClusterPublicId(String ownerClusterPublicId) {
+    this.ownerClusterPublicId = ownerClusterPublicId;
   }
 
   @Override
   public String toString() {
-    return "DatasetDTO{" + "id=" + id + ", publicId=" + publicId + ", name=" + name + ", madePublicOn=" + madePublicOn +
-            ", owner=" + owner + ", status=" + status + ", clusterId=" + clusterId + '}';
+    return "DatasetDTO{" + "name=" + name + ", description=" + description + ", publishedOn=" + publishedOn +
+      ", ownerClusterPublicId=" + ownerClusterPublicId + ", status=" + status +
+      ", categoryCollection=" + categoryCollection + '}';
   }
   
+  public static DatasetDTO parse(String datasetJSON) {
+     return new Gson().fromJson(datasetJSON, DatasetDTO.class);
+   }
 }

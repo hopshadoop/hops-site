@@ -23,7 +23,7 @@ public class RateDTO {
   private Integer id;
   private int rating;
   private UserDTO user;
-  private DatasetDTO dataset;
+  private String datasetId;
 
   public RateDTO() {
   }
@@ -52,14 +52,11 @@ public class RateDTO {
     this.user = user;
   }
 
-  public DatasetDTO getDataset() {
-    return dataset;
+  public String getDatasetId() {
+    return datasetId;
   }
 
-  public void setDataset(DatasetDTO dataset) {
-    this.dataset = dataset;
+  public void setDatasetId(String datasetId) {
+    this.datasetId = datasetId;
   }
-
-  
-
 }
