@@ -49,6 +49,8 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
       return handleRollbackException((RollbackException) exception.getCause());
     } else if (exception.getCause() instanceof AccessLocalException) {
       return handleAccessLocalException((AccessLocalException) exception.getCause());
+    } else if(exception.getCause() instanceof IllegalStateException) {
+      return handleIllegalStateException((IllegalStateException) exception.getCause());
     }
 
     LOGGER.log(Level.INFO, "EJBException Caused by: {0}", exception.getCause().toString());
@@ -125,4 +127,12 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
     return Response.status(Response.Status.UNAUTHORIZED).entity(jsonResponse).build();
   }
 
+  private Response handleIllegalStateException(IllegalStateException illegalStateException) {
+    LOGGER.log(Level.INFO, "IllegalStateException: {0}", illegalStateException.getMessage());
+    JsonResponse jsonResponse = new JsonResponse();
+    jsonResponse.setStatus(Response.Status.EXPECTATION_FAILED.getReasonPhrase());
+    jsonResponse.setStatusCode(Response.Status.EXPECTATION_FAILED.getStatusCode());
+    jsonResponse.setErrorMsg(illegalStateException.getMessage());
+    return Response.status(Response.Status.EXPECTATION_FAILED).entity(jsonResponse).build();
+  }
 }

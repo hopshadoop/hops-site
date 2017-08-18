@@ -28,13 +28,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
-import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -44,40 +42,41 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @Entity
 @Table(name = "dataset",
-        catalog = "hops_site",
-        schema = "")
+  catalog = "hops_site",
+  schema = "")
 @XmlRootElement
 @NamedQueries({
   @NamedQuery(name = "Dataset.findAll",
-          query = "SELECT d FROM Dataset d"),
+    query = "SELECT d FROM Dataset d"),
   @NamedQuery(name = "Dataset.findById",
-          query = "SELECT d FROM Dataset d WHERE d.id = :id"),
-  @NamedQuery(name = "Dataset.findByPublicId",
-          query = "SELECT d FROM Dataset d WHERE d.publicId = :publicId"),
+    query = "SELECT d FROM Dataset d WHERE d.id = :id"),
+  @NamedQuery(name = Dataset.FIND_BY_PUBLIC_ID,
+    query = "SELECT d FROM Dataset d WHERE d.publicId = :" + Dataset.PUBLIC_ID),
+  @NamedQuery(name = Dataset.FIND_BY_PUBLIC_ID_LIST,
+    query = "SELECT d FROM Dataset d WHERE d.publicId IN :" + Dataset.PUBLIC_ID_LIST),
   @NamedQuery(name = "Dataset.findByName",
-          query = "SELECT d FROM Dataset d WHERE d.name = :name"),
+    query = "SELECT d FROM Dataset d WHERE d.name = :name"),
   @NamedQuery(name = "Dataset.findByDescription",
-          query
-          = "SELECT d FROM Dataset d WHERE d.description = :description"),
+    query = "SELECT d FROM Dataset d WHERE d.description = :description"),
   @NamedQuery(name = "Dataset.findByMadePublicOn",
-          query
-          = "SELECT d FROM Dataset d WHERE d.madePublicOn = :madePublicOn"),
-  @NamedQuery(name = "Dataset.findByOwner",
-          query = "SELECT d FROM Dataset d WHERE d.owner = :owner"),
+    query = "SELECT d FROM Dataset d WHERE d.madePublicOn = :madePublicOn"),
   @NamedQuery(name = "Dataset.findByStatus",
-          query = "SELECT d FROM Dataset d WHERE d.status = :status")})
+    query = "SELECT d FROM Dataset d WHERE d.status = :status")})
 public class Dataset implements Serializable {
-
+  public static final String FIND_BY_PUBLIC_ID = "Dataset.findByPublicId";
+  public static final String FIND_BY_PUBLIC_ID_LIST = "Dataset.findByPublicIdList";
+  public static final String PUBLIC_ID = "publicId";
+  public static final String PUBLIC_ID_LIST = "publicIdList"; 
   private static final long serialVersionUID = 1L;
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Basic(optional = false)
-  @Column(name = "Id")
-  private Integer id;
+  @Column(name = "id")
+  private int id;
   @Basic(optional = false)
   @NotNull
   @Size(min = 1,
-          max = 1000)
+    max = 1000)
   @Column(name = "public_id")
   private String publicId;
   @NotNull
@@ -87,75 +86,59 @@ public class Dataset implements Serializable {
   @Size(max = 2000)
   @Column(name = "description")
   private String description;
-  @Column(name = "made_public_on")
+  @Column(name = "published_on")
   @Temporal(TemporalType.TIMESTAMP)
   private Date madePublicOn;
-  @NotNull
-  @Size(max = 150)
-  @Column(name = "owner")
-  private String owner;
-  @Lob
-  @Size(max = 16777215)
-  @Column(name = "readme")
-  private String readme;
+  @Column(name = "readme_path")
+  private String readmePath;
   @Column(name = "status")
   private Integer status;
   @JoinTable(name = "hops_site.dataset_category",
-          joinColumns = {
-            @JoinColumn(name = "dataset_id",
-                    referencedColumnName = "Id")},
-          inverseJoinColumns
-          = {
-            @JoinColumn(name = "category_id",
-                    referencedColumnName = "id")})
-  @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    joinColumns = {
+      @JoinColumn(name = "dataset_id",
+        referencedColumnName = "id")},
+    inverseJoinColumns
+    = {
+      @JoinColumn(name = "category_id",
+        referencedColumnName = "id")})
+  @ManyToMany(fetch = FetchType.LAZY)
   private Collection<Category> categoryCollection;
-  @OneToMany(cascade = CascadeType.ALL,
-          mappedBy = "datasetId")
+  @OneToMany(cascade = CascadeType.REMOVE,
+    fetch = FetchType.LAZY,
+    mappedBy = "datasetId")
   private Collection<DatasetIssue> datasetIssueCollection;
-  @OneToOne(cascade = CascadeType.ALL,
-          mappedBy = "datasetId")
-  private PopularDataset popularDataset;
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER,
-          mappedBy = "datasetId")
+  @OneToMany(cascade = CascadeType.REMOVE,
+    fetch = FetchType.LAZY,
+    mappedBy = "datasetId")
   private Collection<Comment> commentCollection;
-  @JoinColumn(name = "cluster_id",
-          referencedColumnName = "cluster_id")
-  @ManyToOne
-  private RegisteredCluster clusterId;
-  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER,
-          mappedBy = "datasetId")
+  @JoinColumn(name = "owner_cluster_id",
+    referencedColumnName = "id")
+  @ManyToOne(fetch = FetchType.LAZY)
+  private RegisteredCluster ownerCluster;
+  @OneToMany(cascade = CascadeType.ALL,
+    fetch = FetchType.LAZY,
+    mappedBy = "datasetId")
   private Collection<DatasetRating> datasetRatingCollection;
 
   public Dataset() {
   }
 
-  public Dataset(Integer id) {
-    this.id = id;
-  }
-
-  public Dataset(Integer id, String publicId) {
-    this.id = id;
-    this.publicId = publicId;
-  }
-
-  public Dataset(String publicId, String name, String description, Date madePublicOn, String owner, String readme,
-          Collection<Category> categoryCollection, RegisteredCluster clusterId) {
+  public Dataset(String publicId, String name, String description, Date madePublicOn, String readmePath,
+    Collection<Category> categoryCollection, RegisteredCluster cluster) {
     this.publicId = publicId;
     this.name = name;
     this.description = description;
     this.madePublicOn = madePublicOn;
-    this.owner = owner;
-    this.readme = readme;
+    this.readmePath = readmePath;
     this.categoryCollection = categoryCollection;
-    this.clusterId = clusterId;
+    this.ownerCluster = cluster;
   }
 
-  public Integer getId() {
+  public int getId() {
     return id;
   }
 
-  public void setId(Integer id) {
+  public void setId(int id) {
     this.id = id;
   }
 
@@ -191,22 +174,6 @@ public class Dataset implements Serializable {
     this.madePublicOn = madePublicOn;
   }
 
-  public String getOwner() {
-    return owner;
-  }
-
-  public void setOwner(String owner) {
-    this.owner = owner;
-  }
-
-  public String getReadme() {
-    return readme;
-  }
-
-  public void setReadme(String readme) {
-    this.readme = readme;
-  }
-
   public Integer getStatus() {
     return status;
   }
@@ -231,14 +198,6 @@ public class Dataset implements Serializable {
     this.datasetIssueCollection = datasetIssueCollection;
   }
 
-  public PopularDataset getPopularDataset() {
-    return popularDataset;
-  }
-
-  public void setPopularDataset(PopularDataset popularDataset) {
-    this.popularDataset = popularDataset;
-  }
-
   public Collection<Comment> getCommentCollection() {
     return commentCollection;
   }
@@ -247,12 +206,12 @@ public class Dataset implements Serializable {
     this.commentCollection = commentCollection;
   }
 
-  public RegisteredCluster getClusterId() {
-    return clusterId;
+  public RegisteredCluster getOwnerCluster() {
+    return ownerCluster;
   }
 
-  public void setClusterId(RegisteredCluster clusterId) {
-    this.clusterId = clusterId;
+  public void setOwnerCluster(RegisteredCluster cluster) {
+    this.ownerCluster = cluster;
   }
 
   public Collection<DatasetRating> getDatasetRatingCollection() {
@@ -265,19 +224,21 @@ public class Dataset implements Serializable {
 
   @Override
   public int hashCode() {
-    int hash = 0;
-    hash += (id != null ? id.hashCode() : 0);
+    int hash = 3;
+    hash = 79 * hash + this.id;
     return hash;
   }
 
   @Override
-  public boolean equals(Object object) {
-    // TODO: Warning - this method won't work in the case the id fields are not set
-    if (!(object instanceof Dataset)) {
+  public boolean equals(Object obj) {
+    if (obj == null) {
       return false;
     }
-    Dataset other = (Dataset) object;
-    if ((this.id == null && other.id != null) || (this.id != null && !this.id.equals(other.id))) {
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final Dataset other = (Dataset) obj;
+    if (this.id != other.id) {
       return false;
     }
     return true;
@@ -287,5 +248,12 @@ public class Dataset implements Serializable {
   public String toString() {
     return "io.hops.site.dao.entity.Dataset[ id=" + id + " ]";
   }
-  
+
+  public String getReadmePath() {
+    return readmePath;
+  }
+
+  public void setReadmePath(String readmePath) {
+    this.readmePath = readmePath;
+  }
 }

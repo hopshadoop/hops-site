@@ -23,6 +23,7 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
@@ -39,59 +40,52 @@ import javax.xml.bind.annotation.XmlTransient;
 
 @Entity
 @Table(name = "registered_cluster",
-        catalog = "hops_site",
-        schema = "")
+  catalog = "hops_site",
+  schema = "")
 @XmlRootElement
 @NamedQueries({
   @NamedQuery(name = "RegisteredCluster.findAll",
-          query = "SELECT r FROM RegisteredCluster r"),
-  @NamedQuery(name = "RegisteredCluster.findByClusterId",
-          query
-          = "SELECT r FROM RegisteredCluster r WHERE r.clusterId = :clusterId"),
+    query = "SELECT r FROM RegisteredCluster r"),
+   @NamedQuery(name = "RegisteredCluster.findById",
+    query = "SELECT r FROM RegisteredCluster r WHERE r.id = :id"),
+  @NamedQuery(name = "RegisteredCluster.findByPublicId",
+    query = "SELECT r FROM RegisteredCluster r WHERE r.publicId = :publicId"),
   @NamedQuery(name = "RegisteredCluster.findBySearchEndpoint",
-          query
-          = "SELECT r FROM RegisteredCluster r WHERE r.searchEndpoint = :searchEndpoint"),
+    query = "SELECT r FROM RegisteredCluster r WHERE r.httpEndpoint = :httpEndpoint"),
   @NamedQuery(name = "RegisteredCluster.findByEmail",
-          query
-          = "SELECT r FROM RegisteredCluster r WHERE r.email = :email"),
+    query = "SELECT r FROM RegisteredCluster r WHERE r.email = :email"),
   @NamedQuery(name = "RegisteredCluster.findByCert",
-          query
-          = "SELECT r FROM RegisteredCluster r WHERE r.cert = :cert"),
-  @NamedQuery(name = "RegisteredCluster.findByGvodEndpoint",
-          query
-          = "SELECT r FROM RegisteredCluster r WHERE r.gvodEndpoint = :gvodEndpoint"),
-  @NamedQuery(name = "RegisteredCluster.findByHeartbeatsMissed",
-          query
-          = "SELECT r FROM RegisteredCluster r WHERE r.heartbeatsMissed = :heartbeatsMissed"),
+    query = "SELECT r FROM RegisteredCluster r WHERE r.cert = :cert"),
+  @NamedQuery(name = "RegisteredCluster.findByDelaEndpoint",
+    query = "SELECT r FROM RegisteredCluster r WHERE r.delaEndpoint = :delaEndpoint"),
   @NamedQuery(name = "RegisteredCluster.findByDateRegistered",
-          query
-          = "SELECT r FROM RegisteredCluster r WHERE r.dateRegistered = :dateRegistered"),
-  @NamedQuery(name = "RegisteredCluster.findByDateLastPing",
-          query
-          = "SELECT r FROM RegisteredCluster r WHERE r.dateLastPing = :dateLastPing")})
+    query = "SELECT r FROM RegisteredCluster r WHERE r.dateRegistered = :dateRegistered")})
 public class RegisteredCluster implements Serializable {
 
   private static final long serialVersionUID = 1L;
   @Id
-  @Basic(optional = false)
   @NotNull
-  @Size(min = 1,
-          max = 200)
-  @Column(name = "cluster_id")
-  private String clusterId;
-  @Basic(optional = false)
+  @Column(name = "id")
+  private int id;
   @NotNull
+  @Basic(optional = false)
   @Size(min = 1,
-          max = 100)
-  @Column(name = "search_endpoint")
-  private String searchEndpoint;
+    max = 200)
+  @Column(name = "public_id")
+  private String publicId;
+  @NotNull
+  @Basic(optional = false)
+  @Size(min = 1,
+    max = 100)
+  @Column(name = "http_endpoint")
+  private String httpEndpoint;
   @Pattern(regexp
-          = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
-          message = "Invalid email")
-  @Basic(optional = false)
+    = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
+    message = "Invalid email")
   @NotNull
+  @Basic(optional = false)
   @Size(min = 1,
-          max = 100)
+    max = 100)
   @Column(name = "email")
   private String email;
   @Basic(optional = false)
@@ -101,56 +95,30 @@ public class RegisteredCluster implements Serializable {
   private byte[] cert;
   @Basic(optional = false)
   @NotNull
-  @Size(min = 1, max = 100)
-  @Column(name = "gvod_endpoint")
-  private String gvodEndpoint;
-  @Basic(optional = false)
-  @NotNull
-  @Column(name = "heartbeats_missed")
-  private long heartbeatsMissed;
+  @Size(min = 1,
+    max = 100)
+  @Column(name = "dela_endpoint")
+  private String delaEndpoint;
   @Column(name = "date_registered")
   @Temporal(TemporalType.TIMESTAMP)
   private Date dateRegistered;
-  @Column(name = "date_last_ping")
-  @Temporal(TemporalType.TIMESTAMP)
-  private Date dateLastPing;
-  @OneToMany(mappedBy = "clusterId")
+  @OneToMany(fetch = FetchType.LAZY,
+    mappedBy = "ownerCluster")
   private Collection<Dataset> datasetCollection;
-  @OneToMany(cascade = CascadeType.ALL,
-          mappedBy = "clusterId")
+  @OneToMany(fetch = FetchType.LAZY,
+    cascade = CascadeType.ALL,
+    mappedBy = "cluster")
   private Collection<Users> usersCollection;
 
   public RegisteredCluster() {
   }
 
-  public RegisteredCluster(String clusterId) {
-    this.clusterId = clusterId;
-  }
-
-  public RegisteredCluster(String clusterId, String searchEndpoint, String email, byte[] cert, String gvodEndpoint,
-          long heartbeatsMissed) {
-    this.clusterId = clusterId;
-    this.searchEndpoint = searchEndpoint;
+  public RegisteredCluster(String publicId, String httpEndpoint, String email, byte[] cert, String delaEndpoint) {
+    this.publicId = publicId;
+    this.httpEndpoint = httpEndpoint;
     this.email = email;
     this.cert = cert;
-    this.gvodEndpoint = gvodEndpoint;
-    this.heartbeatsMissed = heartbeatsMissed;
-  }
-
-  public String getClusterId() {
-    return clusterId;
-  }
-
-  public void setClusterId(String clusterId) {
-    this.clusterId = clusterId;
-  }
-
-  public String getSearchEndpoint() {
-    return searchEndpoint;
-  }
-
-  public void setSearchEndpoint(String searchEndpoint) {
-    this.searchEndpoint = searchEndpoint;
+    this.delaEndpoint = delaEndpoint;
   }
 
   @XmlTransient
@@ -170,22 +138,6 @@ public class RegisteredCluster implements Serializable {
   public void setCert(byte[] cert) {
     this.cert = cert;
   }
-  
-  public String getGvodEndpoint() {
-    return gvodEndpoint;
-  }
-
-  public void setGvodEndpoint(String gvodEndpoint) {
-    this.gvodEndpoint = gvodEndpoint;
-  }
-
-  public long getHeartbeatsMissed() {
-    return heartbeatsMissed;
-  }
-
-  public void setHeartbeatsMissed(long heartbeatsMissed) {
-    this.heartbeatsMissed = heartbeatsMissed;
-  }
 
   public Date getDateRegistered() {
     return dateRegistered;
@@ -193,14 +145,6 @@ public class RegisteredCluster implements Serializable {
 
   public void setDateRegistered(Date dateRegistered) {
     this.dateRegistered = dateRegistered;
-  }
-
-  public Date getDateLastPing() {
-    return dateLastPing;
-  }
-
-  public void setDateLastPing(Date dateLastPing) {
-    this.dateLastPing = dateLastPing;
   }
 
   @XmlTransient
@@ -224,7 +168,7 @@ public class RegisteredCluster implements Serializable {
   @Override
   public int hashCode() {
     int hash = 0;
-    hash += (clusterId != null ? clusterId.hashCode() : 0);
+    hash += (publicId != null ? publicId.hashCode() : 0);
     return hash;
   }
 
@@ -235,8 +179,8 @@ public class RegisteredCluster implements Serializable {
       return false;
     }
     RegisteredCluster other = (RegisteredCluster) object;
-    if ((this.clusterId == null && other.clusterId != null) || (this.clusterId != null && !this.clusterId.equals(
-            other.clusterId))) {
+    if ((this.publicId == null && other.publicId != null) || (this.publicId != null && !this.publicId.equals(
+      other.publicId))) {
       return false;
     }
     return true;
@@ -244,7 +188,40 @@ public class RegisteredCluster implements Serializable {
 
   @Override
   public String toString() {
-    return "io.hops.site.dao.entity.RegisteredCluster[ clusterId=" + clusterId + " ]";
+    return "io.hops.site.dao.entity.RegisteredCluster[ clusterId=" + publicId + " ]";
   }
 
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public String getPublicId() {
+    return publicId;
+  }
+
+  public void setPublicId(String publicId) {
+    this.publicId = publicId;
+  }
+
+  public String getHttpEndpoint() {
+    return httpEndpoint;
+  }
+
+  public void setHttpEndpoint(String httpEndpoint) {
+    this.httpEndpoint = httpEndpoint;
+  }
+
+  public String getDelaEndpoint() {
+    return delaEndpoint;
+  }
+
+  public void setDelaEndpoint(String delaEndpoint) {
+    this.delaEndpoint = delaEndpoint;
+  }
+
+  
 }

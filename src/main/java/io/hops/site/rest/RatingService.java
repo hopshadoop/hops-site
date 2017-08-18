@@ -57,9 +57,9 @@ public class RatingService {
   @GET
   @NoCache
   @Path("{datasetId}")
-  public Response getRating(@PathParam("datasetId") Integer datasetId) {
-    RatingDTO ratingDto = ratingController.getRating(datasetId);
-    LOGGER.log(Level.INFO, "Get all rating for dataset: {0}", datasetId);
+  public Response getRating(@PathParam("datasetPublicId") String datasetPublicId) {
+    RatingDTO ratingDto = ratingController.getRating(datasetPublicId);
+    LOGGER.log(Level.INFO, "Get all rating for dataset: {0}", datasetPublicId);
     return Response.ok().entity(ratingDto).build();
   }
 
@@ -96,8 +96,8 @@ public class RatingService {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addRating(RateDTO datasetRating) {
     ratingController.addRating(datasetRating);
-    LOGGER.log(Level.INFO, "Add rating for dataset: {0}", datasetRating.getDataset().getPublicId());
-    return Response.ok("OK").build();
+    LOGGER.log(Level.INFO, "Add rating for dataset: {0}", datasetRating.getDatasetId());
+    return Response.ok().build();
   }
 
   @PUT

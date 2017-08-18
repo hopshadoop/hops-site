@@ -23,7 +23,7 @@ public class CommentDTO {
   private Integer id;
   private String content;
   private UserDTO user;
-  private DatasetDTO dataset;
+  private String datasetId;
 
   public CommentDTO() {
   }
@@ -52,12 +52,11 @@ public class CommentDTO {
     this.user = user;
   }
 
-  public DatasetDTO getDataset() {
-    return dataset;
+  public String getDatasetId() {
+    return datasetId;
   }
 
-  public void setDataset(DatasetDTO dataset) {
-    this.dataset = dataset;
+  public void setDatasetId(String datasetId) {
+    this.datasetId = datasetId;
   }
-
 }

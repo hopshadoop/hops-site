@@ -54,7 +54,7 @@ import javax.xml.bind.annotation.XmlTransient;
   @NamedQuery(name = "Users.findByEmail",
           query = "SELECT u FROM Users u WHERE u.email = :email"),
   @NamedQuery(name = "Users.findByEmailAndClusterId",
-          query = "SELECT u FROM Users u WHERE u.email = :email AND u.clusterId.clusterId = :clusterId"),
+          query = "SELECT u FROM Users u WHERE u.email = :email AND u.cluster.id = :clusterId"),
   @NamedQuery(name = "Users.findByStatus",
           query = "SELECT u FROM Users u WHERE u.status = :status")})
 public class Users implements Serializable {
@@ -103,7 +103,7 @@ public class Users implements Serializable {
   @JoinColumn(name = "cluster_id",
           referencedColumnName = "cluster_id")
   @ManyToOne(optional = false)
-  private RegisteredCluster clusterId;
+  private RegisteredCluster cluster;
 
   public Users() {
   }
@@ -123,7 +123,7 @@ public class Users implements Serializable {
     this.firstname = firstname;
     this.lastname = lastname;
     this.email = email;
-    this.clusterId = clusterId;
+    this.cluster = clusterId;
   }
 
   public Integer getId() {
@@ -210,12 +210,12 @@ public class Users implements Serializable {
 
   @XmlTransient
   @JsonIgnore
-  public RegisteredCluster getClusterId() {
-    return clusterId;
+  public RegisteredCluster getCluster() {
+    return cluster;
   }
 
-  public void setClusterId(RegisteredCluster clusterId) {
-    this.clusterId = clusterId;
+  public void setCluster(RegisteredCluster clusterId) {
+    this.cluster = clusterId;
   }
 
   @Override

@@ -16,12 +16,19 @@
 package io.hops.site.dao.facade;
 
 import io.hops.site.dao.entity.Category;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
 @Stateless
-public class CategoryFacade extends AbstractFacade<Category>{
+public class CategoryFacade extends AbstractFacade<Category> {
+
   @PersistenceContext(unitName = "hops-sitePU")
   private EntityManager em;
 
@@ -37,5 +44,32 @@ public class CategoryFacade extends AbstractFacade<Category>{
   protected EntityManager getEntityManager() {
     return em;
   }
-  
+
+  public Collection<Category> getAndStoreCategories(Collection<String> categoryNames) {
+    List<Category> categories = new LinkedList<>();
+    if (categoryNames == null || categoryNames.isEmpty()) {
+      return categories;
+    }
+
+    for (String categoryName : categoryNames) {
+      Optional<Category> c = getByName(categoryName);
+      if (!c.isPresent()) {
+        create(new Category(categoryName));
+        c = getByName(categoryName);
+      }
+      categories.add(c.get());
+    }
+
+    return categories;
+  }
+
+  public Optional<Category> getByName(String category) {
+    TypedQuery<Category> query = em.createNamedQuery(Category.FIND_BY_NAME, Category.class)
+      .setParameter(Category.NAME, category);
+    try {
+      return Optional.of(query.getSingleResult());
+    } catch (NoResultException e) {
+      return Optional.empty();
+    }
+  }
 }

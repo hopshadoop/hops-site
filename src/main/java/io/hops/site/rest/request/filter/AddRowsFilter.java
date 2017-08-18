@@ -17,11 +17,10 @@ package io.hops.site.rest.request.filter;
 
 import io.hops.site.controller.DatasetController;
 import io.hops.site.controller.UsersController;
-import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.Users;
-import io.hops.site.dto.DatasetDTO;
 import io.hops.site.dto.UserDTO;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
@@ -65,24 +64,12 @@ public class AddRowsFilter implements ContainerRequestFilter {
     }
   }
 
-  private void addDatasetIfNotExist(DatasetDTO datasetDTO) {
-    if (datasetDTO.getPublicId() == null) {
-      return;
-    }
-    Dataset ds = datasetController.findDatasetByPublicId(datasetDTO.getPublicId());
-    if (ds != null) {
-      return;
-    }
-    datasetController.addDataset(datasetDTO);
-    LOGGER.log(Level.INFO, "Add new dataset with public id: {0}", datasetDTO.getPublicId());
-  }
-
   private void addUserIfNotExist(UserDTO userDTO) {
     if (userDTO.getEmail() == null) {
       return;
     }
-    Users user = usersController.findUserByEmailAndClusterId(userDTO.getEmail(), userDTO.getClusterId());
-    if (user != null) {
+    Optional<Users> user = usersController.findUserByEmailAndClusterId(userDTO.getEmail(), userDTO.getClusterId());
+    if (!user.isPresent()) {
       return;
     }
     usersController.addNewUser(userDTO);

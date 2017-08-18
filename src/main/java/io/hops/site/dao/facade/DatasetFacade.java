@@ -15,7 +15,14 @@
  */
 package io.hops.site.dao.facade;
 
+import io.hops.site.dao.entity.Category;
 import io.hops.site.dao.entity.Dataset;
+import io.hops.site.dao.entity.RegisteredCluster;
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -41,14 +48,38 @@ public class DatasetFacade extends AbstractFacade<Dataset> {
     return em;
   }
 
-  public Dataset findByPublicId(String publicId) {
-    TypedQuery<Dataset> query = em.createNamedQuery("Dataset.findByPublicId", Dataset.class).setParameter("publicId",
-            publicId);
+  public Optional<Dataset> findByPublicId(String publicId) {
+    TypedQuery<Dataset> query = em.createNamedQuery(Dataset.FIND_BY_PUBLIC_ID, Dataset.class)
+      .setParameter(Dataset.PUBLIC_ID, publicId);
     try {
-      return query.getSingleResult();
+      return Optional.of(query.getSingleResult());
     } catch (NoResultException e) {
-      return null;
+      return Optional.empty();
     }
   }
 
+  public Collection<Integer> findIds(Collection<String> publicIdList) {
+    Collection<Dataset> datasets = findByPublicId(publicIdList);
+    List<Integer> datasetIds = new LinkedList<>();
+    for(Dataset dataset : datasets) {
+      datasetIds.add(dataset.getId());
+    }
+    return datasetIds;
+  }
+  
+  public List<Dataset> findByPublicId(Collection<String> publicIdList) {
+    if(publicIdList.isEmpty()) {
+      return new LinkedList<>();
+    }
+    TypedQuery<Dataset> query = em.createNamedQuery(Dataset.FIND_BY_PUBLIC_ID_LIST, Dataset.class)
+      .setParameter(Dataset.PUBLIC_ID_LIST, publicIdList);
+    return query.getResultList();
+  }
+
+  public Dataset createDataset(String publicId, String name, String description, Date publishedOn, String readmePath,
+    Collection<Category> categories, RegisteredCluster cluster) {
+    create(new Dataset(publicId, name, description, publishedOn, readmePath, categories, cluster));
+    Optional<Dataset> d = findByPublicId(publicId);
+    return d.get();
+  }
 }
