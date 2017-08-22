@@ -1,11 +1,11 @@
 package io.hops.site.rest;
 
 import io.hops.site.controller.ClusterController;
+import io.hops.site.dto.AddressJSON;
+import io.hops.site.dto.ClustersDTO;
 import io.hops.site.dto.HeavyPingDTO;
 import io.hops.site.dto.IdentificationJSON;
-import io.hops.site.dto.PingResponse;
-import io.hops.site.dto.RegisterJSON;
-import io.hops.site.dto.RegisteredClusterJSON;
+import io.hops.site.dto.RegisterDTO;
 import io.hops.site.dto.RegisteredJSON;
 import io.hops.site.rest.annotation.NoCache;
 import io.swagger.annotations.Api;
@@ -49,8 +49,8 @@ public class ClusterService {
   @GET
   @NoCache
   public Response getRegisterd(@Context SecurityContext sc) {
-    List<RegisteredClusterJSON> to_ret = clusterController.getAll();
-    return Response.status(Response.Status.OK).entity(new PingResponse(to_ret)).build();
+    List<AddressJSON> to_ret = clusterController.getAll();
+    return Response.status(Response.Status.OK).entity(new ClustersDTO(to_ret)).build();
   }
 
   @GET
@@ -73,13 +73,12 @@ public class ClusterService {
   @POST
   @NoCache
   @Path("register")
-  public Response register(RegisterJSON registerJson, @Context HttpServletRequest req) throws
+  public Response register(RegisterDTO.Req registerJson, @Context HttpServletRequest req) throws
     CertificateEncodingException {
     X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
     X509Certificate clientCert = certs[0];
-    registerJson.setDerCert(clientCert.getEncoded());
     //TODO:check if cert email == registerJson.getEmail()
-    String registeredId = clusterController.registerCluster(registerJson);
+    String registeredId = clusterController.registerCluster(clientCert.getEncoded(), registerJson);
     LOGGER.log(Level.INFO, "Registering new cluster.");
     return Response.status(Response.Status.OK).entity(new RegisteredJSON(registeredId)).build();
   }
