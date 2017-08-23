@@ -178,7 +178,7 @@ public class DatasetController {
     }
   }
 
-  public void downloadComplete(String datasetPublicId, String clusterPublicId) throws AppException {
+  public void complete(String datasetPublicId, String clusterPublicId) throws AppException {
     Optional<LiveDataset> c = liveDatasetFacade.connection(datasetPublicId, clusterPublicId);
     if (c.isPresent()) {
       LiveDataset connection = c.get();

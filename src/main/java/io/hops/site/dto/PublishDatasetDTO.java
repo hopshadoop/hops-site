@@ -58,7 +58,6 @@ public class PublishDatasetDTO {
     private String datasetPublicId;
 
     public Response() {
-      this.datasetPublicId = datasetPublicId;
     }
 
     public Response(String datasetPublicId) {

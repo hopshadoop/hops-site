@@ -20,6 +20,7 @@ import io.hops.site.controller.DatasetController;
 import io.hops.site.dto.BasicIdentifyDTO;
 import io.hops.site.dto.DatasetIssueDTO;
 import io.hops.site.dto.JsonResponse;
+import io.hops.site.dto.OkDTO;
 import io.hops.site.dto.PublishDatasetDTO;
 import io.hops.site.dto.SearchDTO;
 import io.hops.site.rest.annotation.NoCache;
@@ -108,7 +109,7 @@ public class DatasetService {
     try {
       datasetCtrl.unpublishDataset(msg.getDatasetId(), msg.getClusterId());
       LOGGER.log(Level.INFO, "unpublished dataset:{}", msg.getDatasetId());
-      return Response.ok().build();
+      return Response.ok(new OkDTO()).build();
     } catch (AppException ex) {
       LOGGER.log(Level.WARNING, "could not unpublish dataset - {}", ex.getMessage());
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
@@ -122,7 +123,7 @@ public class DatasetService {
     try {
       datasetCtrl.download(msg.getDatasetId(), msg.getClusterId());
       LOGGER.log(Level.INFO, "download dataset:{}", msg.getDatasetId());
-      return Response.ok().build();
+      return Response.ok().entity(new OkDTO()).build();
     } catch (AppException ex) {
       LOGGER.log(Level.WARNING, "could not download dataset - {}", ex.getMessage());
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
@@ -131,12 +132,12 @@ public class DatasetService {
 
   @POST
   @NoCache
-  @Path("downloadComplete")
+  @Path("complete")
   public Response downloadComplete(BasicIdentifyDTO msg) {
     try {
-      datasetCtrl.downloadComplete(msg.getDatasetId(), msg.getClusterId());
+      datasetCtrl.complete(msg.getDatasetId(), msg.getClusterId());
       LOGGER.log(Level.INFO, "download complete dataset:{}", msg.getDatasetId());
-      return Response.ok().build();
+      return Response.ok().entity(new OkDTO()).build();
     } catch (AppException ex) {
       LOGGER.log(Level.WARNING, "could not complete download dataset - {}", ex.getMessage());
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
