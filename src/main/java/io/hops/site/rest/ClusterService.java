@@ -1,6 +1,7 @@
 package io.hops.site.rest;
 
 import io.hops.site.controller.ClusterController;
+import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dto.AddressJSON;
 import io.hops.site.dto.ClustersDTO;
 import io.hops.site.dto.HeavyPingDTO;
@@ -45,7 +46,18 @@ public class ClusterService {
   private final static Logger LOGGER = Logger.getLogger(ClusterService.class.getName());
   @EJB
   private ClusterController clusterController;
+  @EJB 
+  private HopsSiteSettings hsettings;
 
+  @GET
+  @NoCache
+  @Path("dela/version")
+  public Response getVersion() {
+    LOGGER.log(Level.FINE, "dela version request");
+    String version = hsettings.getDELA_VERSION();
+    return Response.ok(version).build();
+  }
+  
   @GET
   @NoCache
   public Response getRegisterd(@Context SecurityContext sc) {
@@ -122,4 +134,5 @@ public class ClusterService {
     LOGGER.log(Level.INFO, "Registered cluster with id: {0} removed.", clusterId);
     return Response.status(Response.Status.OK).build();
   }
+  
 }
