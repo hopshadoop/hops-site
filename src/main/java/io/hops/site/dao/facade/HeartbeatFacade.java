@@ -40,8 +40,8 @@ public class HeartbeatFacade extends AbstractFacade<Heartbeat> {
   }
   
   public int deleteHeartbeats(Date olderThan) {
-    TypedQuery<Heartbeat> query = em.createNamedQuery("Dataset.deleteOlderThan", Heartbeat.class).setParameter("date",
-      olderThan);
+    TypedQuery<Heartbeat> query = em.createNamedQuery("Heartbeat.deleteOlderThan", Heartbeat.class)
+      .setParameter("date", olderThan);
     int updates = query.executeUpdate();
     return updates;
   }
