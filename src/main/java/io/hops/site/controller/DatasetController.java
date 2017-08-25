@@ -87,16 +87,16 @@ public class DatasetController {
   private final Random rand = new Random();
   private final ObjectMapper mapper = new ObjectMapper();
 
-  public SearchDTO.BaseResult search(SearchDTO.Params searchParams) throws AppException {
+  public SearchDTO.SearchResult search(SearchDTO.Params searchParams) throws AppException {
     String sessionId = settings.getSessionId();
     QueryBuilder qb = DatasetElasticHelper.getNameDescriptionMetadataQuery(searchParams.getSearchTerm());
     SearchHits elasticResult = elasticCtrl.search(settings.DELA_DOC_INDEX, new String[]{settings.DELA_DOC_TYPE}, qb);
     SearchSession session = SearchSession.create(searchParams, elasticResult);
     sessionCtrl.put(sessionId, session);
-    return new SearchDTO.BaseResult(sessionId, session.cachedItems.size());
+    return new SearchDTO.SearchResult(sessionId, session.cachedItems.size());
   }
 
-  public SearchDTO.Page getSearchPage(String sessionId, int startItem, int nrItems) throws AppException {
+  public SearchDTO.PageResult getSearchPage(String sessionId, int startItem, int nrItems) throws AppException {
     Optional<SearchSession> session;
     try {
       session = (Optional) sessionCtrl.get(sessionId);
@@ -116,7 +116,7 @@ public class DatasetController {
         elem.add(e.build());
       }
     }
-    return new SearchDTO.Page(startItem, elem);
+    return new SearchDTO.PageResult(startItem, elem);
   }
 
   public String publishDataset(PublishDatasetDTO.Request req) throws AppException {

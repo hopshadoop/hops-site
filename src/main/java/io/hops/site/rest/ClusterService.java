@@ -104,7 +104,7 @@ public class ClusterService {
     switch (action) {
       case HEAVY_PING:
         LOGGER.log(Level.INFO, "Registering heavy ping from cluster id: {0}.", ping.getClusterId());
-        return Response.ok().build();
+        return Response.ok("ok").build();
       default:
         throw new IllegalStateException("hops-site logic exception");
     }
@@ -120,7 +120,7 @@ public class ClusterService {
         throw new IllegalStateException(action.toString());
       case PING:
         LOGGER.log(Level.INFO, "Registering ping from cluster id: {0}.", ping.getClusterId());
-        return Response.ok().build();
+        return Response.ok("ok").build();
       default:
         throw new IllegalStateException("hops-site logic exception");
     }

@@ -31,14 +31,11 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -57,31 +54,33 @@ public class DatasetService {
   @POST
   @NoCache
   @Path("search")
-  public Response search(SearchDTO.Params searchParams,
-    @Context HttpServletRequest req) {
+  public Response search(SearchDTO.Params searchParams) {
     searchDTOParamsSanityCheck(searchParams);
     try {
-      SearchDTO.BaseResult searchResult = datasetCtrl.search(searchParams);
+      SearchDTO.SearchResult searchResult = datasetCtrl.search(searchParams);
       return Response.ok().entity(searchResult).build();
     } catch (AppException ex) {
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
     }
   }
   
-  private void searchDTOParamsSanityCheck(SearchDTO.Params searchParams) {
+  private void searchDTOParamsSanityCheck(SearchDTO.Params req) {
   }
   
   @POST
   @NoCache
   @Path("page")
-  public Response getPage(@QueryParam("sessionId") String sessionId, @QueryParam("startItem") int startItem,
-    @QueryParam("nrElem") int nrElem) {
+  public Response getPage(SearchDTO.Page req) {
+    searchDTOPageSanityCheck(req);
     try {
-      SearchDTO.Page result = datasetCtrl.getSearchPage(sessionId, startItem, nrElem);
+      SearchDTO.PageResult result = datasetCtrl.getSearchPage(req.getSessionId(), req.getStartItem(), req.getNrItems());
       return Response.ok().entity(result).build();
     } catch (AppException ex) {
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
     }
+  }
+  
+  private void searchDTOPageSanityCheck(SearchDTO.Page req) {
   }
   
   @PUT
