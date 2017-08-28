@@ -1,3 +1,9 @@
+ CREATE TABLE `variables` (
+  `id` varchar(255) NOT NULL,
+  `value` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=ndbcluster DEFAULT CHARSET=latin1 COLLATE=latin1_general_cs;
+
 CREATE TABLE `registered_cluster` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `public_id` varchar(200) NOT NULL UNIQUE,

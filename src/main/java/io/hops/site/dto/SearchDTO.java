@@ -27,15 +27,15 @@ public class SearchDTO {
     }
   }
 
-  public static class BaseResult {
+  public static class SearchResult {
 
     private String sessionId;
     private int nrHits;
 
-    public BaseResult() {
+    public SearchResult() {
     }
 
-    public BaseResult(String sessionId, int nrHits) {
+    public SearchResult(String sessionId, int nrHits) {
       this.sessionId = sessionId;
       this.nrHits = nrHits;
     }
@@ -109,14 +109,53 @@ public class SearchDTO {
   }
 
   public static class Page {
-
+    private String sessionId;
     private int startItem;
-    private List<Item> items;
+    private int nrItems;
 
     public Page() {
     }
 
-    public Page(int startItem, List<Item> items) {
+    public Page(String sessionId, int startItem, int nrItems) {
+      this.sessionId = sessionId;
+      this.startItem = startItem;
+      this.nrItems = nrItems;
+    }
+
+    public String getSessionId() {
+      return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+      this.sessionId = sessionId;
+    }
+
+    public int getStartItem() {
+      return startItem;
+    }
+
+    public void setStartItem(int startItem) {
+      this.startItem = startItem;
+    }
+
+    public int getNrItems() {
+      return nrItems;
+    }
+
+    public void setNrItems(int nrItems) {
+      this.nrItems = nrItems;
+    }
+  }
+
+  public static class PageResult {
+
+    private int startItem;
+    private List<Item> items;
+
+    public PageResult() {
+    }
+
+    public PageResult(int startItem, List<Item> items) {
       this.startItem = startItem;
       this.items = items;
     }
@@ -137,4 +176,5 @@ public class SearchDTO {
       this.items = items;
     }
   }
+  
 }
