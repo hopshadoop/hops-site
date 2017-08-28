@@ -1,9 +1,9 @@
-package io.hops.site.dto;
+package io.hops.site.old_dto;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class PopularDatasetJSON {
+public class PopularDatasetDTO {
 
   private String datasetId;
   private ManifestJSON manifestJson;
@@ -11,10 +11,10 @@ public class PopularDatasetJSON {
   private int seeds;
   private String clusterId;
 
-  public PopularDatasetJSON() {
+  public PopularDatasetDTO() {
   }
 
-  public PopularDatasetJSON(ManifestJSON manifestJson, String datasetId, int leeches, int seeds) {
+  public PopularDatasetDTO(ManifestJSON manifestJson, String datasetId, int leeches, int seeds) {
     this.manifestJson = manifestJson;
     this.datasetId = datasetId;
     this.leeches = leeches;

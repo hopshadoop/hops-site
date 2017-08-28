@@ -17,7 +17,7 @@ package io.hops.site.rest.request.filter;
 
 import io.hops.site.controller.ClusterController;
 import io.hops.site.dao.entity.RegisteredCluster;
-import io.hops.site.dto.JsonResponse;
+import io.hops.site.old_dto.JsonResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.AccessControlException;

@@ -22,8 +22,8 @@ import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dao.facade.HeartbeatFacade;
 import io.hops.site.dao.facade.LiveDatasetFacade;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
-import io.hops.site.dto.AddressJSON;
-import io.hops.site.dto.RegisterDTO;
+import io.hops.site.dto.ClusterAddressDTO;
+import io.hops.site.dto.ClusterServiceDTO;
 import io.hops.site.rest.ClusterService;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,14 +56,14 @@ public class ClusterController {
    * @param msg
    * @return
    */
-  public String registerCluster(byte[] cert, RegisterDTO.Req msg) {
+  public String registerCluster(byte[] cert, ClusterServiceDTO.Register msg) {
     Optional<RegisteredCluster> c = clusterFacade.findByEmail(msg.getEmail());
     if (c.isPresent()) {
       return c.get().getPublicId();
     }
     String clusterPublicId = settings.getClusterId();
-    RegisteredCluster cluster = new RegisteredCluster(clusterPublicId, msg.getHttpEndpoint(),
-      msg.getEmail().toLowerCase(), cert, msg.getDelaEndpoint());
+    RegisteredCluster cluster = new RegisteredCluster(clusterPublicId, msg.getDelaTransferAddress(), 
+      msg.getDelaClusterAddress(), msg.getEmail().toLowerCase(), cert);
     clusterFacade.create(cluster);
     return clusterPublicId;
   }
@@ -79,7 +79,7 @@ public class ClusterController {
         return Action.HEAVY_PING;
       }
     } else {
-      throw new IllegalStateException("Authentication Filter - operations performed from unregistered cluster");
+      return Action.REGISTER;
     }
   }
 
@@ -88,8 +88,8 @@ public class ClusterController {
     heartbeatFacade.edit(heartbeat);
   }
 
-  public Action heavyPing(String clusterPublicId, List<String> upldDSPublicIds, List<String> dwnlDSPublicIds) {
-    Optional<RegisteredCluster> c = this.clusterFacade.findByPublicId(clusterPublicId);
+  public Action heavyPing(String publicCId, List<String> upldDSIds, List<String> dwnlDSIds) {
+    Optional<RegisteredCluster> c = this.clusterFacade.findByPublicId(publicCId);
     if (c.isPresent()) {
       RegisteredCluster cluster = c.get();
       Optional<Heartbeat> h = heartbeatFacade.findByClusterId(cluster.getId());
@@ -98,18 +98,28 @@ public class ClusterController {
       } else {
         heartbeatFacade.create(new Heartbeat(cluster.getId(), settings.getDateNow()));
       }
-      liveDatasetFacade.downloadDatasets(cluster.getId(), datasetFacade.findIds(upldDSPublicIds));
-      liveDatasetFacade.uploadDatasets(cluster.getId(), datasetFacade.findIds(dwnlDSPublicIds));
+      liveDatasetFacade.downloadDatasets(cluster.getId(), datasetFacade.findIds(upldDSIds));
+      liveDatasetFacade.uploadDatasets(cluster.getId(), datasetFacade.findIds(dwnlDSIds));
       return Action.HEAVY_PING;
     } else {
-      throw new IllegalStateException("Authentication Filter - operations performed from unregistered cluster");
+      return Action.REGISTER;
     }
   }
 
   public static enum Action {
+    REGISTER("Cluster not registered."),
+    HEAVY_PING("Heavy ping required"),
+    PING("Ping");
+    
+    private String msg;
 
-    HEAVY_PING,
-    PING,
+    Action(String msg) {
+      this.msg = msg;
+    }
+    @Override
+    public String toString() {
+      return msg;
+    }
   }
 
   /**
@@ -117,11 +127,11 @@ public class ClusterController {
    *
    * @return list of RegisteredClusterJSON
    */
-  public List<AddressJSON> getAll() {
+  public List<ClusterAddressDTO> getAll() {
     List<RegisteredCluster> registeredClusters = clusterFacade.findAll();
-    List<AddressJSON> to_ret = new ArrayList<>();
+    List<ClusterAddressDTO> to_ret = new ArrayList<>();
     for (RegisteredCluster r : registeredClusters) {
-      to_ret.add(new AddressJSON(r.getPublicId(), r.getDelaEndpoint(), r.getHttpEndpoint()));
+      to_ret.add(new ClusterAddressDTO(r.getPublicId(), r.getDelaEndpoint(), r.getHttpEndpoint()));
     }
     return to_ret;
   }

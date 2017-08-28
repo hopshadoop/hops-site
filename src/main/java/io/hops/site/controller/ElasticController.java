@@ -82,6 +82,7 @@ public class ElasticController {
 
       int respStatus = response.getShardInfo().status().getStatus();
       if (respStatus == 200) {
+        LOG.log(Settings.DEBUG, "added to elastic:{0}", docId);
         return;
       } else {
         LOG.log(Level.WARNING, "Elasticsearch error code: {0}", respStatus);

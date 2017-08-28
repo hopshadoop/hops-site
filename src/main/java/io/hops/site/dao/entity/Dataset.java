@@ -18,6 +18,8 @@ package io.hops.site.dao.entity;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -255,5 +257,13 @@ public class Dataset implements Serializable {
 
   public void setReadmePath(String readmePath) {
     this.readmePath = readmePath;
+  }
+  
+  public Collection<String> getCategories() {
+    List<String> result = new LinkedList<>();
+    for(Category c : categoryCollection) {
+      result.add(c.getName());
+    }
+    return result;
   }
 }

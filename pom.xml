@@ -98,7 +98,7 @@
               <webappDirectory>${basedir}/target/${project.build.finalName}</webappDirectory>
               <webResources>
                 <webResource>
-                  <directory>/home/ermiasg/Documents/work/swagger-ui-master/dist</directory>
+                  <directory>/Users/Alex/Documents/Work/Code3/tools/swagger-ui/dist</directory>
                   <targetPath>swagger-ui</targetPath>
                 </webResource>
               </webResources>

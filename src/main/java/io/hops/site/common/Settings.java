@@ -4,6 +4,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
@@ -78,9 +79,6 @@ public class Settings {
 
   // Elasticsearch
   public static final String DELA_DOC_INDEX = "hops-site";
-  public static final String DELA_DOC_TYPE = "dataset";
-  public static final String DELA_DOC_NAME_FIELD = "name";
-  public static final String DELA_DOC_DESCRIPTION_FIELD = "description";
   public static final String DELA_DOC_METADATA_FIELD = "xattr";
   public static final String DELA_DOC_METADATA_FIELDS = DELA_DOC_METADATA_FIELD + ".*";
 
@@ -132,4 +130,7 @@ public class Settings {
   public static String getSessionId() {
     return "" + rand.nextInt();
   }
+  
+  //LOG
+  public final static Level DEBUG = Level.INFO;
 }

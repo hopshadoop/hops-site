@@ -116,12 +116,13 @@ public class RegisteredCluster implements Serializable {
   public RegisteredCluster() {
   }
 
-  public RegisteredCluster(String publicId, String httpEndpoint, String email, byte[] cert, String delaEndpoint) {
+  public RegisteredCluster(String publicId, String delaTransferAddress, String delaClusterAddress, String email, 
+    byte[] cert) {
     this.publicId = publicId;
-    this.httpEndpoint = httpEndpoint;
+    this.httpEndpoint = delaClusterAddress;
     this.email = email;
     this.cert = cert;
-    this.delaEndpoint = delaEndpoint;
+    this.delaEndpoint = delaTransferAddress;
   }
 
   @XmlTransient

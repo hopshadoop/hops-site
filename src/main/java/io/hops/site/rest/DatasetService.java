@@ -17,14 +17,16 @@ package io.hops.site.rest;
 
 import io.hops.site.common.AppException;
 import io.hops.site.controller.DatasetController;
-import io.hops.site.dto.BasicIdentifyDTO;
-import io.hops.site.dto.DatasetIssueDTO;
-import io.hops.site.dto.JsonResponse;
-import io.hops.site.dto.OkDTO;
-import io.hops.site.dto.PublishDatasetDTO;
-import io.hops.site.dto.SearchDTO;
+import io.hops.site.controller.HopsSiteSettings;
+import io.hops.site.dto.DatasetDTO;
+import io.hops.site.dto.SearchServiceDTO;
+import io.hops.site.old_dto.DatasetIssueDTO;
+import io.hops.site.old_dto.JsonResponse;
+import io.hops.site.old_dto.PopularDatasetDTO;
 import io.hops.site.rest.annotation.NoCache;
 import io.swagger.annotations.Api;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -32,14 +34,16 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("dataset")
+@Path("/dataset")
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "/dataset",
@@ -47,114 +51,145 @@ import javax.ws.rs.core.Response;
 @TransactionAttribute(TransactionAttributeType.NEVER)
 public class DatasetService {
 
-  private final static Logger LOGGER = Logger.getLogger(DatasetService.class.getName());
+  private final static Logger LOG = Logger.getLogger(DatasetService.class.getName());
   @EJB
   private DatasetController datasetCtrl;
 
   @POST
   @NoCache
-  @Path("search")
-  public Response search(SearchDTO.Params searchParams) {
-    searchDTOParamsSanityCheck(searchParams);
-    try {
-      SearchDTO.SearchResult searchResult = datasetCtrl.search(searchParams);
-      return Response.ok().entity(searchResult).build();
-    } catch (AppException ex) {
-      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
-    }
-  }
-  
-  private void searchDTOParamsSanityCheck(SearchDTO.Params req) {
-  }
-  
-  @POST
-  @NoCache
-  @Path("page")
-  public Response getPage(SearchDTO.Page req) {
-    searchDTOPageSanityCheck(req);
-    try {
-      SearchDTO.PageResult result = datasetCtrl.getSearchPage(req.getSessionId(), req.getStartItem(), req.getNrItems());
-      return Response.ok().entity(result).build();
-    } catch (AppException ex) {
-      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
-    }
-  }
-  
-  private void searchDTOPageSanityCheck(SearchDTO.Page req) {
-  }
-  
-  @PUT
-  @NoCache
-  @Path("publish")
-  public Response publish(PublishDatasetDTO.Request msg) {
+  @Path("/publish/{publicCId}/{publicDSId}")
+  public Response publish(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId, 
+    DatasetDTO.Proto msg) {
     publishDatasetSanityCheck(msg);
     try {
-      String datasetPublicId = datasetCtrl.publishDataset(msg);
-      LOGGER.log(Level.INFO, "published dataset:{}", msg.getName());
-      return Response.ok().entity(new PublishDatasetDTO.Response(datasetPublicId)).build();
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} publishing", 
+        new Object[]{publicDSId, publicCId});
+      datasetCtrl.publishDataset(publicDSId, publicCId, msg);
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} publishing - done", 
+        new Object[]{publicDSId, publicCId});
+      return Response.ok(publicDSId).build();
     } catch (AppException ex) {
-      LOGGER.log(Level.WARNING, "could not publish dataset - {}", ex.getMessage());
+      LOG.log(Level.WARNING, "could not publish dataset - {}", ex.getMessage());
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
     }
   }
 
-  private void publishDatasetSanityCheck(PublishDatasetDTO.Request publishDataset) {
+  private void publishDatasetSanityCheck(DatasetDTO.Proto dataset) {
   }
   
   @POST
   @NoCache
-  @Path("unpublish")
-  public Response unpublish(BasicIdentifyDTO msg) {
+  @Path("unpublish/{publicCId}/{publicDSId}")
+  public Response unpublish(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId) {
     try {
-      datasetCtrl.unpublishDataset(msg.getDatasetId(), msg.getClusterId());
-      LOGGER.log(Level.INFO, "unpublished dataset:{}", msg.getDatasetId());
-      return Response.ok(new OkDTO()).build();
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} unpublishing", 
+        new Object[]{publicDSId, publicCId});
+      datasetCtrl.unpublishDataset(publicDSId, publicCId);
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} unpublishing - done", 
+        new Object[]{publicDSId, publicCId});
+      return Response.ok("ok").build();
     } catch (AppException ex) {
-      LOGGER.log(Level.WARNING, "could not unpublish dataset - {}", ex.getMessage());
+      LOG.log(Level.WARNING, "could not unpublish dataset - {}", ex.getMessage());
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
     }
   }
   
   @POST
   @NoCache
-  @Path("download")
-  public Response download(BasicIdentifyDTO msg) {
+  @Path("download/{publicCId}/{publicDSId}")
+  public Response download(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId) {
     try {
-      datasetCtrl.download(msg.getDatasetId(), msg.getClusterId());
-      LOGGER.log(Level.INFO, "download dataset:{}", msg.getDatasetId());
-      return Response.ok().entity(new OkDTO()).build();
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} downloading", 
+        new Object[]{publicDSId, publicCId});
+      datasetCtrl.download(publicDSId, publicCId);
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} downloading - done", 
+        new Object[]{publicDSId, publicCId});
+      return Response.ok("ok").build();
     } catch (AppException ex) {
-      LOGGER.log(Level.WARNING, "could not download dataset - {}", ex.getMessage());
+      LOG.log(Level.WARNING, "could not download dataset - {}", ex.getMessage());
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
     }
   }
 
   @POST
   @NoCache
-  @Path("complete")
-  public Response downloadComplete(BasicIdentifyDTO msg) {
+  @Path("complete/{publicCId}/{publicDSId}")
+  public Response complete(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId) {
     try {
-      datasetCtrl.complete(msg.getDatasetId(), msg.getClusterId());
-      LOGGER.log(Level.INFO, "download complete dataset:{}", msg.getDatasetId());
-      return Response.ok().entity(new OkDTO()).build();
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} completing", 
+        new Object[]{publicDSId, publicCId});
+      datasetCtrl.complete(publicDSId, publicCId);
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} downloading - done", 
+        new Object[]{publicDSId, publicCId});
+      return Response.ok("ok").build();
     } catch (AppException ex) {
-      LOGGER.log(Level.WARNING, "could not complete download dataset - {}", ex.getMessage());
+      LOG.log(Level.WARNING, "could not complete download dataset - {}", ex.getMessage());
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
     }
   }
 
   @POST
   @NoCache
-  @Path("remove")
-  public Response downloadAbort(BasicIdentifyDTO msg) {
+  @Path("remove/{publicCId}/{publicDSId}")
+  public Response remove(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId) {
     try {
-      datasetCtrl.remove(msg.getDatasetId(), msg.getClusterId());
-      LOGGER.log(Level.INFO, "remove conn dataset:{}", msg.getDatasetId());
-      return Response.ok().build();
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} removing", 
+        new Object[]{publicDSId, publicCId});
+      datasetCtrl.remove(publicDSId, publicCId);
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} removing - done", 
+        new Object[]{publicDSId, publicCId});
+      return Response.ok("ok").build();
     } catch (AppException ex) {
-      LOGGER.log(Level.WARNING, "could not remove conn dataset - {}", ex.getMessage());
+      LOG.log(Level.WARNING, "could not remove conn dataset - {}", ex.getMessage());
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
     }
+  }
+  
+  @POST
+  @NoCache
+  @Path("search")
+  public Response search(SearchServiceDTO.Params searchParams) {
+    searchDTOParamsSanityCheck(searchParams);
+    try {
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset search");
+      SearchServiceDTO.SearchResult searchResult = datasetCtrl.search(searchParams);
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset search - done");
+      return Response.ok(searchResult).build();
+    } catch (AppException ex) {
+      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
+    }
+  }
+  
+  private void searchDTOParamsSanityCheck(SearchServiceDTO.Params req) {
+  }
+  
+  @POST
+  @NoCache
+  @Path("search/{sessionId}/page")
+  public Response getPage(@PathParam("sessionId") String sessionId, SearchServiceDTO.Page req) {
+    searchDTOPageSanityCheck(req);
+    try {
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset search page");
+      SearchServiceDTO.PageResult result = datasetCtrl.getSearchPage(sessionId, req.getStartItem(), req.getNrItems());
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset search page - done");
+      return Response.ok(result).build();
+    } catch (AppException ex) {
+      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
+    }
+  }
+  
+  private void searchDTOPageSanityCheck(SearchServiceDTO.Page req) {
+  }
+  
+  //********************************************************************************************************************
+  
+  @GET
+  @NoCache
+  @Path("popular")
+  public Response popular(PopularDatasetDTO req) {
+    List<PopularDatasetDTO> result = new LinkedList<>();
+    GenericEntity genericResult = new GenericEntity<List<PopularDatasetDTO>>(result){};
+    return Response.ok(genericResult).build();
   }
   
   @POST
@@ -162,7 +197,7 @@ public class DatasetService {
   @Consumes(MediaType.APPLICATION_JSON)
   public Response addDatasetIssue(DatasetIssueDTO datasetIssue) {
     datasetCtrl.reportDatasetIssue(datasetIssue);
-    LOGGER.log(Level.INFO, "Add dataset issue for dataset: {0}", datasetIssue.getDatasetId());
+    LOG.log(Level.INFO, "Add dataset issue for dataset: {0}", datasetIssue.getDatasetId());
     return Response.ok().build();
   }
 }

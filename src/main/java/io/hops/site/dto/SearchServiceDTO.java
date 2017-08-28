@@ -1,12 +1,10 @@
 package io.hops.site.dto;
 
 import java.util.List;
+import javax.xml.bind.annotation.XmlRootElement;
 
-/**
- * @author Alex Ormenisan <aaor@kth.se>
- */
-public class SearchDTO {
-
+public class SearchServiceDTO {
+  @XmlRootElement
   public static class Params {
 
     private String searchTerm;
@@ -27,6 +25,7 @@ public class SearchDTO {
     }
   }
 
+  @XmlRootElement
   public static class SearchResult {
 
     private String sessionId;
@@ -57,37 +56,37 @@ public class SearchDTO {
     }
   }
 
+  @XmlRootElement
   public static class Item {
 
-    private String datasetId;
-    private DatasetDTO dataset;
+    private String publicDSId;
+    private DatasetDTO.Complete dataset;
     private float score;
-    private List<AddressJSON> peers;
+    private List<ClusterAddressDTO> bootstrap;
 
     public Item() {
     }
 
-    public Item(String datasetId, DatasetDTO dataset, float score, List<AddressJSON> peers) {
-      this.datasetId = datasetId;
+    public Item(String publicDSId, DatasetDTO.Complete dataset, float score, List<ClusterAddressDTO> bootstrap) {
+      this.publicDSId = publicDSId;
       this.dataset = dataset;
       this.score = score;
-      this.peers = peers;
+      this.bootstrap = bootstrap;
     }
 
-    public String getDatasetId() {
-      return datasetId;
+    public String getPublicDSId() {
+      return publicDSId;
     }
 
-    public void setDatasetId(String datasetId) {
-      this.datasetId = datasetId;
+    public void setPublicDSId(String publicDSId) {
+      this.publicDSId = publicDSId;
     }
 
-    
-    public DatasetDTO getDataset() {
+    public DatasetDTO.Complete getDataset() {
       return dataset;
     }
 
-    public void setDataset(DatasetDTO dataset) {
+    public void setDataset(DatasetDTO.Complete dataset) {
       this.dataset = dataset;
     }
 
@@ -99,35 +98,25 @@ public class SearchDTO {
       this.score = score;
     }
 
-    public List<AddressJSON> getPeers() {
-      return peers;
+    public List<ClusterAddressDTO> getBootstrap() {
+      return bootstrap;
     }
 
-    public void setPeers(List<AddressJSON> peers) {
-      this.peers = peers;
+    public void setBootstrap(List<ClusterAddressDTO> bootstrap) {
+      this.bootstrap = bootstrap;
     }
   }
 
   public static class Page {
-    private String sessionId;
     private int startItem;
     private int nrItems;
 
     public Page() {
     }
 
-    public Page(String sessionId, int startItem, int nrItems) {
-      this.sessionId = sessionId;
+    public Page(int startItem, int nrItems) {
       this.startItem = startItem;
       this.nrItems = nrItems;
-    }
-
-    public String getSessionId() {
-      return sessionId;
-    }
-
-    public void setSessionId(String sessionId) {
-      this.sessionId = sessionId;
     }
 
     public int getStartItem() {
@@ -176,5 +165,4 @@ public class SearchDTO {
       this.items = items;
     }
   }
-  
 }

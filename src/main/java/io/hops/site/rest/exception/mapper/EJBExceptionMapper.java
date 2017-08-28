@@ -15,7 +15,7 @@
  */
 package io.hops.site.rest.exception.mapper;
 
-import io.hops.site.dto.JsonResponse;
+import io.hops.site.old_dto.JsonResponse;
 import java.security.AccessControlException;
 import java.util.Set;
 import java.util.logging.Level;

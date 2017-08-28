@@ -19,7 +19,7 @@ import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.dao.entity.Users;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dao.facade.UsersFacade;
-import io.hops.site.dto.UserDTO;
+import io.hops.site.old_dto.UserDTO;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;

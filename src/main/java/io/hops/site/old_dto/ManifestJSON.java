@@ -1,4 +1,4 @@
-package io.hops.site.dto;
+package io.hops.site.old_dto;
 
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;

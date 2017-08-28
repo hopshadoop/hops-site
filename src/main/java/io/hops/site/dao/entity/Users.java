@@ -101,7 +101,7 @@ public class Users implements Serializable {
           mappedBy = "users")
   private Collection<DatasetRating> datasetRatingCollection;
   @JoinColumn(name = "cluster_id",
-          referencedColumnName = "cluster_id")
+          referencedColumnName = "id")
   @ManyToOne(optional = false)
   private RegisteredCluster cluster;
 

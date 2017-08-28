@@ -1,17 +1,13 @@
-package io.hops.site.dto;
+package io.hops.site.old_dto;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class RegisteredJSON {
+public class IdentificationJSON {
 
   private String clusterId;
 
-  public RegisteredJSON() {
-  }
-
-  public RegisteredJSON(String clusterId) {
-    this.clusterId = clusterId;
+  public IdentificationJSON() {
   }
 
   public String getClusterId() {
@@ -20,6 +16,11 @@ public class RegisteredJSON {
 
   public void setClusterId(String clusterId) {
     this.clusterId = clusterId;
+  }
+
+  @Override
+  public String toString() {
+    return "IdentificationJSON{" + "clusterId=" + clusterId + '}';
   }
 
 }

@@ -2,12 +2,8 @@ package io.hops.site.rest;
 
 import io.hops.site.controller.ClusterController;
 import io.hops.site.controller.HopsSiteSettings;
-import io.hops.site.dto.AddressJSON;
-import io.hops.site.dto.ClustersDTO;
-import io.hops.site.dto.HeavyPingDTO;
-import io.hops.site.dto.IdentificationJSON;
-import io.hops.site.dto.RegisterDTO;
-import io.hops.site.dto.RegisteredJSON;
+import io.hops.site.dto.ClusterAddressDTO;
+import io.hops.site.dto.ClusterServiceDTO;
 import io.hops.site.rest.annotation.NoCache;
 import io.swagger.annotations.Api;
 import java.security.cert.CertificateEncodingException;
@@ -24,12 +20,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
@@ -43,33 +39,81 @@ import javax.ws.rs.core.SecurityContext;
 @TransactionAttribute(TransactionAttributeType.NEVER)
 public class ClusterService {
 
-  private final static Logger LOGGER = Logger.getLogger(ClusterService.class.getName());
+  private final static Logger LOG = Logger.getLogger(ClusterService.class.getName());
   @EJB
   private ClusterController clusterController;
-  @EJB 
+  @EJB
   private HopsSiteSettings hsettings;
 
+  //*****************************************************VERIFIED*******************************************************
   @GET
   @NoCache
   @Path("dela/version")
   public Response getVersion() {
-    LOGGER.log(Level.FINE, "dela version request");
+    LOG.log(Level.FINE, "dela version request");
     String version = hsettings.getDELA_VERSION();
     return Response.ok(version).build();
   }
-  
+
+  @PUT
+  @NoCache
+  @Path("register")
+  public Response register(@Context HttpServletRequest req, ClusterServiceDTO.Register msg) throws
+    CertificateEncodingException {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster register");
+    X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
+    X509Certificate clientCert = certs[0];
+    //TODO:check if cert email == registerJson.getEmail()
+    String publicCId = clusterController.registerCluster(clientCert.getEncoded(), msg);
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster register done:{0}", publicCId);
+    return Response.ok(publicCId).build();
+  }
+
+  @PUT
+  @NoCache
+  @Path("heavyPing/{publicCId}")
+  public Response heavyPing(@PathParam("publicCId") String publicCId, ClusterServiceDTO.HeavyPing ping) {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster heavyPing {0}", publicCId);
+    ClusterController.Action action = clusterController.heavyPing(publicCId, ping.getUpldDSIds(),
+      ping.getDwnlDSIds());
+    switch (action) {
+      case HEAVY_PING:
+        LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster heavyPing done {0}", publicCId);
+        return Response.ok("ok").build();
+      default:
+        throw new IllegalStateException(action.toString());
+    }
+  }
+
+  @PUT
+  @NoCache
+  @Path("ping/{publicCId}")
+  public Response ping(@PathParam("publicCId") String publicCId) {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster ping {0}", publicCId);
+    ClusterController.Action action = clusterController.ping(publicCId);
+    switch (action) {
+      case PING:
+        LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster ping done {0}", publicCId);
+        return Response.ok("ok").build();
+      default:
+        throw new IllegalStateException(action.toString());
+    }
+  }
+
+  //********************************************************************************************************************
   @GET
   @NoCache
   public Response getRegisterd(@Context SecurityContext sc) {
-    List<AddressJSON> to_ret = clusterController.getAll();
-    return Response.status(Response.Status.OK).entity(new ClustersDTO(to_ret)).build();
+    GenericEntity result = new GenericEntity<List<ClusterAddressDTO>>(clusterController.getAll()) {
+    };
+    return Response.ok(result).build();
   }
 
   @GET
   @NoCache
   @Path("role")
   public Response getClusterRole(@Context SecurityContext sc) {
-    LOGGER.log(Level.INFO, "Cluster: {0}", sc.getUserPrincipal().getName());
+    LOG.log(Level.INFO, "Cluster: {0}", sc.getUserPrincipal().getName());
     String role;
     if (sc.isUserInRole("clusters")) {
       role = "clusters";
@@ -78,52 +122,8 @@ public class ClusterService {
     } else {
       role = "none";
     }
-    LOGGER.log(Level.INFO, "Cluster Role: {0}", role);
+    LOG.log(Level.INFO, "Cluster Role: {0}", role);
     return Response.ok(role).build();
-  }
-
-  @POST
-  @NoCache
-  @Path("register")
-  public Response register(RegisterDTO.Req registerJson, @Context HttpServletRequest req) throws
-    CertificateEncodingException {
-    X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
-    X509Certificate clientCert = certs[0];
-    //TODO:check if cert email == registerJson.getEmail()
-    String registeredId = clusterController.registerCluster(clientCert.getEncoded(), registerJson);
-    LOGGER.log(Level.INFO, "Registering new cluster.");
-    return Response.status(Response.Status.OK).entity(new RegisteredJSON(registeredId)).build();
-  }
-
-  @PUT
-  @NoCache
-  @Path("heavyPing")
-  public Response heavyPing(HeavyPingDTO ping) {
-    ClusterController.Action action = clusterController.heavyPing(ping.getClusterId(), ping.getUpldDSIds(), ping.
-      getDwnlDSIds());
-    switch (action) {
-      case HEAVY_PING:
-        LOGGER.log(Level.INFO, "Registering heavy ping from cluster id: {0}.", ping.getClusterId());
-        return Response.ok("ok").build();
-      default:
-        throw new IllegalStateException("hops-site logic exception");
-    }
-  }
-
-  @PUT
-  @NoCache
-  @Path("ping")
-  public Response ping(IdentificationJSON ping) {
-    ClusterController.Action action = clusterController.ping(ping.getClusterId());
-    switch (action) {
-      case HEAVY_PING:
-        throw new IllegalStateException(action.toString());
-      case PING:
-        LOGGER.log(Level.INFO, "Registering ping from cluster id: {0}.", ping.getClusterId());
-        return Response.ok("ok").build();
-      default:
-        throw new IllegalStateException("hops-site logic exception");
-    }
   }
 
   @DELETE
@@ -131,8 +131,8 @@ public class ClusterService {
   @RolesAllowed({"admin"})
   public Response removeRegisterdCluster(@PathParam("clusterId") String clusterId) {
     clusterController.removeClusterByPublicId(clusterId);
-    LOGGER.log(Level.INFO, "Registered cluster with id: {0} removed.", clusterId);
+    LOG.log(Level.INFO, "Registered cluster with id: {0} removed.", clusterId);
     return Response.status(Response.Status.OK).build();
   }
-  
+
 }

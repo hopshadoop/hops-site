@@ -1,6 +1,7 @@
 package io.hops.site.controller;
 
 import io.hops.site.dao.entity.HopsSiteVariables;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
@@ -46,6 +47,7 @@ public class HopsSiteSettings {
   }
 
   //**************************************************VARIABLES*********************************************************
+  public static final Level DELA_DEBUG = Level.INFO;
   private static final String VARIABLE_DELA_VERSION = "dela_version";
   private String DELA_VERSION = "0.1"; 
   private void populateVariables() {

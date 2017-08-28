@@ -15,7 +15,7 @@
  */
 package io.hops.site.rest.request.filter;
 
-import io.hops.site.dto.UserDTO;
+import io.hops.site.old_dto.UserDTO;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement

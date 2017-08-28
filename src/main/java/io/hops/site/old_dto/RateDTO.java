@@ -13,19 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.site.dto;
+package io.hops.site.old_dto;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class DatasetIssueDTO {
+public class RateDTO {
 
-  private String type;
-  private String msg;
+  private Integer id;
+  private int rating;
   private UserDTO user;
   private String datasetId;
 
-  public DatasetIssueDTO() {
+  public RateDTO() {
+  }
+
+  public Integer getId() {
+    return id;
+  }
+
+  public void setId(Integer id) {
+    this.id = id;
+  }
+
+  public int getRating() {
+    return rating;
+  }
+
+  public void setRating(int rating) {
+    this.rating = rating;
   }
 
   public UserDTO getUser() {
@@ -43,21 +59,4 @@ public class DatasetIssueDTO {
   public void setDatasetId(String datasetId) {
     this.datasetId = datasetId;
   }
-
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
-  }
-
-  public String getMsg() {
-    return msg;
-  }
-
-  public void setMsg(String msg) {
-    this.msg = msg;
-  }
-
 }

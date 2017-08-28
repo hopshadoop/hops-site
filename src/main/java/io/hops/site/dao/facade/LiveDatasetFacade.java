@@ -4,7 +4,7 @@ import io.hops.site.common.Settings;
 import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.LiveDataset;
 import io.hops.site.dao.entity.RegisteredCluster;
-import io.hops.site.dto.AddressJSON;
+import io.hops.site.dto.ClusterAddressDTO;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,8 +42,8 @@ public class LiveDatasetFacade extends AbstractFacade<LiveDataset> {
     return em;
   }
 
-  public List<AddressJSON> datasetPeers(String datasetPublicId, int nrPeers) {
-    List<AddressJSON> result = new LinkedList<>();
+  public List<ClusterAddressDTO> datasetPeers(String datasetPublicId, int nrPeers) {
+    List<ClusterAddressDTO> result = new LinkedList<>();
     Optional<Dataset> dataset = datasetFacade.findByPublicId(datasetPublicId);
     if (!dataset.isPresent()) {
       return result;
@@ -53,7 +53,7 @@ public class LiveDatasetFacade extends AbstractFacade<LiveDataset> {
     for (LiveDataset dp : queryA.getResultList()) {
       Optional<RegisteredCluster> cluster = clusterFacade.findById(dp.getId().getClusterId());
       if (cluster.isPresent()) {
-        result.add(new AddressJSON(cluster.get().getPublicId(), cluster.get().getDelaEndpoint(), cluster.get().
+        result.add(new ClusterAddressDTO(cluster.get().getPublicId(), cluster.get().getDelaEndpoint(), cluster.get().
           getHttpEndpoint()));
       } else {
         //cleanup? something is wrong with table

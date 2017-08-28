@@ -15,8 +15,7 @@
  */
 package io.hops.site.rest.request.filter;
 
-import io.hops.site.dto.DatasetDTO;
-import io.hops.site.dto.UserDTO;
+import io.hops.site.old_dto.UserDTO;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -49,4 +48,6 @@ public class GenericReqUserDatasetDTO {
     return "GenericRequestDTO{" + "user=" + user + ", dataset=" + dataset + '}';
   }
 
+  public static class DatasetDTO {
+  }
 }
