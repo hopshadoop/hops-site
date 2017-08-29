@@ -78,7 +78,7 @@ public class AuthFilter implements ContainerRequestFilter {
       return;
     }
     X509Certificate principalCert = certs[0];
-    String clusterEmail = getCertificateCommonName(principalCert);
+    String clusterEmail = getCertificateEmail(principalCert);
     if (clusterEmail.isEmpty()) { //Common name not set
       requestContext.abortWith(buildResponse("Common name not set.", Response.Status.UNAUTHORIZED));
       return;
@@ -88,13 +88,13 @@ public class AuthFilter implements ContainerRequestFilter {
     Method method = resourceInfo.getResourceMethod();
     LOGGER.log(Level.INFO, "Path: {0}, method: {1}", new Object[]{path, method});
 
-    RegisteredCluster clusterFromCert = clusterController.getClusterByEmail(clusterEmail);
-    if (clusterFromCert == null && !"cluster/register".equals(path)) { //not yet registerd
+    Optional<RegisteredCluster> clusterFromCert = clusterController.getClusterByEmail(clusterEmail);
+    if (!clusterFromCert.isPresent() && !"cluster/register".equals(path)) { //not yet registerd
       requestContext.abortWith(buildResponse("Cluster not registerd.", Response.Status.FORBIDDEN));
       return;
     }
 
-    if (clusterFromCert != null && "cluster/register".equals(path)) { //already registered
+    if (clusterFromCert.isPresent() && "cluster/register".equals(path)) { //already registered
       requestContext.abortWith(buildResponse("Cluster already registered.", Response.Status.FORBIDDEN));
       return;
     }
@@ -109,13 +109,14 @@ public class AuthFilter implements ContainerRequestFilter {
     }
   }
 
-  private String getCertificateCommonName(X509Certificate principalCert) {
+  private String getCertificateEmail(X509Certificate principalCert) {
     String tmpName, name = "";
     Principal principal = principalCert.getSubjectDN();
-    // Extract the common name (CN)
-    int start = principal.getName().indexOf("CN");
+    // Extract the email
+    String email = "EMAILADDRESS=";
+    int start = principal.getName().indexOf(email);
     if (start > -1) {
-      tmpName = principal.getName().substring(start + 3);
+      tmpName = principal.getName().substring(start + email.length());
       int end = tmpName.indexOf(",");
       if (end > 0) {
         name = tmpName.substring(0, end);
@@ -123,6 +124,7 @@ public class AuthFilter implements ContainerRequestFilter {
         name = tmpName;
       }
       LOGGER.log(Level.INFO, "Request from principal: {0}", principal.getName());
+      LOGGER.log(Level.INFO, "Request with email: {0}", name.toLowerCase());
     }
     return name.toLowerCase();
   }

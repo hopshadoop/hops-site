@@ -131,15 +131,12 @@ public class ClusterController {
    * @param clusterEmail
    * @return
    */
-  public RegisteredCluster getClusterByEmail(String clusterEmail) {
+  public Optional<RegisteredCluster> getClusterByEmail(String clusterEmail) {
     if (clusterEmail == null || clusterEmail.isEmpty()) {
       throw new IllegalArgumentException("Cluster email not assigned.");
     }
     Optional<RegisteredCluster> cluster = clusterFacade.findByEmail(clusterEmail.toLowerCase());
-    if (!cluster.isPresent()) {
-      throw new IllegalArgumentException("Cluster email not assigned.");
-    }
-    return cluster.get();
+    return cluster;
   }
 
   /**
