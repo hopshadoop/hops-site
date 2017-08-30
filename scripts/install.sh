@@ -89,3 +89,9 @@ cd ${GLASSFISH_PATH}/bin
 
 ./asadmin --interactive=false --port $ADMIN_PORT $ASASMDIN_PW deploy --force=true ${HOPS_SITE_WAR}
 
+# hack fix for RootCA private key not readable by vagrant user
+sudo chown root:vagrant /srv/hops/certs-dir/private/ca.key.pem
+sudo chmod 440 /srv/hops/certs-dir/private/ca.key.pem
+# hack fix for .rnd not owned by vagrant
+sudo chown vagrant:vagrant ~/.rnd
+
