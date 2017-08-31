@@ -11,8 +11,9 @@ MYSQL_SERVER='10.0.2.15'
 MYSQL_PORT='3306'
 DB_NAME='hops_site'
 MSQL_DIR='/srv/hops/mysql-cluster/ndb/scripts/'
-HOPS_SITE_TABLES="${INSTALL_PATH}/hops-site/sql/tables.sql"
-HOPS_SITE_ROWS="${INSTALL_PATH}/hops-site/sql/rows.sql"
+HOPS_SITE_BASE="${INSTALL_PATH}/hops-site"
+HOPS_SITE_TABLES="${HOPS_SITE_BASE}/sql/tables.sql"
+HOPS_SITE_ROWS="${HOPS_SITE_BASE}/sql/rows.sql"
 HOPS_SITE_TAR='hops-site.tar.gz'
 HOPS_SITE_WAR="${INSTALL_PATH}/hops-site/target/hops-site.war"
 HOPS_SITE_DOWNLOAD_URL="http://snurran.sics.se/hops/"
@@ -88,6 +89,9 @@ cd ${GLASSFISH_PATH}/bin
 ./asadmin $ASASMDIN_PW start-domain ${DOMAIN}
 
 ./asadmin --interactive=false --port $ADMIN_PORT $ASASMDIN_PW deploy --force=true ${HOPS_SITE_WAR}
+
+cd ${HOPS_SITE_BASE}/scripts
+./hops-site_elastic.sh
 
 # hack fix for RootCA private key not readable by vagrant user
 sudo chown root:vagrant /srv/hops/certs-dir/private/ca.key.pem
