@@ -103,3 +103,5 @@ sudo chmod 440 /srv/hops/certs-dir/private/ca.key.pem
 # hack fix for .rnd not owned by vagrant
 sudo chown vagrant:vagrant ~/.rnd
 
+cd ${DOMAIN_DIR}
+python domain1/bin/csr-ca.py
