@@ -87,6 +87,7 @@ public class DatasetController {
   private final Random rand = new Random();
   private final ObjectMapper mapper = new ObjectMapper();
 
+  //*****************************************************SEARCH*********************************************************
   public SearchServiceDTO.SearchResult search(SearchServiceDTO.Params searchParams) throws AppException {
     String sessionId = settings.getSessionId();
     QueryBuilder qb = DatasetElasticHelper.getNameDescriptionMetadataQuery(searchParams.getSearchTerm());
@@ -97,7 +98,7 @@ public class DatasetController {
     return new SearchServiceDTO.SearchResult(sessionId, session.cachedItems.size());
   }
 
-  public SearchServiceDTO.PageResult getSearchPage(String sessionId, int startItem, int nrItems) throws AppException {
+  public List<SearchServiceDTO.Item> getSearchPage(String sessionId, int startItem, int nrItems) throws AppException {
     Optional<SearchSession> session;
     try {
       session = (Optional) sessionCtrl.get(sessionId);
@@ -110,23 +111,30 @@ public class DatasetController {
 
     List<SearchServiceDTO.Item> elem = new LinkedList<>();
     for (CachedItem e : session.get().getElem(startItem, nrItems)) {
-      if (!e.hasPeers()) {
-        e.setPeers(liveDatasetFacade.datasetPeers(e.publicDSId, settings.LIVE_DATASET_BOOTSTRAP_PEERS));
-      }
-      if (!e.hasDataset()) {
-        Optional<Dataset> dataset = datasetFacade.findByPublicId(e.publicDSId);
-        if (!dataset.isPresent()) {
-          throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "dataset issue");
-        }
-        e.setDataset(dataset.get());
-      }
       if (e.complete()) {
         elem.add(e.build());
       }
     }
-    return new SearchServiceDTO.PageResult(startItem, elem);
+    return elem;
   }
 
+  public SearchServiceDTO.ItemDetails getDetails(String publicDSId) throws AppException {
+    List<ClusterAddressDTO> bootstrap
+      = liveDatasetFacade.datasetPeers(publicDSId, settings.LIVE_DATASET_BOOTSTRAP_PEERS);
+
+    Optional<Dataset> dataset = datasetFacade.findByPublicId(publicDSId);
+    if (!dataset.isPresent()) {
+      throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "dataset issue");
+    }
+
+    long size = 1;
+    DatasetDTO.Owner owner = new DatasetDTO.Owner(dataset.get().getOwnerCluster().getPublicId(), "user description");
+    DatasetDTO.Details details = new DatasetDTO.Details(owner, dataset.get().getCategories(), 
+      dataset.get().getMadePublicOn(), size);
+    return new SearchServiceDTO.ItemDetails(details, bootstrap);
+  }
+
+  //******************************************************DATASET*******************************************************
   public String publishDataset(String publicDSId, String publicCId, DatasetDTO.Proto msg) throws AppException {
     Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(publicCId);
     if (!cluster.isPresent()) {
@@ -147,11 +155,11 @@ public class DatasetController {
     elasticCtrl.add(settings.DELA_DOC_INDEX, ElasticDoc.DOC_TYPE, publicDSId, toJson(elasticDoc));
     return publicDSId;
   }
-  
+
   private ElasticDoc elasticDoc(String publicDSId, DatasetDTO.Proto msg) {
     return new ElasticDoc(publicDSId, msg.getName(), msg.getDescription());
   }
-  
+
   private String toJson(ElasticDoc doc) {
     return new Gson().toJson(doc);
   }
@@ -244,45 +252,21 @@ public class DatasetController {
     private String name;
     private String description;
     private final float score;
-    private Optional<List<ClusterAddressDTO>> peers;
-    private Optional<Dataset> dataset;
 
     public CachedItem(String publicDSId, String name, String description, float score) {
       this.publicDSId = publicDSId;
       this.name = name;
       this.description = description;
       this.score = score;
-      this.peers = Optional.empty();
-      this.dataset = Optional.empty();
-    }
-
-    public boolean hasPeers() {
-      return peers.isPresent();
-    }
-
-    public void setPeers(List<ClusterAddressDTO> peers) {
-      this.peers = Optional.of(peers);
-    }
-
-    public boolean hasDataset() {
-      return dataset.isPresent();
-    }
-
-    public void setDataset(Dataset dataset) {
-      this.dataset = Optional.of(dataset);
     }
 
     public boolean complete() {
-      return peers.isPresent() && dataset.isPresent();
+      return true;
     }
 
     public SearchServiceDTO.Item build() {
-      //TODO Alex - fixme - size, owner
-      long size = 1;
-      DatasetDTO.Owner owner = new DatasetDTO.Owner(dataset.get().getOwnerCluster().getPublicId(), "user description");
-      DatasetDTO.Complete datasetAux = new DatasetDTO.Complete(owner, name, description, 
-        dataset.get().getCategories(), dataset.get().getMadePublicOn(), size);
-      return new SearchServiceDTO.Item(publicDSId, datasetAux, score, peers.get());
+      DatasetDTO.Search dataset = new DatasetDTO.Search(name, description);
+      return new SearchServiceDTO.Item(publicDSId, dataset, score);
     }
   }
 

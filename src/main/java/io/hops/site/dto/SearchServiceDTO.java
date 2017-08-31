@@ -1,11 +1,12 @@
 package io.hops.site.dto;
 
+import java.io.Serializable;
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 public class SearchServiceDTO {
   @XmlRootElement
-  public static class Params {
+  public static class Params implements Serializable {
 
     private String searchTerm;
 
@@ -26,7 +27,7 @@ public class SearchServiceDTO {
   }
 
   @XmlRootElement
-  public static class SearchResult {
+  public static class SearchResult implements Serializable {
 
     private String sessionId;
     private int nrHits;
@@ -57,21 +58,19 @@ public class SearchServiceDTO {
   }
 
   @XmlRootElement
-  public static class Item {
+  public static class Item implements Serializable {
 
     private String publicDSId;
-    private DatasetDTO.Complete dataset;
+    private DatasetDTO.Search dataset;
     private float score;
-    private List<ClusterAddressDTO> bootstrap;
 
     public Item() {
     }
 
-    public Item(String publicDSId, DatasetDTO.Complete dataset, float score, List<ClusterAddressDTO> bootstrap) {
+    public Item(String publicDSId, DatasetDTO.Search dataset, float score) {
       this.publicDSId = publicDSId;
       this.dataset = dataset;
       this.score = score;
-      this.bootstrap = bootstrap;
     }
 
     public String getPublicDSId() {
@@ -82,11 +81,11 @@ public class SearchServiceDTO {
       this.publicDSId = publicDSId;
     }
 
-    public DatasetDTO.Complete getDataset() {
+    public DatasetDTO.Search getDataset() {
       return dataset;
     }
 
-    public void setDataset(DatasetDTO.Complete dataset) {
+    public void setDataset(DatasetDTO.Search dataset) {
       this.dataset = dataset;
     }
 
@@ -97,6 +96,27 @@ public class SearchServiceDTO {
     public void setScore(float score) {
       this.score = score;
     }
+  }
+  
+  public static class ItemDetails implements Serializable {
+    private DatasetDTO.Details dataset;
+    private List<ClusterAddressDTO> bootstrap;
+
+    public ItemDetails() {
+    }
+
+    public ItemDetails(DatasetDTO.Details dataset, List<ClusterAddressDTO> bootstrap) {
+      this.dataset = dataset;
+      this.bootstrap = bootstrap;
+    }
+
+    public DatasetDTO.Details getDataset() {
+      return dataset;
+    }
+
+    public void setDataset(DatasetDTO.Details dataset) {
+      this.dataset = dataset;
+    }
 
     public List<ClusterAddressDTO> getBootstrap() {
       return bootstrap;
@@ -104,65 +124,6 @@ public class SearchServiceDTO {
 
     public void setBootstrap(List<ClusterAddressDTO> bootstrap) {
       this.bootstrap = bootstrap;
-    }
-  }
-
-  public static class Page {
-    private int startItem;
-    private int nrItems;
-
-    public Page() {
-    }
-
-    public Page(int startItem, int nrItems) {
-      this.startItem = startItem;
-      this.nrItems = nrItems;
-    }
-
-    public int getStartItem() {
-      return startItem;
-    }
-
-    public void setStartItem(int startItem) {
-      this.startItem = startItem;
-    }
-
-    public int getNrItems() {
-      return nrItems;
-    }
-
-    public void setNrItems(int nrItems) {
-      this.nrItems = nrItems;
-    }
-  }
-
-  public static class PageResult {
-
-    private int startItem;
-    private List<Item> items;
-
-    public PageResult() {
-    }
-
-    public PageResult(int startItem, List<Item> items) {
-      this.startItem = startItem;
-      this.items = items;
-    }
-
-    public int getStartItem() {
-      return startItem;
-    }
-
-    public void setStartItem(int startItem) {
-      this.startItem = startItem;
-    }
-
-    public List<Item> getItems() {
-      return items;
-    }
-
-    public void setItems(List<Item> items) {
-      this.items = items;
     }
   }
 }

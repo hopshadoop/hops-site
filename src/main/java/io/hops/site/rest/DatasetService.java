@@ -15,6 +15,7 @@
  */
 package io.hops.site.rest;
 
+import com.google.gson.Gson;
 import io.hops.site.common.AppException;
 import io.hops.site.controller.DatasetController;
 import io.hops.site.controller.HopsSiteSettings;
@@ -62,10 +63,10 @@ public class DatasetService {
     DatasetDTO.Proto msg) {
     publishDatasetSanityCheck(msg);
     try {
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} publishing", 
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset - {0} cluster:{1} publishing", 
         new Object[]{publicDSId, publicCId});
       datasetCtrl.publishDataset(publicDSId, publicCId, msg);
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} publishing - done", 
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:done - {0} cluster:{1} publishing", 
         new Object[]{publicDSId, publicCId});
       return Response.ok(publicDSId).build();
     } catch (AppException ex) {
@@ -82,10 +83,10 @@ public class DatasetService {
   @Path("unpublish/{publicCId}/{publicDSId}")
   public Response unpublish(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId) {
     try {
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} unpublishing", 
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset - {0} cluster:{1} unpublishing", 
         new Object[]{publicDSId, publicCId});
       datasetCtrl.unpublishDataset(publicDSId, publicCId);
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} unpublishing - done", 
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:done - {0} cluster:{1} unpublishing", 
         new Object[]{publicDSId, publicCId});
       return Response.ok("ok").build();
     } catch (AppException ex) {
@@ -99,10 +100,10 @@ public class DatasetService {
   @Path("download/{publicCId}/{publicDSId}")
   public Response download(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId) {
     try {
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} downloading", 
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset - {0} cluster:{1} downloading", 
         new Object[]{publicDSId, publicCId});
       datasetCtrl.download(publicDSId, publicCId);
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} downloading - done", 
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:done - {0} cluster:{1} downloading", 
         new Object[]{publicDSId, publicCId});
       return Response.ok("ok").build();
     } catch (AppException ex) {
@@ -116,10 +117,10 @@ public class DatasetService {
   @Path("complete/{publicCId}/{publicDSId}")
   public Response complete(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId) {
     try {
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} completing", 
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset - {0} cluster:{1} completing", 
         new Object[]{publicDSId, publicCId});
       datasetCtrl.complete(publicDSId, publicCId);
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} downloading - done", 
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:done - {0} cluster:{1} downloading", 
         new Object[]{publicDSId, publicCId});
       return Response.ok("ok").build();
     } catch (AppException ex) {
@@ -133,10 +134,10 @@ public class DatasetService {
   @Path("remove/{publicCId}/{publicDSId}")
   public Response remove(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId) {
     try {
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} removing", 
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset - {0} cluster:{1} removing", 
         new Object[]{publicDSId, publicCId});
       datasetCtrl.remove(publicDSId, publicCId);
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:{0} cluster:{1} removing - done", 
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:done - {0} cluster:{1} removing", 
         new Object[]{publicDSId, publicCId});
       return Response.ok("ok").build();
     } catch (AppException ex) {
@@ -145,9 +146,11 @@ public class DatasetService {
     }
   }
   
+  //********************************************************************************************************************
   @POST
   @NoCache
   @Path("search")
+  @Produces(MediaType.APPLICATION_JSON)
   public Response search(SearchServiceDTO.Params searchParams) {
     searchDTOParamsSanityCheck(searchParams);
     try {
@@ -163,25 +166,34 @@ public class DatasetService {
   private void searchDTOParamsSanityCheck(SearchServiceDTO.Params req) {
   }
   
-  @POST
+  @GET
   @NoCache
-  @Path("search/{sessionId}/page")
-  public Response getPage(@PathParam("sessionId") String sessionId, SearchServiceDTO.Page req) {
-    searchDTOPageSanityCheck(req);
+  @Path("search/{sessionId}/page/{startItem}/{nrItems}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response getPage(@PathParam("sessionId") String sessionId, @PathParam("startItem") Integer startItem, 
+    @PathParam("nrItems") Integer nrItems) {
     try {
       LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset search page");
-      SearchServiceDTO.PageResult result = datasetCtrl.getSearchPage(sessionId, req.getStartItem(), req.getNrItems());
+      List<SearchServiceDTO.Item> result = datasetCtrl.getSearchPage(sessionId, startItem, nrItems);
       LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset search page - done");
-      return Response.ok(result).build();
+      return Response.ok(new Gson().toJson(result)).build();
     } catch (AppException ex) {
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
     }
   }
   
-  private void searchDTOPageSanityCheck(SearchServiceDTO.Page req) {
+  @GET
+  @NoCache
+  @Path("details/{publicDSId}")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response details(@PathParam("publiDSId") String publicDSId) throws AppException {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset - details {0}", publicDSId);
+    SearchServiceDTO.ItemDetails result = datasetCtrl.getDetails(publicDSId);
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:done - details {0}", publicDSId);
+    return Response.ok(new Gson().toJson(result)).build();
   }
-  
   //********************************************************************************************************************
+  
   
   @GET
   @NoCache
