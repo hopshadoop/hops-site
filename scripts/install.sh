@@ -5,12 +5,13 @@ INSTALL_PATH='/srv/hops'
 GLASSFISH_PATH='/srv/hops/glassfish/versions/glassfish-4.1.2.172'
 DOMAIN_DIR='/srv/hops/domains'
 DOMAIN='domain2'
-DOMAINPW_FILE="${DOMAIN_DIR}/${DOMAIN}/master-password"
+DOMAINPW_FILE="${DOMAIN_DIR}/master-password"
 CERTS_DIR='/srv/hops/certs-dir'
 MYSQL_SERVER='10.0.2.15'
 MYSQL_PORT='3306'
 DB_NAME='hops_site'
-MSQL_DIR='/srv/hops/mysql-cluster/ndb/scripts/'
+MYSQL_DIR='/srv/hops/mysql-cluster/ndb/scripts/'
+MSQL_CONNECTOR='mysql-connector-java-5.1.29-bin.jar'
 HOPS_SITE_BASE="${INSTALL_PATH}/hops-site"
 HOPS_SITE_TABLES="${HOPS_SITE_BASE}/sql/tables.sql"
 HOPS_SITE_ROWS="${HOPS_SITE_BASE}/sql/rows.sql"
@@ -21,15 +22,16 @@ ASASMDIN_PW="--user adminuser --passwordfile ${DOMAINPW_FILE}"
 KEYSTOREPW="adminpw"
 KEYSTORE_PASSWORD="-srcstorepass $KEYSTOREPW -deststorepass $KEYSTOREPW -destkeypass $KEYSTOREPW"
 KEY_PASSWORD="-keypass $KEYSTOREPW -storepass $KEYSTOREPW"
-
+OPENSSL_CONF="${HOPS_SITE_BASE}/conf/openssl-ca.cnf"
 DOMAIN_BASE_PORT=50000
 ADMIN_PORT=`expr $DOMAIN_BASE_PORT + 48` # HTTPS listener port: portbase + 81
 
 cd ${INSTALL_PATH}
-
+sudo mkdir $HOPS_SITE_BASE
+sudo chown vagrant:vagrant $HOPS_SITE_BASE
 sudo wget ${HOPS_SITE_DOWNLOAD_URL}${HOPS_SITE_TAR} && tar xvzf ${HOPS_SITE_TAR} && sudo rm ${HOPS_SITE_TAR}
 
-cd ${MSQL_DIR}
+cd ${MYSQL_DIR}
 ./mysql-client.sh -e "CREATE DATABASE IF NOT EXISTS hops_site"
 ./mysql-client.sh hops_site < ${HOPS_SITE_TABLES}
 ./mysql-client.sh hops_site < ${HOPS_SITE_ROWS}
@@ -40,7 +42,7 @@ echo -e "AS_ADMIN_PASSWORD=${KEYSTOREPW}\nAS_ADMIN_MASTERPASSWORD=${KEYSTOREPW}"
 ./asadmin create-domain --portbase ${DOMAIN_BASE_PORT} ${DOMAIN} $ASASMDIN_PW 
 ./asadmin $ASASMDIN_PW start-domain ${DOMAIN}
 
-cp ${DOMAIN_DIR}/domain1/lib/${MSQL_CONNECTOR} ${DOMAIN_DIR}/${DOMAIN}/lib/
+cp ${DOMAIN_DIR}/domain1/lib/${MSQL_CONNECTOR} ${DOMAIN_DIR}/${DOMAIN}/lib
 
 ./asadmin --port $ADMIN_PORT $ASASMDIN_PW  create-jdbc-connection-pool --datasourceclassname com.mysql.jdbc.jdbc2.optional.MysqlDataSource \
                                                                        --restype javax.sql.DataSource \
@@ -66,6 +68,8 @@ keytool -certreq -alias hops.site-admin -keyalg RSA -file hops.site-admin.req -k
 
 keytool -genkey -alias hops.site-instance -keyalg RSA -keysize 1024 -keystore keystore.jks -dname "CN=hops.site-instance, O=SICS, L=Stockholm, ST=Sweden, C=SE" $KEY_PASSWORD
 keytool -certreq -alias hops.site-instance -keyalg RSA -file hops.site-instance.req -keystore keystore.jks $KEY_PASSWORD
+
+cp ${OPENSSL_CONF} "${CERTS_DIR}/openssl-ca.cnf"
 
 cd ${CERTS_DIR}
 sudo openssl ca -batch -in ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-admin.req -cert certs/ca.cert.pem -keyfile private/ca.key.pem -out ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-admin.pem -config ./openssl-ca.cnf -key $KEYSTOREPW
