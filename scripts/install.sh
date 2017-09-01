@@ -23,6 +23,7 @@ KEYSTOREPW="adminpw"
 KEYSTORE_PASSWORD="-srcstorepass $KEYSTOREPW -deststorepass $KEYSTOREPW -destkeypass $KEYSTOREPW"
 KEY_PASSWORD="-keypass $KEYSTOREPW -storepass $KEYSTOREPW"
 OPENSSL_CONF="${HOPS_SITE_BASE}/conf/openssl-ca.cnf"
+ADMIN_CERT_ALIAS="hops.site-admin"
 DOMAIN_BASE_PORT=50000
 ADMIN_PORT=`expr $DOMAIN_BASE_PORT + 48` # HTTPS listener port: portbase + 81
 
@@ -63,8 +64,8 @@ keytool -import -noprompt -trustcacerts -alias HopsRootCA -file ${CERTS_DIR}/cer
 chmod 600 cacerts.jks
 chmod 600 keystore.jks
 
-keytool -genkey -alias hops.site-admin -keyalg RSA -keysize 1024 -keystore keystore.jks -dname "CN=hops.site-admin, O=SICS, L=Stockholm, ST=Sweden, C=SE" $KEY_PASSWORD
-keytool -certreq -alias hops.site-admin -keyalg RSA -file hops.site-admin.req -keystore keystore.jks $KEY_PASSWORD
+keytool -genkey -alias ${ADMIN_CERT_ALIAS} -keyalg RSA -keysize 1024 -keystore keystore.jks -dname "CN=hops.site-admin, O=SICS, L=Stockholm, ST=Sweden, C=SE" $KEY_PASSWORD
+keytool -certreq -alias ${ADMIN_CERT_ALIAS} -keyalg RSA -file hops.site-admin.req -keystore keystore.jks $KEY_PASSWORD
 
 keytool -genkey -alias hops.site-instance -keyalg RSA -keysize 1024 -keystore keystore.jks -dname "CN=hops.site-instance, O=SICS, L=Stockholm, ST=Sweden, C=SE" $KEY_PASSWORD
 keytool -certreq -alias hops.site-instance -keyalg RSA -file hops.site-instance.req -keystore keystore.jks $KEY_PASSWORD
@@ -77,14 +78,14 @@ sudo openssl ca -batch -in ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-instance.req
 
 cd ${DOMAIN_DIR}/${DOMAIN}/config
 openssl x509 -in hops.site-admin.pem -outform DER -out hops.site-admin.der
-keytool -import -noprompt -alias hops.site-admin -file hops.site-admin.der -keystore keystore.jks $KEYSTORE_PASSWORD
+keytool -import -noprompt -alias ${ADMIN_CERT_ALIAS} -file hops.site-admin.der -keystore keystore.jks $KEYSTORE_PASSWORD
 
 openssl x509 -in hops.site-instance.pem -outform DER -out hops.site-instance.der
 keytool -import -noprompt -alias hops.site-instance -file hops.site-instance.der -keystore keystore.jks $KEYSTORE_PASSWORD
 
 
 cd ${GLASSFISH_PATH}/bin
-./asadmin --port $ADMIN_PORT $ASASMDIN_PW set "configs.config.server-config.network-config.protocols.protocol.http-listener-2.ssl.cert-nickname=hops.site"
+./asadmin --port $ADMIN_PORT $ASASMDIN_PW set "configs.config.server-config.network-config.protocols.protocol.http-listener-2.ssl.cert-nickname=${ADMIN_CERT_ALIAS}"
 ./asadmin $ASASMDIN_PW stop-domain ${DOMAIN}
 ./asadmin $ASASMDIN_PW start-domain ${DOMAIN}
 
