@@ -7,6 +7,7 @@
 CREATE TABLE `registered_cluster` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `public_id` varchar(200) NOT NULL UNIQUE,
+  `org_name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `cert` blob NOT NULL,
   `dela_endpoint` varchar(100) NOT NULL,
@@ -15,17 +16,31 @@ CREATE TABLE `registered_cluster` (
   PRIMARY KEY (`id`)
 ) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `firstname` varchar(45) NOT NULL,
+  `lastname` varchar(45) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `cluster_id` int(11) NOT NULL,
+  `status` int(11) DEFAULT '1',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `index2` (`email`,`cluster_id`),
+  FOREIGN KEY (`cluster_id`) REFERENCES `registered_cluster` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 CREATE TABLE `dataset` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `public_id` varchar(1000) NOT NULL UNIQUE,
-  `owner_cluster_id` int(11) NOT NULL,
+  `owner_user_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
   `description` varchar(2000) DEFAULT NULL,
   `published_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `readme_path` varchar(150) DEFAULT NULL,
   `status` int(11) DEFAULT '1',
+  `size` int(11) DEFAULT '0',
+  `rating` int(11) DEFAULT '1',
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`owner_cluster_id`) REFERENCES `registered_cluster` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
+  FOREIGN KEY (`owner_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `cluster_heartbeat` (
@@ -58,18 +73,6 @@ CREATE TABLE `dataset_health` (
   PRIMARY KEY (`dataset_id`, `status`),
   FOREIGN KEY (`dataset_id`) REFERENCES `dataset` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   FOREIGN KEY (`status`) REFERENCES `dataset_status` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
-CREATE TABLE `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `firstname` varchar(45) NOT NULL,
-  `lastname` varchar(45) NOT NULL,
-  `email` varchar(150) NOT NULL,
-  `cluster_id` int(11) NOT NULL,
-  `status` int(11) DEFAULT '1',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `index2` (`email`,`cluster_id`),
-  FOREIGN KEY (`cluster_id`) REFERENCES `registered_cluster` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE `comment` (

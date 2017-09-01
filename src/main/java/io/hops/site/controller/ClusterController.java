@@ -53,17 +53,19 @@ public class ClusterController {
   /**
    * Register a new cluster
    *
+   * @param cert
+   * @param orgName
    * @param msg
    * @return
    */
-  public String registerCluster(byte[] cert, ClusterServiceDTO.Register msg) {
+  public String registerCluster(byte[] cert, String orgName, ClusterServiceDTO.Register msg) {
     Optional<RegisteredCluster> c = clusterFacade.findByEmail(msg.getEmail());
     if (c.isPresent()) {
       return c.get().getPublicId();
     }
     String clusterPublicId = settings.getClusterId();
     RegisteredCluster cluster = new RegisteredCluster(clusterPublicId, msg.getDelaTransferAddress(), 
-      msg.getDelaClusterAddress(), msg.getEmail().toLowerCase(), cert);
+      msg.getDelaClusterAddress(), msg.getEmail().toLowerCase(), cert, orgName);
     clusterFacade.create(cluster);
     return clusterPublicId;
   }

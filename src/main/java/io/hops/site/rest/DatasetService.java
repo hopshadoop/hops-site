@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import io.hops.site.common.AppException;
 import io.hops.site.controller.DatasetController;
 import io.hops.site.controller.HopsSiteSettings;
+import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dto.DatasetDTO;
 import io.hops.site.dto.SearchServiceDTO;
 import io.hops.site.old_dto.DatasetIssueDTO;
@@ -28,6 +29,7 @@ import io.hops.site.rest.annotation.NoCache;
 import io.swagger.annotations.Api;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
@@ -94,6 +96,22 @@ public class DatasetService {
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
     }
   }
+  
+  @GET
+  @NoCache
+  @Path("byPublicId/{publicDSId}")
+  public Response getByPublicId(@PathParam("publicDSId") String publicDSId) {
+    Optional<Dataset> dataset = datasetCtrl.findDatasetByPublicId(publicDSId);
+    if (!dataset.isPresent()) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
+    DatasetDTO.Complete ds = new DatasetDTO.Complete(null, dataset.get().getName(), dataset.get().getDescription(),
+            dataset.get().getCategories(), dataset.get().getMadePublicOn(), dataset.get().getRating(), dataset.get().
+            getDsSize());
+    LOG.log(Level.INFO, "Get dataset for id- {0}", publicDSId);
+    return Response.status(Response.Status.OK).entity(ds).build();
+  }
+
   
   @POST
   @NoCache

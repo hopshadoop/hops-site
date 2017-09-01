@@ -95,6 +95,10 @@ public class Dataset implements Serializable {
   private String readmePath;
   @Column(name = "status")
   private Integer status;
+  @Column(name = "size")
+  private Integer dsSize;
+  @Column(name = "rating")
+  private Integer rating;
   @JoinTable(name = "hops_site.dataset_category",
     joinColumns = {
       @JoinColumn(name = "dataset_id",
@@ -182,6 +186,22 @@ public class Dataset implements Serializable {
 
   public void setStatus(Integer status) {
     this.status = status;
+  }
+
+  public Integer getDsSize() {
+    return dsSize;
+  }
+
+  public void setDsSize(Integer dsSize) {
+    this.dsSize = dsSize;
+  }
+
+  public Integer getRating() {
+    return rating;
+  }
+
+  public void setRating(Integer rating) {
+    this.rating = rating;
   }
 
   public Collection<Category> getCategoryCollection() {

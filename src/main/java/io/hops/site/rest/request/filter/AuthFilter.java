@@ -18,6 +18,7 @@ package io.hops.site.rest.request.filter;
 import io.hops.site.controller.ClusterController;
 import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.old_dto.JsonResponse;
+import io.hops.site.util.CertificateHelper;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.AccessControlException;
@@ -78,7 +79,7 @@ public class AuthFilter implements ContainerRequestFilter {
       return;
     }
     X509Certificate principalCert = certs[0];
-    String clusterEmail = getCertificateEmail(principalCert);
+    String clusterEmail = CertificateHelper.getCertificatePart(principalCert, "EMAILADDRESS");
     if (clusterEmail.isEmpty()) { //Common name not set
       requestContext.abortWith(buildResponse("Common name not set.", Response.Status.UNAUTHORIZED));
       return;
@@ -107,26 +108,6 @@ public class AuthFilter implements ContainerRequestFilter {
     if (!matchCerts(clusterInReq.getCert(), principalCert)) { // req as different cluster
       requestContext.abortWith(buildResponse("Cluster in request do not match certificat.", Response.Status.FORBIDDEN));
     }
-  }
-
-  private String getCertificateEmail(X509Certificate principalCert) {
-    String tmpName, name = "";
-    Principal principal = principalCert.getSubjectDN();
-    // Extract the email
-    String email = "EMAILADDRESS=";
-    int start = principal.getName().indexOf(email);
-    if (start > -1) {
-      tmpName = principal.getName().substring(start + email.length());
-      int end = tmpName.indexOf(",");
-      if (end > 0) {
-        name = tmpName.substring(0, end);
-      } else {
-        name = tmpName;
-      }
-      LOGGER.log(Level.INFO, "Request from principal: {0}", principal.getName());
-      LOGGER.log(Level.INFO, "Request with email: {0}", name.toLowerCase());
-    }
-    return name.toLowerCase();
   }
 
   private RegisteredCluster getClusterFromReq(ContainerRequestContext requestContext) {

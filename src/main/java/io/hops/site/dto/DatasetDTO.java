@@ -124,18 +124,20 @@ public class DatasetDTO {
     private String description;
     private Collection<String> categories;
     private Date publishedOn;
+    private int rating;
     private long size;
 
     public Complete() {
     }
 
     public Complete(Owner owner, String name, String description, Collection<String> categories, Date publishedOn,
-      long size) {
+      int rating, long size) {
       this.owner = owner;
       this.name = name;
       this.description = description;
       this.categories = categories;
       this.publishedOn = publishedOn;
+      this.rating = rating;
       this.size = size;
     }
 
@@ -177,6 +179,14 @@ public class DatasetDTO {
 
     public void setPublishedOn(Date publishedOn) {
       this.publishedOn = publishedOn;
+    }
+
+    public int getRating() {
+      return rating;
+    }
+
+    public void setRating(int rating) {
+      this.rating = rating;
     }
 
     public long getSize() {

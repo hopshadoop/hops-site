@@ -60,11 +60,7 @@ public class RatingController {
     if (ratings.isEmpty()) {
       return new RatingDTO(datasetPublicId, 0, 0);
     }
-    int rated = 0;
-    for (DatasetRating rate : ratings) {
-      rated += rate.getRating();
-    }
-    rated /= ratings.size();
+    int rated = calculateRating(ratings);
     return new RatingDTO(datasetPublicId, rated, ratings.size());
   }
 
@@ -109,8 +105,8 @@ public class RatingController {
     if (!dataset.isPresent()) {
       throw new IllegalArgumentException("Dataset not found.");
     }
-    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(datasetRating.getUser().getEmail(), 
-      datasetRating.getUser().getClusterId());
+    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(datasetRating.getUser().getEmail(),
+            datasetRating.getUser().getClusterId());
     if (!user.isPresent()) {
       throw new IllegalArgumentException("User not found.");
     }
@@ -124,8 +120,14 @@ public class RatingController {
     }
     DatasetRating newDatasetRating = new DatasetRating(datasetRating.getRating(), user.get(), dataset.get());
     datasetRatingFacade.create(newDatasetRating);
+
+    //update dataset
+    List<DatasetRating> ratings = new ArrayList(dataset.get().getDatasetRatingCollection());
+    int rated = calculateRating(ratings);
+    dataset.get().setRating(rated);
+    datasetFacade.edit(dataset.get());
   }
-  
+
   private void rateDTOSanityCheck(RateDTO rateDTO) {
     if (rateDTO == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
@@ -151,7 +153,14 @@ public class RatingController {
       throw new IllegalArgumentException("Id not assigned.");
     }
     DatasetRating datasetRating = datasetRatingFacade.find(ratingId);
+    Dataset dataset = datasetRating.getDatasetId();
     datasetRatingFacade.remove(datasetRating);
+
+    //update dataset
+    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
+    int rated = calculateRating(ratings);
+    dataset.setRating(rated);
+    datasetFacade.edit(dataset);
   }
 
   /**
@@ -180,5 +189,21 @@ public class RatingController {
     }
     rating.setRating(datasetRating.getRating());
     datasetRatingFacade.edit(rating);
+
+    //update dataset
+    Dataset dataset = rating.getDatasetId();
+    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
+    int rated = calculateRating(ratings);
+    dataset.setRating(rated);
+    datasetFacade.edit(dataset);
+  }
+
+  private int calculateRating(List<DatasetRating> ratings) {
+    int rated = 0;
+    for (DatasetRating rate : ratings) {
+      rated += rate.getRating();
+    }
+    rated /= ratings.size();
+    return rated;
   }
 }

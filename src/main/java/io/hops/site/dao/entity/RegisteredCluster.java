@@ -91,6 +91,12 @@ public class RegisteredCluster implements Serializable {
     max = 100)
   @Column(name = "email")
   private String email;
+  @NotNull
+  @Basic(optional = false)
+  @Size(min = 1,
+    max = 100)
+  @Column(name = "org_name")
+  private String orgName;
   @Basic(optional = false)
   @NotNull
   @Lob
@@ -117,10 +123,11 @@ public class RegisteredCluster implements Serializable {
   }
 
   public RegisteredCluster(String publicId, String delaTransferAddress, String delaClusterAddress, String email, 
-    byte[] cert) {
+    byte[] cert, String orgName) {
     this.publicId = publicId;
     this.httpEndpoint = delaClusterAddress;
     this.email = email;
+    this.orgName = orgName;
     this.cert = cert;
     this.delaEndpoint = delaTransferAddress;
   }
@@ -133,6 +140,14 @@ public class RegisteredCluster implements Serializable {
 
   public void setEmail(String email) {
     this.email = email;
+  }
+
+  public String getOrgName() {
+    return orgName;
+  }
+
+  public void setOrgName(String orgName) {
+    this.orgName = orgName;
   }
 
   public byte[] getCert() {
