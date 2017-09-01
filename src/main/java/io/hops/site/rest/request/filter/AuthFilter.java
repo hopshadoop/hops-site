@@ -90,7 +90,7 @@ public class AuthFilter implements ContainerRequestFilter {
     LOGGER.log(Level.INFO, "Path: {0}, method: {1}", new Object[]{path, method});
 
     Optional<RegisteredCluster> clusterFromCert = clusterController.getClusterByEmail(clusterEmail);
-    if (!clusterFromCert.isPresent() && !"cluster/register".equals(path)) { //not yet registerd
+    if (!clusterFromCert.isPresent() && !allowedPath(path)) { //not yet registerd
       requestContext.abortWith(buildResponse("Cluster not registerd.", Response.Status.FORBIDDEN));
       return;
     }
@@ -100,14 +100,38 @@ public class AuthFilter implements ContainerRequestFilter {
       return;
     }
 
-    RegisteredCluster clusterInReq = getClusterFromReq(requestContext);
-    if (clusterInReq == null) { // not protected ex. getRole
-      return;
-    }
+//    RegisteredCluster clusterInReq = getClusterFromReq(requestContext);
+//    if (clusterInReq == null) { // not protected ex. getRole
+//      return;
+//    }
 
-    if (!matchCerts(clusterInReq.getCert(), principalCert)) { // req as different cluster
-      requestContext.abortWith(buildResponse("Cluster in request do not match certificat.", Response.Status.FORBIDDEN));
+//    if (!matchCerts(clusterInReq.getCert(), principalCert)) { // req as different cluster
+//      requestContext.abortWith(buildResponse("Cluster in request do not match certificat.", Response.Status.FORBIDDEN));
+//    }
+  }
+
+  private boolean allowedPath(String path) {
+    return "cluster/register".equals(path) ||
+        "cluster/dela/version".equals(path);
+  }
+  private String getCertificateEmail(X509Certificate principalCert) {
+    String tmpName, name = "";
+    Principal principal = principalCert.getSubjectDN();
+    // Extract the email
+    String email = "EMAILADDRESS=";
+    int start = principal.getName().indexOf(email);
+    if (start > -1) {
+      tmpName = principal.getName().substring(start + email.length());
+      int end = tmpName.indexOf(",");
+      if (end > 0) {
+        name = tmpName.substring(0, end);
+      } else {
+        name = tmpName;
+      }
+      LOGGER.log(Level.INFO, "Request from principal: {0}", principal.getName());
+      LOGGER.log(Level.INFO, "Request with email: {0}", name.toLowerCase());
     }
+    return name.toLowerCase();
   }
 
   private RegisteredCluster getClusterFromReq(ContainerRequestContext requestContext) {

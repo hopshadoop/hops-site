@@ -37,10 +37,11 @@ public class DatasetHealthFacade extends AbstractFacade<DatasetHealth> {
   }
   
   public int updateAllDatasetHealth() {
-    int updates = em.createNativeQuery("INSERT INTO hops_site.dataset_health (dataset_id, status, count) "
-      + "SELECT ld.dataset_id, ld.status, COUNT(*) as ld_count "
-      + "FROM hops_site.live_dataset ld GROUP BY ld.dataset_id, ld.status "
-      + "ON DUPLICATE KEY UPDATE count = ld_count").executeUpdate();
-    return updates;
+//    int updates = em.createNativeQuery("INSERT INTO hops_site.dataset_health (dataset_id, status, count) "
+//      + "SELECT ld.dataset_id, ld.status, COUNT(*) as ld_count "
+//      + "FROM hops_site.live_dataset ld GROUP BY ld.dataset_id, ld.status "
+//      + "ON DUPLICATE KEY UPDATE count = ld_count").executeUpdate();
+//    return updates;
+    return 0;
   }
 }
