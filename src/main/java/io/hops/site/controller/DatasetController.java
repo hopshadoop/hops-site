@@ -145,7 +145,7 @@ public class DatasetController {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} create dataset",
       new Object[]{publicDSId, publicCId});
     Dataset dataset = datasetFacade.createDataset(publicDSId, msg.getName(), msg.getDescription(),
-      readmePath, categories, cluster.get());
+      readmePath, categories, cluster.get(), msg.getSize());
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} live dataset",
       new Object[]{publicDSId, publicCId});
     liveDatasetFacade.uploadDataset(cluster.get().getId(), dataset.getId());

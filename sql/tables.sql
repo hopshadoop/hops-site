@@ -37,7 +37,7 @@ CREATE TABLE `dataset` (
   `published_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `readme_path` varchar(150) DEFAULT NULL,
   `status` int(11) DEFAULT '1',
-  `size` int(11) DEFAULT '0',
+  `size` BIGINT DEFAULT '0',
   `rating` int(11) DEFAULT '1',
   PRIMARY KEY (`id`),
   FOREIGN KEY (`owner_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION

@@ -96,7 +96,7 @@ public class Dataset implements Serializable {
   @Column(name = "status")
   private Integer status;
   @Column(name = "size")
-  private Integer dsSize;
+  private long dsSize;
   @Column(name = "rating")
   private Integer rating;
   @JoinTable(name = "hops_site.dataset_category",
@@ -130,13 +130,14 @@ public class Dataset implements Serializable {
   }
 
   public Dataset(String publicId, String name, String description, String readmePath,
-    Collection<Category> categoryCollection, RegisteredCluster cluster) {
+    Collection<Category> categoryCollection, RegisteredCluster cluster, long dsSize) {
     this.publicId = publicId;
     this.name = name;
     this.description = description;
     this.readmePath = readmePath;
     this.categoryCollection = categoryCollection;
     this.ownerCluster = cluster;
+    this.dsSize = dsSize;
   }
 
   public int getId() {
@@ -154,6 +155,7 @@ public class Dataset implements Serializable {
   public void setPublicId(String publicId) {
     this.publicId = publicId;
   }
+  
 
   public String getName() {
     return name;
@@ -187,11 +189,11 @@ public class Dataset implements Serializable {
     this.status = status;
   }
 
-  public Integer getDsSize() {
+  public long getDsSize() {
     return dsSize;
   }
 
-  public void setDsSize(Integer dsSize) {
+  public void setDsSize(long dsSize) {
     this.dsSize = dsSize;
   }
 

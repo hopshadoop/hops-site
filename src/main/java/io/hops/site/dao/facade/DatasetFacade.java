@@ -76,8 +76,8 @@ public class DatasetFacade extends AbstractFacade<Dataset> {
   }
 
   public Dataset createDataset(String publicId, String name, String description, String readmePath,
-    Collection<Category> categories, RegisteredCluster cluster) {
-    create(new Dataset(publicId, name, description, readmePath, categories, cluster));
+    Collection<Category> categories, RegisteredCluster cluster, long size) {
+    create(new Dataset(publicId, name, description, readmePath, categories, cluster, size));
     Optional<Dataset> d = findByPublicId(publicId);
     return d.get();
   }
