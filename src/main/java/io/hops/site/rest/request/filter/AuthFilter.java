@@ -95,11 +95,10 @@ public class AuthFilter implements ContainerRequestFilter {
       return;
     }
 
-    if (clusterFromCert.isPresent() && "cluster/register".equals(path)) { //already registered
-      requestContext.abortWith(buildResponse("Cluster already registered.", Response.Status.FORBIDDEN));
-      return;
-    }
-
+//    if (clusterFromCert.isPresent() && "cluster/register".equals(path)) { //already registered
+//      requestContext.abortWith(buildResponse("Cluster already registered.", Response.Status.FORBIDDEN));
+//      return;
+//    }
 //    RegisteredCluster clusterInReq = getClusterFromReq(requestContext);
 //    if (clusterInReq == null) { // not protected ex. getRole
 //      return;

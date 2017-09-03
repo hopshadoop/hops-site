@@ -129,12 +129,11 @@ public class Dataset implements Serializable {
   public Dataset() {
   }
 
-  public Dataset(String publicId, String name, String description, Date madePublicOn, String readmePath,
+  public Dataset(String publicId, String name, String description, String readmePath,
     Collection<Category> categoryCollection, RegisteredCluster cluster) {
     this.publicId = publicId;
     this.name = name;
     this.description = description;
-    this.madePublicOn = madePublicOn;
     this.readmePath = readmePath;
     this.categoryCollection = categoryCollection;
     this.ownerCluster = cluster;

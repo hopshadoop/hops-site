@@ -19,7 +19,6 @@ import io.hops.site.dao.entity.Category;
 import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.RegisteredCluster;
 import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -76,9 +75,9 @@ public class DatasetFacade extends AbstractFacade<Dataset> {
     return query.getResultList();
   }
 
-  public Dataset createDataset(String publicId, String name, String description, Date publishedOn, String readmePath,
+  public Dataset createDataset(String publicId, String name, String description, String readmePath,
     Collection<Category> categories, RegisteredCluster cluster) {
-    create(new Dataset(publicId, name, description, publishedOn, readmePath, categories, cluster));
+    create(new Dataset(publicId, name, description, readmePath, categories, cluster));
     Optional<Dataset> d = findByPublicId(publicId);
     return d.get();
   }

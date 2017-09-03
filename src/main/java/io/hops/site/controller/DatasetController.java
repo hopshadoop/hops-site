@@ -38,7 +38,6 @@ import io.hops.site.dto.SearchServiceDTO;
 import io.hops.site.dto.internal.ElasticDoc;
 import io.hops.site.old_dto.DatasetIssueDTO;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -140,13 +139,12 @@ public class DatasetController {
     if (!cluster.isPresent()) {
       throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "cluster not registered");
     }
-    Date publishedOn = settings.getDateNow();
     Collection<Category> categories = categoryFacade.getAndStoreCategories(msg.getCategories());
     //TODO Alex - Readme
     String readmePath = "";
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} create dataset",
       new Object[]{publicDSId, publicCId});
-    Dataset dataset = datasetFacade.createDataset(publicDSId, msg.getName(), msg.getDescription(), publishedOn,
+    Dataset dataset = datasetFacade.createDataset(publicDSId, msg.getName(), msg.getDescription(),
       readmePath, categories, cluster.get());
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} live dataset",
       new Object[]{publicDSId, publicCId});

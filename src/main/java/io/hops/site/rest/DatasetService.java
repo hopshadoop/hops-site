@@ -202,9 +202,9 @@ public class DatasetService {
   
   @GET
   @NoCache
-  @Path("details/{publicDSId}")
+  @Path("{publicDSId}/details")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response details(@PathParam("publiDSId") String publicDSId) throws AppException {
+  public Response details(@PathParam("publicDSId") String publicDSId) throws AppException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset - details {0}", publicDSId);
     SearchServiceDTO.ItemDetails result = datasetCtrl.getDetails(publicDSId);
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:done - details {0}", publicDSId);
