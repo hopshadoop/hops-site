@@ -149,6 +149,10 @@ public class DatasetController {
     String readmePath = "";
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} create dataset",
       new Object[]{publicDSId, publicCId});
+    if(datasetFacade.findByPublicId(publicCId) != null)  {
+      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), 
+        ThirdPartyException.Error.DATASET_EXISTS.toString());
+    }
     Dataset dataset = datasetFacade.createDataset(publicDSId, msg.getName(), msg.getDescription(),
       readmePath, categories, user.get(), msg.getSize());
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} live dataset",

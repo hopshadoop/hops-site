@@ -2,7 +2,8 @@ package io.hops.site.controller;
 
 public class ThirdPartyException {
   public static enum Error {
-    USER_NOT_REGISTERED("user not registered");
+    USER_NOT_REGISTERED("user not registered"),
+    DATASET_EXISTS("dataset exists");
     
     private final String msg;
     
