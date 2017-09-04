@@ -17,10 +17,7 @@ package io.hops.site.rest.request.filter;
 
 import io.hops.site.controller.DatasetController;
 import io.hops.site.controller.UsersController;
-import io.hops.site.dao.entity.Users;
-import io.hops.site.old_dto.UserDTO;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Priority;
@@ -58,22 +55,8 @@ public class AddRowsFilter implements ContainerRequestFilter {
       }
 
       if (reqDTO.getUser() != null) {
-        addUserIfNotExist(reqDTO.getUser());
+        return;
       }
-           
     }
   }
-
-  private void addUserIfNotExist(UserDTO userDTO) {
-    if (userDTO.getEmail() == null) {
-      return;
-    }
-    Optional<Users> user = usersController.findUserByEmailAndClusterId(userDTO.getEmail(), userDTO.getClusterId());
-    if (!user.isPresent()) {
-      return;
-    }
-    usersController.addNewUser(userDTO);
-    LOGGER.log(Level.INFO, "Add new user for cluster: {0}", userDTO.getClusterId());
-  }
-
 }

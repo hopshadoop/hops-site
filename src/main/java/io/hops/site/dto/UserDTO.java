@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.site.old_dto;
+package io.hops.site.dto;
 
+import io.hops.site.dao.entity.Users;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -23,9 +24,14 @@ public class UserDTO {
   private String firstname;
   private String lastname;
   private String email;
-  private String clusterId;
 
   public UserDTO() {
+  }
+  
+  public UserDTO(Users user) {
+    this.firstname = user.getFirstname();
+    this.lastname = user.getLastname();
+    this.email = user.getEmail();
   }
 
   public String getFirstname() {
@@ -51,19 +57,4 @@ public class UserDTO {
   public void setEmail(String email) {
     this.email = email;
   }
-
-  public String getClusterId() {
-    return clusterId;
-  }
-
-  public void setClusterId(String clusterId) {
-    this.clusterId = clusterId;
-  }
-  
-  @Override
-  public String toString() {
-    return "UserDTO{" + "firstname=" + firstname + ", lastname=" + lastname + ", email=" + email + ", clusterPublicId="
-            + clusterId + '}';
-  }
-
 }

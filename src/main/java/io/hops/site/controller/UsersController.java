@@ -19,7 +19,7 @@ import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.dao.entity.Users;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dao.facade.UsersFacade;
-import io.hops.site.old_dto.UserDTO;
+import io.hops.site.dto.UserDTO;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,9 +43,9 @@ public class UsersController {
    *
    * @param user
    */
-  public void addNewUser(UserDTO user) {
-    userDTOSanityCheck(user);
-    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(user.getClusterId());
+  public void addNewUser(String publicCId, UserDTO user) {
+    userDTOSanityCheck(publicCId, user);
+    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(publicCId);
     if (!cluster.isPresent()) {
       throw new IllegalArgumentException("Cluster not found.");
     }
@@ -59,9 +59,9 @@ public class UsersController {
    *
    * @param updateUser
    */
-  public void updateUser(UserDTO updateUser) {
-    userDTOSanityCheck(updateUser);
-    Optional<Users> userAux = userFacade.findByEmailAndPublicClusterId(updateUser.getEmail(), updateUser.getClusterId());
+  public void updateUser(String publicCId, UserDTO updateUser) {
+    userDTOSanityCheck(publicCId, updateUser);
+    Optional<Users> userAux = userFacade.findByEmailAndPublicClusterId(updateUser.getEmail(), publicCId);
     if (!userAux.isPresent()) {
       throw new IllegalArgumentException("User not found.");
     }
@@ -72,14 +72,14 @@ public class UsersController {
     LOGGER.log(Level.INFO, "Updating user: {0}.", user.getId());
   }
 
-  private void userDTOSanityCheck(UserDTO user) {
+  private void userDTOSanityCheck(String publicCId, UserDTO user) {
     if (user == null) {
       throw new IllegalArgumentException("User is not assigned.");
     }
     if (user.getEmail() == null || user.getEmail().isEmpty()) {
       throw new IllegalArgumentException("User email not assigned.");
     }
-    if (user.getClusterId() == null || user.getClusterId().isEmpty()) {
+    if (publicCId == null || publicCId.isEmpty()) {
       throw new IllegalArgumentException("Cluster is not assigned.");
     }
     if ((user.getFirstname() == null || user.getFirstname().isEmpty()) && (user.getLastname() == null || user.

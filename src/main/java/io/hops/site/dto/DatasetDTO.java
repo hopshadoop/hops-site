@@ -1,5 +1,6 @@
 package io.hops.site.dto;
 
+import io.hops.site.dao.entity.Users;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -12,6 +13,7 @@ public class DatasetDTO {
     private String description;
     private Collection<String> categories;
     private long size;
+    private String userEmail;
 
     public String getName() {
       return name;
@@ -43,6 +45,14 @@ public class DatasetDTO {
 
     public void setSize(long size) {
       this.size = size;
+    }
+
+    public String getUserEmail() {
+      return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+      this.userEmail = userEmail;
     }
   }
   
@@ -215,9 +225,9 @@ public class DatasetDTO {
     public Owner() {
     }
 
-    public Owner(String clusterDescription, String userDescription) {
-      this.clusterDescription = clusterDescription;
-      this.userDescription = userDescription;
+    public Owner(Users owner) {
+      this.clusterDescription = owner.getCluster().getPublicId();
+      this.userDescription = owner.getFirstname() + " " + owner.getLastname();
     }
 
     public String getClusterDescription() {

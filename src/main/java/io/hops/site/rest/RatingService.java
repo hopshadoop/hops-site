@@ -94,8 +94,9 @@ public class RatingService {
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response addRating(RateDTO datasetRating) {
-    ratingController.addRating(datasetRating);
+  @Path("/add/{publicCId}")
+  public Response addRating(@PathParam("publicCId") String publicCId, RateDTO datasetRating) {
+    ratingController.addRating(publicCId, datasetRating);
     LOGGER.log(Level.INFO, "Add rating for dataset: {0}", datasetRating.getDatasetId());
     return Response.ok().build();
   }

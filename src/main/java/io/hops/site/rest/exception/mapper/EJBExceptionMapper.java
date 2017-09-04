@@ -34,7 +34,7 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
 
-  private final static Logger LOGGER = Logger.getLogger(EJBExceptionMapper.class.getName());
+  private final static Logger LOG = Logger.getLogger(EJBExceptionMapper.class.getName());
 
   @Override
   @Produces(MediaType.APPLICATION_JSON)
@@ -53,8 +53,8 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
       return handleIllegalStateException((IllegalStateException) exception.getCause());
     }
 
-    LOGGER.log(Level.INFO, "EJBException Caused by: {0}", exception.getCause().toString());
-    LOGGER.log(Level.INFO, "EJBException: {0}", exception.getCause().getMessage());
+    LOG.log(Level.INFO, "EJBException Caused by: {0}", exception.getCause().toString());
+    LOG.log(Level.INFO, "EJBException: {0}", exception.getCause().getMessage());
     JsonResponse jsonResponse = new JsonResponse();
     jsonResponse.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getReasonPhrase());
     jsonResponse.setStatusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
@@ -63,14 +63,14 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
   }
 
   private Response handleConstraintViolation(ConstraintViolationException cve) {
-    LOGGER.log(Level.INFO, "ConstraintViolationException: {0}", cve.getMessage());
+    LOG.log(Level.INFO, "ConstraintViolationException: {0}", cve.getMessage());
     JsonResponse jsonResponse = new JsonResponse();
     jsonResponse.setStatus(Response.Status.BAD_REQUEST.getReasonPhrase());
     jsonResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
     StringBuilder sb = new StringBuilder();
     Set<ConstraintViolation<?>> cvs = cve.getConstraintViolations();
     for (ConstraintViolation<?> cv : cvs) {
-      LOGGER.log(Level.INFO, "Attribute: {0}, {1}", new Object[]{cv.getPropertyPath(), cv.getMessage()});
+      LOG.log(Level.INFO, "Attribute: {0}, {1}", new Object[]{cv.getPropertyPath(), cv.getMessage()});
       sb.append(cv.getPropertyPath()).append(", ").append(cv.getMessage()).append("\n");
     }
     if (sb.toString().isEmpty()) {
@@ -83,7 +83,7 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
   }
 
   private Response handleAccessControlException(AccessControlException ace) {
-    LOGGER.log(Level.INFO, "AccessControlException: {0}", ace.getMessage());
+    LOG.log(Level.INFO, "AccessControlException: {0}", ace.getMessage());
     JsonResponse jsonResponse = new JsonResponse();
     jsonResponse.setStatus(Response.Status.FORBIDDEN.getReasonPhrase());
     jsonResponse.setStatusCode(Response.Status.FORBIDDEN.getStatusCode());
@@ -92,7 +92,7 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
   }
 
   private Response handleIllegalArgumentException(IllegalArgumentException iae) {
-    LOGGER.log(Level.INFO, "IllegalArgumentException: {0}", iae.getMessage());
+    LOG.log(Level.INFO, "IllegalArgumentException: {0}", iae.getMessage());
     JsonResponse jsonResponse = new JsonResponse();
     jsonResponse.setStatus(Response.Status.EXPECTATION_FAILED.getReasonPhrase());
     jsonResponse.setStatusCode(Response.Status.EXPECTATION_FAILED.getStatusCode());
@@ -101,13 +101,13 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
   }
 
   private Response handleRollbackException(RollbackException pe) {
-    LOGGER.log(Level.INFO, "RollbackException: {0}", pe.getMessage());
+    LOG.log(Level.INFO, "RollbackException: {0}", pe.getMessage());
     Throwable e = pe;
     //get to the bottom of this
     while (e.getCause() != null) {
       e = e.getCause();
     }
-    LOGGER.log(Level.INFO, "RollbackException Caused by: {0}", e.getMessage());
+    LOG.log(Level.INFO, "RollbackException Caused by: {0}", e.getMessage());
     if (e instanceof ConstraintViolationException) {
       return handleConstraintViolation((ConstraintViolationException) e);      
     }
@@ -119,7 +119,7 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
   }
 
   private Response handleAccessLocalException(AccessLocalException accessLocalException) {
-    LOGGER.log(Level.INFO, "AccessLocalException: {0}", accessLocalException.getMessage());
+    LOG.log(Level.INFO, "AccessLocalException: {0}", accessLocalException.getMessage());
     JsonResponse jsonResponse = new JsonResponse();
     jsonResponse.setStatus(Response.Status.UNAUTHORIZED.getReasonPhrase());
     jsonResponse.setStatusCode(Response.Status.UNAUTHORIZED.getStatusCode());
@@ -128,7 +128,7 @@ public class EJBExceptionMapper implements ExceptionMapper<EJBException> {
   }
 
   private Response handleIllegalStateException(IllegalStateException illegalStateException) {
-    LOGGER.log(Level.INFO, "IllegalStateException: {0}", illegalStateException.getMessage());
+    LOG.log(Level.INFO, "IllegalStateException: {0}", illegalStateException.getMessage());
     JsonResponse jsonResponse = new JsonResponse();
     jsonResponse.setStatus(Response.Status.EXPECTATION_FAILED.getReasonPhrase());
     jsonResponse.setStatusCode(Response.Status.EXPECTATION_FAILED.getStatusCode());

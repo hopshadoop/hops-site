@@ -22,7 +22,7 @@ import javax.ejb.Singleton;
 @ConcurrencyManagement(ConcurrencyManagementType.BEAN)
 public class HopsSiteController {
 
-  private static final Logger LOGGGER = Logger.getLogger(HopsSiteController.class.getName());
+  private static final Logger LOG = Logger.getLogger(HopsSiteController.class.getName());
 
   @EJB
   private Settings settings;

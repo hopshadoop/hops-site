@@ -99,14 +99,13 @@ public class RatingController {
    *
    * @param datasetRating
    */
-  public void addRating(RateDTO datasetRating) {
+  public void addRating(String publicCId, RateDTO datasetRating) {
     rateDTOSanityCheck(datasetRating);
     Optional<Dataset> dataset = datasetFacade.findByPublicId(datasetRating.getDatasetId());
     if (!dataset.isPresent()) {
       throw new IllegalArgumentException("Dataset not found.");
     }
-    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(datasetRating.getUser().getEmail(),
-            datasetRating.getUser().getClusterId());
+    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(datasetRating.getUser().getEmail(), publicCId);
     if (!user.isPresent()) {
       throw new IllegalArgumentException("User not found.");
     }

@@ -62,7 +62,7 @@ public class DatasetService {
   @NoCache
   @Path("/publish/{publicCId}/{publicDSId}")
   public Response publish(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId, 
-    DatasetDTO.Proto msg) {
+    DatasetDTO.Proto msg) throws AppException {
     publishDatasetSanityCheck(msg);
     try {
       LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset - {0} cluster:{1} publishing", 
@@ -72,8 +72,8 @@ public class DatasetService {
         new Object[]{publicDSId, publicCId});
       return Response.ok(publicDSId).build();
     } catch (AppException ex) {
-      LOG.log(Level.WARNING, "could not publish dataset - {}", ex.getMessage());
-      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
+      LOG.log(Level.WARNING, "could not publish dataset - {0}", ex.getMessage());
+      throw ex;
     }
   }
 
@@ -92,7 +92,7 @@ public class DatasetService {
         new Object[]{publicDSId, publicCId});
       return Response.ok("ok").build();
     } catch (AppException ex) {
-      LOG.log(Level.WARNING, "could not unpublish dataset - {}", ex.getMessage());
+      LOG.log(Level.WARNING, "could not unpublish dataset - {0}", ex.getMessage());
       return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
     }
   }

@@ -21,7 +21,6 @@ import io.hops.site.old_dto.JsonResponse;
 import io.hops.site.util.CertificateHelper;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.security.AccessControlException;
 import java.security.Principal;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -42,7 +41,6 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
-import org.glassfish.jersey.server.ContainerRequest;
 
 @Provider
 @Priority(Priorities.AUTHORIZATION)
@@ -133,34 +131,34 @@ public class AuthFilter implements ContainerRequestFilter {
     return name.toLowerCase();
   }
 
-  private RegisteredCluster getClusterFromReq(ContainerRequestContext requestContext) {
-    ContainerRequest cr = (ContainerRequest) requestContext;
-    if (cr.bufferEntity()) {
-      GenericReqDTO reqDTO;
-      try {
-        reqDTO = cr.readEntity(GenericReqDTO.class);
-      } catch (Exception nsme) {
-        //nothing to do. It is not GenericRequestDTO, thus can not be checked.
-        LOGGER.log(Level.INFO, "Not a generic request.");
-        return null;
-      }
-      LOGGER.log(Level.INFO, "Generic request: {0}.", reqDTO.toString());
-      String clusterPublicId;
-      if (reqDTO.getUser() != null) {
-        clusterPublicId = reqDTO.getUser().getClusterId();
-      } else if (reqDTO.getClusterId() != null) {
-        clusterPublicId = reqDTO.getClusterId();
-      } else {
-        throw new AccessControlException("update logic for GenericReqDTO");
-      }
-      Optional<RegisteredCluster> cluster = clusterController.getClusterByPublicId(clusterPublicId);
-      if (!cluster.isPresent()) {
-        throw new AccessControlException("Cluster not registered.");
-      }
-      return cluster.get();
-    }
-    return null;
-  }
+//  private RegisteredCluster getClusterFromReq(ContainerRequestContext requestContext) {
+//    ContainerRequest cr = (ContainerRequest) requestContext;
+//    if (cr.bufferEntity()) {
+//      GenericReqDTO reqDTO;
+//      try {
+//        reqDTO = cr.readEntity(GenericReqDTO.class);
+//      } catch (Exception nsme) {
+//        //nothing to do. It is not GenericRequestDTO, thus can not be checked.
+//        LOGGER.log(Level.INFO, "Not a generic request.");
+//        return null;
+//      }
+//      LOGGER.log(Level.INFO, "Generic request: {0}.", reqDTO.toString());
+//      String clusterPublicId;
+//      if (reqDTO.getUser() != null) {
+//        clusterPublicId = reqDTO.getUser().getClusterId();
+//      } else if (reqDTO.getClusterId() != null) {
+//        clusterPublicId = reqDTO.getClusterId();
+//      } else {
+//        throw new AccessControlException("update logic for GenericReqDTO");
+//      }
+//      Optional<RegisteredCluster> cluster = clusterController.getClusterByPublicId(clusterPublicId);
+//      if (!cluster.isPresent()) {
+//        throw new AccessControlException("Cluster not registered.");
+//      }
+//      return cluster.get();
+//    }
+//    return null;
+//  }
 
   private Response buildResponse(String message, Response.Status status) {
     JsonResponse json = new JsonResponse();

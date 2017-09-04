@@ -5,6 +5,7 @@ import io.hops.site.rest.CommentService;
 import io.hops.site.rest.DatasetService;
 import io.hops.site.rest.RatingService;
 import io.hops.site.rest.UserService;
+import io.hops.site.rest.exception.mapper.AppExceptionMapper;
 import io.hops.site.rest.exception.mapper.EJBExceptionMapper;
 import io.hops.site.rest.request.filter.AddRowsFilter;
 import io.hops.site.rest.request.filter.AuthFilter;
@@ -28,6 +29,7 @@ public class ApplicationConfig extends ResourceConfig {
     
     //Exception mappers
     register(EJBExceptionMapper.class);
+    register(AppExceptionMapper.class);
     
     //response filters
     register(CORSFilter.class);

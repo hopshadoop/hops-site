@@ -15,6 +15,7 @@
  */
 package io.hops.site.old_dto;
 
+import io.hops.site.dto.UserDTO;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement

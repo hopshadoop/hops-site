@@ -127,7 +127,7 @@ public class DatasetController {
     }
 
     long size = 1;
-    DatasetDTO.Owner owner = new DatasetDTO.Owner(dataset.get().getOwnerCluster().getPublicId(), "user description");
+    DatasetDTO.Owner owner = new DatasetDTO.Owner(dataset.get().getOwner());
     DatasetDTO.Details details = new DatasetDTO.Details(owner, dataset.get().getCategories(), 
       dataset.get().getMadePublicOn(), size);
     return new SearchServiceDTO.ItemDetails(details, bootstrap);
@@ -139,13 +139,18 @@ public class DatasetController {
     if (!cluster.isPresent()) {
       throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "cluster not registered");
     }
+    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(msg.getUserEmail(), publicCId);
+    if(!user.isPresent()) {
+      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), 
+        ThirdPartyException.Error.USER_NOT_REGISTERED.toString());
+    }
     Collection<Category> categories = categoryFacade.getAndStoreCategories(msg.getCategories());
     //TODO Alex - Readme
     String readmePath = "";
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} create dataset",
       new Object[]{publicDSId, publicCId});
     Dataset dataset = datasetFacade.createDataset(publicDSId, msg.getName(), msg.getDescription(),
-      readmePath, categories, cluster.get(), msg.getSize());
+      readmePath, categories, user.get(), msg.getSize());
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} live dataset",
       new Object[]{publicDSId, publicCId});
     liveDatasetFacade.uploadDataset(cluster.get().getId(), dataset.getId());
@@ -172,7 +177,7 @@ public class DatasetController {
       return;
     }
     Dataset dataset = d.get();
-    if (dataset.getOwnerCluster().getId() != cluster.get().getId()) {
+    if (dataset.getOwner().getCluster().getId() != cluster.get().getId()) {
       throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "only owner can unpublish");
     }
     datasetFacade.remove(dataset);

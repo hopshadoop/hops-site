@@ -117,10 +117,10 @@ public class Dataset implements Serializable {
     fetch = FetchType.LAZY,
     mappedBy = "datasetId")
   private Collection<Comment> commentCollection;
-  @JoinColumn(name = "owner_cluster_id",
+  @JoinColumn(name = "owner_user_id",
     referencedColumnName = "id")
   @ManyToOne(fetch = FetchType.LAZY)
-  private RegisteredCluster ownerCluster;
+  private Users owner;
   @OneToMany(cascade = CascadeType.ALL,
     fetch = FetchType.LAZY,
     mappedBy = "datasetId")
@@ -130,13 +130,13 @@ public class Dataset implements Serializable {
   }
 
   public Dataset(String publicId, String name, String description, String readmePath,
-    Collection<Category> categoryCollection, RegisteredCluster cluster, long dsSize) {
+    Collection<Category> categoryCollection, Users owner, long dsSize) {
     this.publicId = publicId;
     this.name = name;
     this.description = description;
     this.readmePath = readmePath;
     this.categoryCollection = categoryCollection;
-    this.ownerCluster = cluster;
+    this.owner = owner;
     this.dsSize = dsSize;
   }
 
@@ -229,12 +229,12 @@ public class Dataset implements Serializable {
     this.commentCollection = commentCollection;
   }
 
-  public RegisteredCluster getOwnerCluster() {
-    return ownerCluster;
+  public Users getOwner() {
+    return owner;
   }
 
-  public void setOwnerCluster(RegisteredCluster cluster) {
-    this.ownerCluster = cluster;
+  public void setOwner(Users owner) {
+    this.owner = owner;
   }
 
   public Collection<DatasetRating> getDatasetRatingCollection() {

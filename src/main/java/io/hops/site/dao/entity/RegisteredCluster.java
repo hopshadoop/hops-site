@@ -112,9 +112,6 @@ public class RegisteredCluster implements Serializable {
   @Temporal(TemporalType.TIMESTAMP)
   private Date dateRegistered;
   @OneToMany(fetch = FetchType.LAZY,
-    mappedBy = "ownerCluster")
-  private Collection<Dataset> datasetCollection;
-  @OneToMany(fetch = FetchType.LAZY,
     cascade = CascadeType.ALL,
     mappedBy = "cluster")
   private Collection<Users> usersCollection;
@@ -164,15 +161,6 @@ public class RegisteredCluster implements Serializable {
 
   public void setDateRegistered(Date dateRegistered) {
     this.dateRegistered = dateRegistered;
-  }
-
-  @XmlTransient
-  public Collection<Dataset> getDatasetCollection() {
-    return datasetCollection;
-  }
-
-  public void setDatasetCollection(Collection<Dataset> datasetCollection) {
-    this.datasetCollection = datasetCollection;
   }
 
   @XmlTransient
