@@ -18,6 +18,8 @@ import javax.xml.bind.annotation.XmlRootElement;
   schema = "")
 @XmlRootElement
 @NamedQueries({
+  @NamedQuery(name = "DatasetHealth.findByDatasetId",
+    query = "SELECT dh FROM DatasetHealth dh WHERE dh.datasetId = :datasetIdList"),
   @NamedQuery(name = "DatasetHealth.findByDatasetIdList",
     query = "SELECT dh FROM DatasetHealth dh WHERE dh.datasetId IN :datasetIdList")})
 public class DatasetHealth implements Serializable {

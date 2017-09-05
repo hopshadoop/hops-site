@@ -2,8 +2,10 @@ package io.hops.site.dao.facade;
 
 import io.hops.site.dao.entity.DatasetHealth;
 import java.util.List;
+import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
@@ -29,17 +31,27 @@ public class DatasetHealthFacade extends AbstractFacade<DatasetHealth> {
     return em;
   }
 
+  public Optional<DatasetHealth> findByDatasetId(Integer datasetId) {
+    TypedQuery<DatasetHealth> query = em.createNamedQuery("DatasetHealth.findByPublicId", DatasetHealth.class)
+      .setParameter("datasetId", datasetId);
+    try {
+      return Optional.of(query.getSingleResult());
+    } catch (NoResultException ex) {
+      return Optional.empty();
+    }
+  }
+
   public List<DatasetHealth> findByDatasetId(List<Integer> datasetIdList) {
 
     TypedQuery<DatasetHealth> query = em.createNamedQuery("DatasetHealth.findByPublicIdList", DatasetHealth.class)
       .setParameter("datasetIdList", datasetIdList);
     return query.getResultList();
   }
-  
+
   public int updateAllDatasetHealth() {
     int updates = em.createNativeQuery("INSERT INTO hops_site.dataset_health (dataset_id, status, count) "
-      + "SELECT hops_site.dataset_id, hops_site.status, COUNT(*)"
-      + "FROM hops_site.live_dataset ld GROUP BY hops_site.dataset_id, hops_site.status "
+      + "SELECT ld.dataset_id, ld.status, COUNT(*)"
+      + "FROM hops_site.live_dataset ld GROUP BY ld.dataset_id, ld.status "
       + "ON DUPLICATE KEY UPDATE count = VALUES(count)").executeUpdate();
     return updates;
   }

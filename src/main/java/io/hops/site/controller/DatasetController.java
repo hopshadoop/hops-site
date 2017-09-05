@@ -22,12 +22,14 @@ import io.hops.site.common.Settings;
 import io.hops.site.controller.HopsSiteController.Session;
 import io.hops.site.dao.entity.Category;
 import io.hops.site.dao.entity.Dataset;
+import io.hops.site.dao.entity.DatasetHealth;
 import io.hops.site.dao.entity.DatasetIssue;
 import io.hops.site.dao.entity.LiveDataset;
 import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.dao.entity.Users;
 import io.hops.site.dao.facade.CategoryFacade;
 import io.hops.site.dao.facade.DatasetFacade;
+import io.hops.site.dao.facade.DatasetHealthFacade;
 import io.hops.site.dao.facade.DatasetIssueFacade;
 import io.hops.site.dao.facade.LiveDatasetFacade;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
@@ -66,6 +68,8 @@ public class DatasetController {
   private Settings settings;
   @EJB
   private DatasetFacade datasetFacade;
+  @EJB
+  private DatasetHealthFacade datasetHealthFacade;
   @EJB
   private DatasetIssueFacade datasetIssueFacade;
   @EJB
@@ -126,10 +130,12 @@ public class DatasetController {
       throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "dataset issue");
     }
 
-    long size = 1;
     DatasetDTO.Owner owner = new DatasetDTO.Owner(dataset.get().getOwner());
-    DatasetDTO.Details details = new DatasetDTO.Details(owner, dataset.get().getCategories(), 
-      dataset.get().getMadePublicOn(), size);
+    Optional<DatasetHealth> datasetHealth = datasetHealthFacade.findByDatasetId(dataset.get().getId());
+    if(!datasetHealth.isPresent()) {
+      datasetHealth = Optional.of(new DatasetHealth(dataset.get().getId(), 0, 0));
+    }
+    DatasetDTO.Details details = new DatasetDTO.Details(owner, dataset.get(), datasetHealth.get());
     return new SearchServiceDTO.ItemDetails(details, bootstrap);
   }
 

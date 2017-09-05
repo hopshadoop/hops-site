@@ -1,5 +1,7 @@
 package io.hops.site.dto;
 
+import io.hops.site.dao.entity.Dataset;
+import io.hops.site.dao.entity.DatasetHealth;
 import io.hops.site.dao.entity.Users;
 import java.io.Serializable;
 import java.util.Collection;
@@ -92,15 +94,17 @@ public class DatasetDTO {
     private Collection<String> categories;
     private Date publishedOn;
     private long size;
+    private Health datasetHealth;
 
     public Details() {
     }
 
-    public Details(Owner owner, Collection<String> categories, Date publishedOn, long size) {
+    public Details(Owner owner, Dataset dataset, DatasetHealth datasetHealth) {
       this.owner = owner;
-      this.categories = categories;
-      this.publishedOn = publishedOn;
-      this.size = size;
+      this.categories = dataset.getCategories();
+      this.publishedOn = dataset.getMadePublicOn();
+      this.size = dataset.getDsSize();
+      this.datasetHealth = new Health(datasetHealth);
     }
 
     public Owner getOwner() {
@@ -133,6 +137,44 @@ public class DatasetDTO {
 
     public void setSize(long size) {
       this.size = size;
+    }
+
+    public Health getDatasetHealth() {
+      return datasetHealth;
+    }
+
+    public void setDatasetHealth(Health datasetHealth) {
+      this.datasetHealth = datasetHealth;
+    }
+  }
+  
+  @XmlRootElement
+  public static class Health implements Serializable {
+    private int seeders;
+    private int leechers;
+
+    public Health() {
+    }
+
+    public Health(DatasetHealth datasetHealth) {
+      this.seeders = datasetHealth.getSeeds();
+      this.leechers = datasetHealth.getLeeches();
+    }
+    
+    public int getSeeders() {
+      return seeders;
+    }
+
+    public void setSeeders(int seeders) {
+      this.seeders = seeders;
+    }
+
+    public int getLeechers() {
+      return leechers;
+    }
+
+    public void setLeechers(int leechers) {
+      this.leechers = leechers;
     }
   }
   
