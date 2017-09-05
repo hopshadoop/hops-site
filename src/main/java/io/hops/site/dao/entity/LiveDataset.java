@@ -6,8 +6,11 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -25,7 +28,7 @@ import javax.xml.bind.annotation.XmlRootElement;
   @NamedQuery(name = "LiveDataset.datasetPeers",
     query = "SELECT ld FROM LiveDataset ld WHERE ld.id.datasetId = :datasetId"),
   @NamedQuery(name = "LiveDataset.peerDatasets",
-    query = "SELECT ld FROM LiveDataset ld WHERE ld.id.clusterId = :clusterId"),
+    query = "SELECT ld FROM LiveDataset ld WHERE ld.id.clusterId = :clusterId ORDER BY ld.heartbeat.lastPinged"),
   @NamedQuery(name = "LiveDataset.byId",
     query = "SELECT ld FROM LiveDataset ld WHERE ld.id.datasetId = :datasetId AND ld.id.clusterId = :clusterId")
 })
@@ -38,6 +41,10 @@ public class LiveDataset implements Serializable {
 
   @Column(name = "status")
   private int status;
+
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "cluster_id", insertable=false, updatable=false)
+  private Heartbeat heartbeat;
 
   public LiveDataset() {
   }

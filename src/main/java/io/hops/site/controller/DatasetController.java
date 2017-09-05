@@ -147,9 +147,10 @@ public class DatasetController {
     Collection<Category> categories = categoryFacade.getAndStoreCategories(msg.getCategories());
     //TODO Alex - Readme
     String readmePath = "";
-    LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} create dataset",
-      new Object[]{publicDSId, publicCId});
-    if(datasetFacade.findByPublicId(publicCId) != null)  {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:publish {0}",
+      new Object[]{publicDSId});
+    Optional<Dataset> dAux = datasetFacade.findByPublicId(publicDSId);
+    if(dAux.isPresent())  {
       throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), 
         ThirdPartyException.Error.DATASET_EXISTS.toString());
     }
@@ -160,6 +161,8 @@ public class DatasetController {
     liveDatasetFacade.uploadDataset(cluster.get().getId(), dataset.getId());
     ElasticDoc elasticDoc = elasticDoc(publicDSId, msg);
     elasticCtrl.add(settings.DELA_DOC_INDEX, ElasticDoc.DOC_TYPE, publicDSId, toJson(elasticDoc));
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:publish - done {0}",
+      new Object[]{publicDSId});
     return publicDSId;
   }
 
