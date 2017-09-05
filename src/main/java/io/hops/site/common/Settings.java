@@ -111,8 +111,6 @@ public class Settings {
   public final static int LIVE_DATASET_UPLOAD_STATUS = 0;
   public final static int LIVE_DATASET_DOWNLOAD_STATUS = 1;
   public final static int LIVE_DATASET_BOOTSTRAP_PEERS = 5;
-  public final static long DATASET_HEALTH_INTERVAL = 30*1000l; //s - should maybe be hours in deploy
-  public final static long HEARTBEAT_CHECK_INTERVAL = 3*60*1000l; //s - should maybe be hours in deploy
   
   //Util
   public static Date getDateNow() {

@@ -131,12 +131,21 @@ public class DatasetController {
     }
 
     DatasetDTO.Owner owner = new DatasetDTO.Owner(dataset.get().getOwner());
-    Optional<DatasetHealth> datasetHealth = datasetHealthFacade.findByDatasetId(dataset.get().getId());
-    if(!datasetHealth.isPresent()) {
-      datasetHealth = Optional.of(new DatasetHealth(dataset.get().getId(), 0, 0));
-    }
-    DatasetDTO.Details details = new DatasetDTO.Details(owner, dataset.get(), datasetHealth.get());
+    DatasetDTO.Health datasetHealth = health(datasetHealthFacade.findByDatasetId(dataset.get().getId()));
+    DatasetDTO.Details details = new DatasetDTO.Details(owner, dataset.get(), datasetHealth);
     return new SearchServiceDTO.ItemDetails(details, bootstrap);
+  }
+  
+  private DatasetDTO.Health health(List<DatasetHealth> aux) {
+    DatasetDTO.Health datasetHealth = new DatasetDTO.Health();
+    for(DatasetHealth dh : aux) {
+      if(HopsSiteSettings.LIVE_DATASET_STATUS_UPLOAD == dh.getId().getStatus()) {
+        datasetHealth.setSeeders(dh.getCount());
+      } else if(HopsSiteSettings.LIVE_DATASET_STATUS_DOWNLOAD == dh.getId().getStatus()) {
+        datasetHealth.setLeechers(dh.getCount());
+      }
+    }
+    return datasetHealth;
   }
 
   //******************************************************DATASET*******************************************************

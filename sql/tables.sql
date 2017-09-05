@@ -45,7 +45,7 @@ CREATE TABLE `dataset` (
 
 CREATE TABLE `cluster_heartbeat` (
   `cluster_id` int(11) NOT NULL UNIQUE,
-  `date_last_ping` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_last_ping` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`cluster_id`),
   FOREIGN KEY (`cluster_id`) REFERENCES `registered_cluster` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=ndbcluster DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -70,6 +70,7 @@ CREATE TABLE `dataset_health` (
   `dataset_id` int(11) NOT NULL,
   `status` int(11) NOT NULL,
   `count` int(11) NOT NULL DEFAULT '0',
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`dataset_id`, `status`),
   FOREIGN KEY (`dataset_id`) REFERENCES `dataset` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   FOREIGN KEY (`status`) REFERENCES `dataset_status` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION

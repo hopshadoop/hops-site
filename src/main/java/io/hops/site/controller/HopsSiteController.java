@@ -31,6 +31,8 @@ public class HopsSiteController {
 
   @EJB
   private Settings settings;
+  @EJB
+  private HopsSiteSettings hsettings;
   @Resource
   TimerService timerService;
 
@@ -44,8 +46,8 @@ public class HopsSiteController {
 
   @PostConstruct
   private void init() {
-    timerService.createTimer(0, settings.DATASET_HEALTH_INTERVAL, DATASET_HEALTH_TIMER);
-    timerService.createTimer(0, settings.HEARTBEAT_CHECK_INTERVAL, HEARTBEAT_CHECK_TIMER);
+    timerService.createTimer(0, hsettings.DATASET_HEALTH_INTERVAL, DATASET_HEALTH_TIMER);
+    timerService.createTimer(0, hsettings.HEARTBEAT_CHECK_INTERVAL, HEARTBEAT_CHECK_TIMER);
   }
 
   @PreDestroy

@@ -1,7 +1,6 @@
 package io.hops.site.dto;
 
 import io.hops.site.dao.entity.Dataset;
-import io.hops.site.dao.entity.DatasetHealth;
 import io.hops.site.dao.entity.Users;
 import java.io.Serializable;
 import java.util.Collection;
@@ -99,12 +98,12 @@ public class DatasetDTO {
     public Details() {
     }
 
-    public Details(Owner owner, Dataset dataset, DatasetHealth datasetHealth) {
+    public Details(Owner owner, Dataset dataset, Health datasetHealth) {
       this.owner = owner;
       this.categories = dataset.getCategories();
       this.publishedOn = dataset.getMadePublicOn();
       this.size = dataset.getDsSize();
-      this.datasetHealth = new Health(datasetHealth);
+      this.datasetHealth = datasetHealth;
     }
 
     public Owner getOwner() {
@@ -156,11 +155,6 @@ public class DatasetDTO {
     public Health() {
     }
 
-    public Health(DatasetHealth datasetHealth) {
-      this.seeders = datasetHealth.getSeeds();
-      this.leechers = datasetHealth.getLeeches();
-    }
-    
     public int getSeeders() {
       return seeders;
     }

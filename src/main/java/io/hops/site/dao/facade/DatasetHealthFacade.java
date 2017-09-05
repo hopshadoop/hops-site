@@ -1,11 +1,12 @@
 package io.hops.site.dao.facade;
 
+import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dao.entity.DatasetHealth;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.List;
-import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
@@ -31,28 +32,34 @@ public class DatasetHealthFacade extends AbstractFacade<DatasetHealth> {
     return em;
   }
 
-  public Optional<DatasetHealth> findByDatasetId(Integer datasetId) {
-    TypedQuery<DatasetHealth> query = em.createNamedQuery("DatasetHealth.findByPublicId", DatasetHealth.class)
+  public List<DatasetHealth> findByDatasetId(Integer datasetId) {
+    TypedQuery<DatasetHealth> query = em.createNamedQuery("DatasetHealth.findByDatasetId", DatasetHealth.class)
       .setParameter("datasetId", datasetId);
-    try {
-      return Optional.of(query.getSingleResult());
-    } catch (NoResultException ex) {
-      return Optional.empty();
-    }
+    return query.getResultList();
   }
 
   public List<DatasetHealth> findByDatasetId(List<Integer> datasetIdList) {
 
-    TypedQuery<DatasetHealth> query = em.createNamedQuery("DatasetHealth.findByPublicIdList", DatasetHealth.class)
+    TypedQuery<DatasetHealth> query = em.createNamedQuery("DatasetHealth.findByDatasetIdList", DatasetHealth.class)
       .setParameter("datasetIdList", datasetIdList);
     return query.getResultList();
   }
 
   public int updateAllDatasetHealth() {
-    int updates = em.createNativeQuery("INSERT INTO hops_site.dataset_health (dataset_id, status, count) "
-      + "SELECT ld.dataset_id, ld.status, COUNT(*)"
+    //get timestamp 1h before starting the update
+    Timestamp updated_now = (Timestamp) em.createNativeQuery("SELECT CURRENT_TIMESTAMP").getSingleResult();
+    Calendar cal = Calendar.getInstance();
+    cal.setTimeInMillis(updated_now.getTime());
+    cal.add(Calendar.SECOND, (-1)*HopsSiteSettings.DATASET_HEALTH_OLDER_THAN);
+    Timestamp old = new Timestamp(cal.getTime().getTime());
+    //update
+    int updates = em.createNativeQuery("INSERT INTO hops_site.dataset_health (dataset_id, status, count, updated) "
+      + "SELECT ld.dataset_id, ld.status, COUNT(*), CURRENT_TIMESTAMP "
       + "FROM hops_site.live_dataset ld GROUP BY ld.dataset_id, ld.status "
-      + "ON DUPLICATE KEY UPDATE count = VALUES(count)").executeUpdate();
+      + "ON DUPLICATE KEY UPDATE count = VALUES(count), updated = VALUES(updated)")
+      .executeUpdate();
+    //delete old un-updated - as they are not live anymore
+    updates += em.createNamedQuery("DatasetHealth.deleteOlderThan").setParameter("timestamp", old).executeUpdate();
     return updates;
   }
 }
