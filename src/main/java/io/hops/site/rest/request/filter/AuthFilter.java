@@ -16,16 +16,17 @@
 package io.hops.site.rest.request.filter;
 
 import io.hops.site.controller.ClusterController;
+import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.old_dto.JsonResponse;
+import io.hops.site.rest.exception.ThirdPartyException;
 import io.hops.site.util.CertificateHelper;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.security.Principal;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -54,127 +55,76 @@ public class AuthFilter implements ContainerRequestFilter {
 
   @Context
   private ResourceInfo resourceInfo;
-  
+
+  private static final Set<String> publicPaths = new HashSet<String>() {
+    {
+      add("cluster/register");
+      add("cluster/dela/version");
+    }
+  };
+
+  private static final String CLUSTER_ID_PARAM = "publicCId";
+
   @PostConstruct
   private void init() {
     try {
       //path, size in bytes and, number of log files to use
       fh = new FileHandler("../logs/hops-site%g.log", 2000000, 50);
       LOGGER.addHandler(fh);
-      SimpleFormatter formatter = new SimpleFormatter();  
+      SimpleFormatter formatter = new SimpleFormatter();
       fh.setFormatter(formatter);
     } catch (IOException | SecurityException ex) {
       LOGGER.log(Level.SEVERE, null, ex.getMessage());
     }
-    LOGGER.log(Level.INFO, "Hops-site auth filter log.");
+    LOGGER.log(Level.INFO, "hops_site:auth_filter log.");
   }
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
     X509Certificate[] certs = (X509Certificate[]) requestContext.getProperty("javax.servlet.request.X509Certificate");
     if (certs == null || certs.length < 1) {
-      requestContext.abortWith(buildResponse("No cert found.", Response.Status.UNAUTHORIZED));
+      requestContext.abortWith(fail(ThirdPartyException.Error.CERT_MISSING));
       return;
     }
-    X509Certificate principalCert = certs[0];
-    String clusterEmail = CertificateHelper.getCertificatePart(principalCert, "EMAILADDRESS");
-    if (clusterEmail.isEmpty()) { //Common name not set
-      requestContext.abortWith(buildResponse("Common name not set.", Response.Status.UNAUTHORIZED));
+    String clusterEmail = CertificateHelper.getCertificateEmail(certs[0]);
+    if (clusterEmail == null || clusterEmail.isEmpty()) {
+      requestContext.abortWith(fail(ThirdPartyException.Error.EMAIL_MISSING));
+      return;
+    }
+    Optional<RegisteredCluster> cluster = clusterController.getClusterByEmail(clusterEmail);
+    if (!cluster.isPresent()) {
+      requestContext.abortWith(fail(ThirdPartyException.Error.CLUSTER_NOT_REGISTERED));
+      return;
+    }
+    if (!CertificateHelper.matchCerts(cluster.get().getCert(), certs[0])) {
+      requestContext.abortWith(fail(ThirdPartyException.Error.CERT_MISSMATCH));
       return;
     }
 
     String path = requestContext.getUriInfo().getPath();
     Method method = resourceInfo.getResourceMethod();
-    LOGGER.log(Level.INFO, "Path: {0}, method: {1}", new Object[]{path, method});
+    LOGGER.log(HopsSiteSettings.DELA_DEBUG, "hops_site:auth: path:{0}, method:{1}", new Object[]{path, method});
 
-    Optional<RegisteredCluster> clusterFromCert = clusterController.getClusterByEmail(clusterEmail);
-    if (!clusterFromCert.isPresent() && !allowedPath(path)) { //not yet registerd
-      requestContext.abortWith(buildResponse("Cluster not registerd.", Response.Status.FORBIDDEN));
+    if (publicPaths.contains(path)) {
       return;
     }
 
-//    if (clusterFromCert.isPresent() && "cluster/register".equals(path)) { //already registered
-//      requestContext.abortWith(buildResponse("Cluster already registered.", Response.Status.FORBIDDEN));
-//      return;
-//    }
-//    RegisteredCluster clusterInReq = getClusterFromReq(requestContext);
-//    if (clusterInReq == null) { // not protected ex. getRole
-//      return;
-//    }
-
-//    if (!matchCerts(clusterInReq.getCert(), principalCert)) { // req as different cluster
-//      requestContext.abortWith(buildResponse("Cluster in request do not match certificat.", Response.Status.FORBIDDEN));
-//    }
-  }
-
-  private boolean allowedPath(String path) {
-    return "cluster/register".equals(path) ||
-        "cluster/dela/version".equals(path);
-  }
-  private String getCertificateEmail(X509Certificate principalCert) {
-    String tmpName, name = "";
-    Principal principal = principalCert.getSubjectDN();
-    // Extract the email
-    String email = "EMAILADDRESS=";
-    int start = principal.getName().indexOf(email);
-    if (start > -1) {
-      tmpName = principal.getName().substring(start + email.length());
-      int end = tmpName.indexOf(",");
-      if (end > 0) {
-        name = tmpName.substring(0, end);
-      } else {
-        name = tmpName;
-      }
-      LOGGER.log(Level.INFO, "Request from principal: {0}", principal.getName());
-      LOGGER.log(Level.INFO, "Request with email: {0}", name.toLowerCase());
+    String publicCId = requestContext.getUriInfo().getPathParameters().getFirst(CLUSTER_ID_PARAM);
+    if (publicCId == null) {
+      requestContext.abortWith(fail(ThirdPartyException.Error.CLUSTER_ID_MISSING));
+      return;
     }
-    return name.toLowerCase();
+    if (!cluster.get().getPublicId().equals(publicCId)) {
+      requestContext.abortWith(fail(ThirdPartyException.Error.IMPERSONATION));
+      return;
+    }
   }
 
-//  private RegisteredCluster getClusterFromReq(ContainerRequestContext requestContext) {
-//    ContainerRequest cr = (ContainerRequest) requestContext;
-//    if (cr.bufferEntity()) {
-//      GenericReqDTO reqDTO;
-//      try {
-//        reqDTO = cr.readEntity(GenericReqDTO.class);
-//      } catch (Exception nsme) {
-//        //nothing to do. It is not GenericRequestDTO, thus can not be checked.
-//        LOGGER.log(Level.INFO, "Not a generic request.");
-//        return null;
-//      }
-//      LOGGER.log(Level.INFO, "Generic request: {0}.", reqDTO.toString());
-//      String clusterPublicId;
-//      if (reqDTO.getUser() != null) {
-//        clusterPublicId = reqDTO.getUser().getClusterId();
-//      } else if (reqDTO.getClusterId() != null) {
-//        clusterPublicId = reqDTO.getClusterId();
-//      } else {
-//        throw new AccessControlException("update logic for GenericReqDTO");
-//      }
-//      Optional<RegisteredCluster> cluster = clusterController.getClusterByPublicId(clusterPublicId);
-//      if (!cluster.isPresent()) {
-//        throw new AccessControlException("Cluster not registered.");
-//      }
-//      return cluster.get();
-//    }
-//    return null;
-//  }
-
-  private Response buildResponse(String message, Response.Status status) {
+  private Response fail(ThirdPartyException.Error msg) {
     JsonResponse json = new JsonResponse();
-    json.setStatus(status.getReasonPhrase());
-    json.setStatusCode(status.getStatusCode());
-    json.setErrorMsg(message);
-    return Response.status(status).entity(json).build();
+    json.setStatus(Response.Status.UNAUTHORIZED.getReasonPhrase());
+    json.setStatusCode(Response.Status.UNAUTHORIZED.getStatusCode());
+    json.setErrorMsg(msg.toString());
+    return Response.status(Response.Status.UNAUTHORIZED).entity(json).build();
   }
-
-  private boolean matchCerts(byte[] cert, X509Certificate principalCert) {
-    try {
-      return Arrays.equals(principalCert.getEncoded(), cert);
-    } catch (CertificateEncodingException ex) {
-      LOGGER.log(Level.SEVERE, null, ex);
-      return false;
-    }
-  }
-
 }

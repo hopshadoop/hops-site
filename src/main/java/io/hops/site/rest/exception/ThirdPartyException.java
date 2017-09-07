@@ -42,9 +42,14 @@ public class ThirdPartyException extends AppException {
   }
   
   public static enum Error {
+    CERT_MISSING("certificate missing"),
+    CERT_MISSMATCH("certificate missmatch"),
+    EMAIL_MISSING("email missing"),
     CLUSTER_NOT_REGISTERED("cluster not registered"),
+    CLUSTER_ID_MISSING("cluster id param missing"),
+    IMPERSONATION("cluster id does not match certificate"),
+    USER_NOT_REGISTERED("user not registered"),
     HEAVY_PING("heavy ping required"),
-    USER_NOT_REGISTERED("user not registered"), 
     DATASET_EXISTS("dataset exists"),
     DATASET_DOES_NOT_EXIST("dataset does not exist");
     
