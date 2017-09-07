@@ -17,7 +17,6 @@ package io.hops.site.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import io.hops.site.common.AppException;
 import io.hops.site.common.Settings;
 import io.hops.site.controller.HopsSiteController.Session;
 import io.hops.site.dao.entity.Category;
@@ -39,6 +38,8 @@ import io.hops.site.dto.DatasetDTO;
 import io.hops.site.dto.SearchServiceDTO;
 import io.hops.site.dto.internal.ElasticDoc;
 import io.hops.site.old_dto.DatasetIssueDTO;
+import io.hops.site.rest.exception.AppException;
+import io.hops.site.rest.exception.ThirdPartyException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -149,15 +150,16 @@ public class DatasetController {
   }
 
   //******************************************************DATASET*******************************************************
-  public String publishDataset(String publicDSId, String publicCId, DatasetDTO.Proto msg) throws AppException {
+  public String publishDataset(String publicDSId, String publicCId, DatasetDTO.Proto msg) throws ThirdPartyException {
     Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(publicCId);
     if (!cluster.isPresent()) {
-      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "cluster not registered");
+      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(), 
+        ThirdPartyException.Error.CLUSTER_NOT_REGISTERED, ThirdPartyException.Source.REMOTE_DELA, "access control");
     }
     Optional<Users> user = userFacade.findByEmailAndPublicClusterId(msg.getUserEmail(), publicCId);
     if(!user.isPresent()) {
-      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), 
-        ThirdPartyException.Error.USER_NOT_REGISTERED.toString());
+      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(), 
+        ThirdPartyException.Error.USER_NOT_REGISTERED, ThirdPartyException.Source.REMOTE_DELA, "access control");
     }
     Collection<Category> categories = categoryFacade.getAndStoreCategories(msg.getCategories());
     //TODO Alex - Readme
@@ -166,8 +168,8 @@ public class DatasetController {
       new Object[]{publicDSId});
     Optional<Dataset> dAux = datasetFacade.findByPublicId(publicDSId);
     if(dAux.isPresent())  {
-      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), 
-        ThirdPartyException.Error.DATASET_EXISTS.toString());
+      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(), 
+        ThirdPartyException.Error.DATASET_EXISTS, ThirdPartyException.Source.REMOTE_DELA, "duplicate resource");
     }
     Dataset dataset = datasetFacade.createDataset(publicDSId, msg.getName(), msg.getDescription(),
       readmePath, categories, user.get(), msg.getSize());
@@ -175,7 +177,12 @@ public class DatasetController {
       new Object[]{publicDSId, publicCId});
     liveDatasetFacade.uploadDataset(cluster.get().getId(), dataset.getId());
     ElasticDoc elasticDoc = elasticDoc(publicDSId, msg);
-    elasticCtrl.add(settings.DELA_DOC_INDEX, ElasticDoc.DOC_TYPE, publicDSId, toJson(elasticDoc));
+    try {
+      elasticCtrl.add(settings.DELA_DOC_INDEX, ElasticDoc.DOC_TYPE, publicDSId, toJson(elasticDoc));
+    } catch (AppException ex) {
+      throw new ThirdPartyException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "elastic", 
+        ThirdPartyException.Source.LOCAL, "internal error");
+    }
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:publish - done {0}",
       new Object[]{publicDSId});
     return publicDSId;

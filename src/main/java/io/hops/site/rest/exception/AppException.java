@@ -1,4 +1,4 @@
-package io.hops.site.common;
+package io.hops.site.rest.exception;
 
 /**
  * @author Alex Ormenisan <aaor@kth.se>

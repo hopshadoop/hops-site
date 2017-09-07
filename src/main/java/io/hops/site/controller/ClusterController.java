@@ -109,19 +109,9 @@ public class ClusterController {
   }
 
   public static enum Action {
-    REGISTER("Cluster not registered."),
-    HEAVY_PING("Heavy ping required"),
-    PING("Ping");
-    
-    private String msg;
-
-    Action(String msg) {
-      this.msg = msg;
-    }
-    @Override
-    public String toString() {
-      return msg;
-    }
+    REGISTER,
+    HEAVY_PING,
+    PING;
   }
 
   /**

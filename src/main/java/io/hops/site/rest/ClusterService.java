@@ -5,6 +5,7 @@ import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dto.ClusterAddressDTO;
 import io.hops.site.dto.ClusterServiceDTO;
 import io.hops.site.rest.annotation.NoCache;
+import io.hops.site.rest.exception.ThirdPartyException;
 import io.hops.site.util.CertificateHelper;
 import io.swagger.annotations.Api;
 import java.security.cert.CertificateEncodingException;
@@ -59,8 +60,8 @@ public class ClusterService {
   @PUT
   @NoCache
   @Path("register")
-  public Response register(@Context HttpServletRequest req, ClusterServiceDTO.Register msg) throws
-    CertificateEncodingException {
+  public Response register(@Context HttpServletRequest req, ClusterServiceDTO.Register msg)
+    throws CertificateEncodingException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster register");
     X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
     X509Certificate clientCert = certs[0];
@@ -74,8 +75,10 @@ public class ClusterService {
   @PUT
   @NoCache
   @Path("heavyPing/{publicCId}")
-  public Response heavyPing(@PathParam("publicCId") String publicCId, ClusterServiceDTO.HeavyPing ping) {
-    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster heavyPing {0}", publicCId);
+  public Response heavyPing(@PathParam("publicCId") String publicCId, ClusterServiceDTO.HeavyPing ping) 
+    throws ThirdPartyException {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster heavyPing {0} <{1}, {2}>",
+      new Object[]{publicCId, ping.getUpldDSIds().size(), ping.getDwnlDSIds().size()});
     ClusterController.Action action = clusterController.heavyPing(publicCId, ping.getUpldDSIds(),
       ping.getDwnlDSIds());
     switch (action) {
@@ -83,14 +86,15 @@ public class ClusterService {
         LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster heavyPing done {0}", publicCId);
         return Response.ok("ok").build();
       default:
-        throw new IllegalStateException(action.toString());
+        throw new ThirdPartyException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+          ThirdPartyException.Error.CLUSTER_NOT_REGISTERED, ThirdPartyException.Source.REMOTE_DELA, "protocol");
     }
   }
 
   @PUT
   @NoCache
   @Path("ping/{publicCId}")
-  public Response ping(@PathParam("publicCId") String publicCId) {
+  public Response ping(@PathParam("publicCId") String publicCId) throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster ping {0}", publicCId);
     ClusterController.Action action = clusterController.ping(publicCId);
     switch (action) {
@@ -98,7 +102,8 @@ public class ClusterService {
         LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster ping done {0}", publicCId);
         return Response.ok("ok").build();
       default:
-        throw new IllegalStateException(action.toString());
+        throw new ThirdPartyException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
+          ThirdPartyException.Error.HEAVY_PING, ThirdPartyException.Source.REMOTE_DELA, "protocol");
     }
   }
 

@@ -16,7 +16,7 @@
 package io.hops.site.rest;
 
 import com.google.gson.Gson;
-import io.hops.site.common.AppException;
+import io.hops.site.rest.exception.AppException;
 import io.hops.site.controller.DatasetController;
 import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dao.entity.Dataset;

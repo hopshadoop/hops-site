@@ -1,6 +1,6 @@
 package io.hops.site.controller;
 
-import io.hops.site.common.AppException;
+import io.hops.site.rest.exception.AppException;
 import io.hops.site.common.Ip;
 import io.hops.site.common.ResponseMessages;
 import io.hops.site.common.Settings;

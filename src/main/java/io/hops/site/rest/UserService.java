@@ -15,7 +15,7 @@
  */
 package io.hops.site.rest;
 
-import io.hops.site.common.AppException;
+import io.hops.site.rest.exception.AppException;
 import io.hops.site.controller.UsersController;
 import io.hops.site.dao.entity.Users;
 import io.hops.site.dto.UserDTO;
