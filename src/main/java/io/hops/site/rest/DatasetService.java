@@ -20,6 +20,7 @@ import io.hops.site.rest.exception.AppException;
 import io.hops.site.controller.DatasetController;
 import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dao.entity.Dataset;
+import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dto.DatasetDTO;
 import io.hops.site.dto.SearchServiceDTO;
 import io.hops.site.old_dto.DatasetIssueDTO;
@@ -57,6 +58,8 @@ public class DatasetService {
   private final static Logger LOG = Logger.getLogger(DatasetService.class.getName());
   @EJB
   private DatasetController datasetCtrl;
+  @EJB
+  private DatasetFacade datasetFacade;
 
   @POST
   @NoCache
@@ -212,6 +215,13 @@ public class DatasetService {
   }
   //********************************************************************************************************************
   
+  @GET
+  @NoCache
+  public Response getAll() {
+    List<Dataset> result = datasetFacade.findAll();
+    GenericEntity<List<Dataset>> genericResult = new GenericEntity<List<Dataset>>(result){};
+    return Response.ok(genericResult).build();
+  }
   
   @GET
   @NoCache

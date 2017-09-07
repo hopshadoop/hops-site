@@ -15,6 +15,7 @@
  */
 package io.hops.site.dao.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
@@ -140,6 +141,7 @@ public class Dataset implements Serializable {
     this.dsSize = dsSize;
   }
 
+  @JsonIgnore
   public int getId() {
     return id;
   }
@@ -181,6 +183,7 @@ public class Dataset implements Serializable {
     this.madePublicOn = madePublicOn;
   }
 
+  @JsonIgnore
   public Integer getStatus() {
     return status;
   }

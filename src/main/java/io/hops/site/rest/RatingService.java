@@ -44,7 +44,7 @@ import javax.ws.rs.core.Response;
 @Path("rating")
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/rating",
+@Api(value = "rating",
         description = "Rating service")
 @TransactionAttribute(TransactionAttributeType.NEVER)
 public class RatingService {
