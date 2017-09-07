@@ -76,4 +76,26 @@ public class ClusterServiceDTO {
       this.dwnlDSIds = dwnlDSIds;
     }
   }
+  
+  @XmlRootElement
+  public static class Ping {
+    private int upldDSSize;
+    private int dwnlDSSize;
+
+    public int getUpldDSSize() {
+      return upldDSSize;
+    }
+
+    public void setUpldDSSize(int upldDSSize) {
+      this.upldDSSize = upldDSSize;
+    }
+
+    public int getDwnlDSSize() {
+      return dwnlDSSize;
+    }
+
+    public void setDwnlDSSize(int dwnlDSSize) {
+      this.dwnlDSSize = dwnlDSSize;
+    }
+  }
 }

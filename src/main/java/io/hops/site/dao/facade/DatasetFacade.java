@@ -19,8 +19,10 @@ import io.hops.site.dao.entity.Category;
 import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.Users;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -57,11 +59,11 @@ public class DatasetFacade extends AbstractFacade<Dataset> {
     }
   }
 
-  public Collection<Integer> findIds(Collection<String> publicIdList) {
-    Collection<Dataset> datasets = findByPublicId(publicIdList);
-    List<Integer> datasetIds = new LinkedList<>();
+  public Map<String, Integer> findIds(Collection<String> publicIdList) {
+    List<Dataset> datasets = findByPublicId(publicIdList);
+    Map<String, Integer> datasetIds = new HashMap<>();
     for(Dataset dataset : datasets) {
-      datasetIds.add(dataset.getId());
+      datasetIds.put(dataset.getPublicId(), dataset.getId());
     }
     return datasetIds;
   }

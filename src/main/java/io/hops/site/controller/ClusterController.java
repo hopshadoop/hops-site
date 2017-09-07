@@ -17,6 +17,7 @@ package io.hops.site.controller;
 
 import io.hops.site.common.Settings;
 import io.hops.site.dao.entity.Heartbeat;
+import io.hops.site.dao.entity.LiveDataset;
 import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dao.facade.HeartbeatFacade;
@@ -64,25 +65,44 @@ public class ClusterController {
       return c.get().getPublicId();
     }
     String clusterPublicId = settings.getClusterId();
-    RegisteredCluster cluster = new RegisteredCluster(clusterPublicId, msg.getDelaTransferAddress(), 
+    RegisteredCluster cluster = new RegisteredCluster(clusterPublicId, msg.getDelaTransferAddress(),
       msg.getDelaClusterAddress(), msg.getEmail().toLowerCase(), cert, orgName);
     clusterFacade.create(cluster);
     return clusterPublicId;
   }
 
-  public Action ping(String clusterPublicId) {
-    Optional<RegisteredCluster> cluster = this.clusterFacade.findByPublicId(clusterPublicId);
+  public Action ping(String publicCId, ClusterServiceDTO.Ping msg) {
+    Optional<RegisteredCluster> cluster = this.clusterFacade.findByPublicId(publicCId);
     if (cluster.isPresent()) {
       Optional<Heartbeat> h = heartbeatFacade.findByClusterId(cluster.get().getId());
       if (h.isPresent()) {
-        ping(h.get());
-        return Action.PING;
-      } else {
-        return Action.HEAVY_PING;
+        if (pingSanityCheck(cluster.get().getId(), msg)) {
+          ping(h.get());
+          return Action.PING;
+        }
       }
+      return Action.HEAVY_PING;
     } else {
       return Action.REGISTER;
     }
+  }
+
+  private boolean pingSanityCheck(int clusterId, ClusterServiceDTO.Ping msg) {
+    List<LiveDataset> liveDatasets = liveDatasetFacade.liveDatasets(clusterId);
+    if(liveDatasets.size() != msg.getDwnlDSSize() + msg.getUpldDSSize()) {
+      return false;
+    }
+    
+    int dwnl = 0;
+    int upld = 0;
+    for(LiveDataset liveDataset : liveDatasets) {
+      if(liveDataset.getStatus() == HopsSiteSettings.LIVE_DATASET_STATUS_UPLOAD) {
+        upld++;
+      } else if (liveDataset.getStatus() == HopsSiteSettings.LIVE_DATASET_STATUS_DOWNLOAD) {
+        dwnl++;
+      }
+    }
+    return dwnl == msg.getDwnlDSSize() && upld == msg.getUpldDSSize();
   }
 
   private void ping(Heartbeat heartbeat) {
@@ -100,15 +120,16 @@ public class ClusterController {
       } else {
         heartbeatFacade.create(new Heartbeat(cluster.getId(), settings.getDateNow()));
       }
-      liveDatasetFacade.downloadDatasets(cluster.getId(), datasetFacade.findIds(upldDSIds));
-      liveDatasetFacade.uploadDatasets(cluster.getId(), datasetFacade.findIds(dwnlDSIds));
+      liveDatasetFacade.downloadDatasets(cluster.getId(), datasetFacade.findIds(dwnlDSIds).values());
+      liveDatasetFacade.uploadDatasets(cluster.getId(), datasetFacade.findIds(upldDSIds).values());
       return Action.HEAVY_PING;
     } else {
       return Action.REGISTER;
     }
   }
-
+  
   public static enum Action {
+
     REGISTER,
     HEAVY_PING,
     PING;

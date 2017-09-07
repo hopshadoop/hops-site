@@ -75,12 +75,12 @@ public class ClusterService {
   @PUT
   @NoCache
   @Path("heavyPing/{publicCId}")
-  public Response heavyPing(@PathParam("publicCId") String publicCId, ClusterServiceDTO.HeavyPing ping) 
+  public Response heavyPing(@PathParam("publicCId") String publicCId, ClusterServiceDTO.HeavyPing msg) 
     throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster heavyPing {0} <{1}, {2}>",
-      new Object[]{publicCId, ping.getUpldDSIds().size(), ping.getDwnlDSIds().size()});
-    ClusterController.Action action = clusterController.heavyPing(publicCId, ping.getUpldDSIds(),
-      ping.getDwnlDSIds());
+      new Object[]{publicCId, msg.getUpldDSIds().size(), msg.getDwnlDSIds().size()});
+    ClusterController.Action action = clusterController.heavyPing(publicCId, msg.getUpldDSIds(),
+      msg.getDwnlDSIds());
     switch (action) {
       case HEAVY_PING:
         LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster heavyPing done {0}", publicCId);
@@ -94,9 +94,10 @@ public class ClusterService {
   @PUT
   @NoCache
   @Path("ping/{publicCId}")
-  public Response ping(@PathParam("publicCId") String publicCId) throws ThirdPartyException {
+  public Response ping(@PathParam("publicCId") String publicCId, ClusterServiceDTO.Ping msg) 
+    throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster ping {0}", publicCId);
-    ClusterController.Action action = clusterController.ping(publicCId);
+    ClusterController.Action action = clusterController.ping(publicCId, msg);
     switch (action) {
       case PING:
         LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster ping done {0}", publicCId);

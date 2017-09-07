@@ -80,7 +80,13 @@ public class LiveDatasetFacade extends AbstractFacade<LiveDataset> {
       return Optional.empty();
     }
   }
-
+  
+  public List<LiveDataset> liveDatasets(int clusterId) {
+    TypedQuery<LiveDataset> query = em.createNamedQuery("LiveDataset.peerDatasets", LiveDataset.class).
+      setParameter("clusterId", clusterId);
+    return query.getResultList();
+  }
+  
   public void uploadDatasets(int clusterId, Collection<Integer> datasetIds) {
     for (Integer datasetId : datasetIds) {
       uploadDataset(clusterId, datasetId);
