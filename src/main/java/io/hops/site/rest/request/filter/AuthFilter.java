@@ -62,6 +62,15 @@ public class AuthFilter implements ContainerRequestFilter {
       add("cluster/dela/version");
     }
   };
+  
+  public static final String SEARCH_PREFIX = "dataset/search";
+  
+  public static boolean isSearch(String path) {
+    if(path.startsWith(SEARCH_PREFIX)) {
+      return true;
+    }
+    return false;
+  }
 
   private static final String CLUSTER_ID_PARAM = "publicCId";
 
@@ -91,6 +100,23 @@ public class AuthFilter implements ContainerRequestFilter {
       requestContext.abortWith(fail(ThirdPartyException.Error.EMAIL_MISSING));
       return;
     }
+
+    String path = requestContext.getUriInfo().getPath();
+    Method method = resourceInfo.getResourceMethod();
+    LOGGER.log(HopsSiteSettings.DELA_DEBUG, "hops_site:auth: path:{0}, method:{1}", new Object[]{path, method});
+
+    if (publicPaths.contains(path)) {
+      return;
+    }
+    if(isSearch(path)) {
+      return;
+    }
+    String publicCId = requestContext.getUriInfo().getPathParameters().getFirst(CLUSTER_ID_PARAM);
+    if (publicCId == null) {
+//      requestContext.abortWith(fail(ThirdPartyException.Error.CLUSTER_ID_MISSING));
+      return;
+    }
+
     Optional<RegisteredCluster> cluster = clusterController.getClusterByEmail(clusterEmail);
     if (!cluster.isPresent()) {
       requestContext.abortWith(fail(ThirdPartyException.Error.CLUSTER_NOT_REGISTERED));
@@ -100,20 +126,8 @@ public class AuthFilter implements ContainerRequestFilter {
       requestContext.abortWith(fail(ThirdPartyException.Error.CERT_MISSMATCH));
       return;
     }
-
-    String path = requestContext.getUriInfo().getPath();
-    Method method = resourceInfo.getResourceMethod();
-    LOGGER.log(HopsSiteSettings.DELA_DEBUG, "hops_site:auth: path:{0}, method:{1}", new Object[]{path, method});
-
-    if (publicPaths.contains(path)) {
-      return;
-    }
-
-    String publicCId = requestContext.getUriInfo().getPathParameters().getFirst(CLUSTER_ID_PARAM);
-    if (publicCId == null) {
-      requestContext.abortWith(fail(ThirdPartyException.Error.CLUSTER_ID_MISSING));
-      return;
-    }
+    
+    
     if (!cluster.get().getPublicId().equals(publicCId)) {
       requestContext.abortWith(fail(ThirdPartyException.Error.IMPERSONATION));
       return;
