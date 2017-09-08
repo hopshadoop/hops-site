@@ -50,7 +50,7 @@ public class UserService {
 
   @EJB
   private UsersController usersController;
-  
+
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("/register/{publicCId}")
@@ -66,17 +66,27 @@ public class UserService {
   }
 
   @GET
-  @Produces(MediaType.APPLICATION_JSON)
-  @Path("/get/{publicCId}")
+  @Path("/{publicCId}")
   public Response getUser(@PathParam("publicCId") String publicCId, String userEmail) throws AppException {
     Optional<Users> user = usersController.findUserByEmailAndClusterId(userEmail, publicCId);
-    if(!user.isPresent()) {
+    if (!user.isPresent()) {
       return Response.ok(new UserDTO(user.get())).build();
     } else {
       throw new AppException(Response.Status.EXPECTATION_FAILED.getStatusCode(), "user not found");
     }
   }
-  
+
+  @GET
+  @Path("/id/{publicCId}")
+  public Response getUserId(@PathParam("publicCId") String publicCId, String userEmail) throws AppException {
+    Optional<Users> user = usersController.findUserByEmailAndClusterId(userEmail, publicCId);
+    if (!user.isPresent()) {
+      return Response.ok(user.get().getId()).build();
+    } else {
+      throw new AppException(Response.Status.EXPECTATION_FAILED.getStatusCode(), "user not found");
+    }
+  }
+
   @DELETE
   @Path("/delete/{userId}")
   @RolesAllowed({"admin"})
