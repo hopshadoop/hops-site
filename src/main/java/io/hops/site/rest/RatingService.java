@@ -15,11 +15,13 @@
  */
 package io.hops.site.rest;
 
+import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.controller.RatingController;
 import io.hops.site.dao.entity.DatasetRating;
 import io.hops.site.old_dto.RateDTO;
 import io.hops.site.old_dto.RatingDTO;
 import io.hops.site.rest.annotation.NoCache;
+import io.hops.site.rest.exception.ThirdPartyException;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.logging.Level;
@@ -49,63 +51,58 @@ import javax.ws.rs.core.Response;
 @TransactionAttribute(TransactionAttributeType.NEVER)
 public class RatingService {
 
-  private final static Logger LOGGER = Logger.getLogger(RatingService.class.getName());
+  private final static Logger LOG = Logger.getLogger(RatingService.class.getName());
 
   @EJB
   private RatingController ratingController;
-
+  
+  //**************************************************PUBLIC************************************************************
   @GET
   @NoCache
-  @Path("{datasetId}")
-  public Response getRating(@PathParam("datasetPublicId") String datasetPublicId) {
-    RatingDTO ratingDto = ratingController.getRating(datasetPublicId);
-    LOGGER.log(Level.INFO, "Get all rating for dataset: {0}", datasetPublicId);
+  @Path("dataset/{publicDSId}")
+  public Response getRatingByPublicId(@PathParam("publicDSId") String publicDSId) throws ThirdPartyException {
+    RatingDTO ratingDto = ratingController.getRating(publicDSId);
+    LOG.log(Level.INFO, "Get all rating for dataset: {0}", publicDSId);
     return Response.ok().entity(ratingDto).build();
   }
 
   @GET
   @NoCache
-  @Path("byPublicId/{publicId}")
-  public Response getRatingByPublicId(@PathParam("publicId") String publicId) {
-    RatingDTO ratingDto = ratingController.getRating(publicId);
-    LOGGER.log(Level.INFO, "Get all rating for dataset: {0}", publicId);
-    return Response.ok().entity(ratingDto).build();
-  }
-
-  @GET
-  @NoCache
-  @Path("all/{datasetId}")
-  public Response getAllRatings(@PathParam("datasetId") Integer datasetId) {
-    List<DatasetRating> ratings = ratingController.getAllRatings(datasetId);
+  @Path("all/{publicDSId}")
+  public Response getAllRatings(@PathParam("publicDSId") String publicDSId) throws ThirdPartyException {
+    List<DatasetRating> ratings = ratingController.getAllRatings(publicDSId);
     GenericEntity<List<DatasetRating>> datasetRatings = new GenericEntity<List<DatasetRating>>(ratings) {};
-    LOGGER.log(Level.INFO, "Get all rating for dataset: {0}", datasetId);
+    LOG.log(Level.INFO, "Get all rating for dataset: {0}", publicDSId);
     return Response.ok().entity(datasetRatings).build();
   }
 
   @GET
   @NoCache
-  @Path("all/byPublicId/{publicId}")
-  public Response getAllRatingsByPublicId(@PathParam("publicId") String publicId) {
-    List<DatasetRating> ratings = ratingController.getAllRatings(publicId);
+  @Path("all/byPublicId/{publicDSId}")
+  public Response getAllRatingsByPublicId(@PathParam("publicDSId") String publicDSId) throws ThirdPartyException {
+    List<DatasetRating> ratings = ratingController.getAllRatings(publicDSId);
     GenericEntity<List<DatasetRating>> datasetRatings = new GenericEntity<List<DatasetRating>>(ratings) {};
-    LOGGER.log(Level.INFO, "Get all rating for dataset: {0}", publicId);
+    LOG.log(Level.INFO, "Get all rating for dataset: {0}", publicDSId);
     return Response.ok().entity(datasetRatings).build();
   }
 
+  //****************************************************CLUSTER ID*****************************************************
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("/add/{publicCId}")
-  public Response addRating(@PathParam("publicCId") String publicCId, RateDTO datasetRating) {
+  public Response addRating(@PathParam("publicCId") String publicCId, RateDTO datasetRating) 
+    throws ThirdPartyException {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:add {0}", publicCId);
     ratingController.addRating(publicCId, datasetRating);
-    LOGGER.log(Level.INFO, "Add rating for dataset: {0}", datasetRating.getDatasetId());
-    return Response.ok().build();
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:add - done {0}", publicCId);
+    return Response.ok("ok").build();
   }
 
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
   public Response updateRating(RateDTO datasetRating) {
     ratingController.updateRating(datasetRating);
-    LOGGER.log(Level.INFO, "Update rating to: {0}", datasetRating.getRating());
+    LOG.log(Level.INFO, "Update rating to: {0}", datasetRating.getRating());
     return Response.ok("OK").build();
   }
 
@@ -114,7 +111,7 @@ public class RatingService {
   @RolesAllowed({"admin"})
   public Response deleteRating(@PathParam("ratingId") Integer ratingId) {
     ratingController.deleteRating(ratingId);
-    LOGGER.log(Level.INFO, "Delete rating with id: {0}", ratingId);
+    LOG.log(Level.INFO, "Delete rating with id: {0}", ratingId);
     return Response.ok("OK").build();
   }
 }

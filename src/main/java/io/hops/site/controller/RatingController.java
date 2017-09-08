@@ -24,6 +24,7 @@ import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dao.facade.UsersFacade;
 import io.hops.site.old_dto.RateDTO;
 import io.hops.site.old_dto.RatingDTO;
+import io.hops.site.rest.exception.ThirdPartyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.ws.rs.core.Response;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.NEVER)
@@ -46,50 +48,29 @@ public class RatingController {
   private DatasetRatingFacade datasetRatingFacade;
 
   /**
-   * Calculates the rating for the given public id
+   * Calculates the rating for the given public dataset id
    *
-   * @param datasetPublicId
+   * @param publicDSId
    * @return
    */
-  public RatingDTO getRating(String datasetPublicId) {
-    Optional<Dataset> dataset = datasetFacade.findByPublicId(datasetPublicId);
-    if (!dataset.isPresent()) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
-    List<DatasetRating> ratings = new ArrayList(dataset.get().getDatasetRatingCollection());
+  public RatingDTO getRating(String publicDSId) throws ThirdPartyException {
+    Dataset dataset = getDataset(publicDSId);
+    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
     if (ratings.isEmpty()) {
-      return new RatingDTO(datasetPublicId, 0, 0);
+      return new RatingDTO(publicDSId, 0, 0);
     }
     int rated = calculateRating(ratings);
-    return new RatingDTO(datasetPublicId, rated, ratings.size());
-  }
-
-  /**
-   * Get all ratings by dataset id
-   *
-   * @param datasetId
-   * @return
-   */
-  public List<DatasetRating> getAllRatings(Integer datasetId) {
-    Dataset dataset = datasetFacade.find(datasetId);
-    if (dataset == null) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
-    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
-    return ratings;
+    return new RatingDTO(publicDSId, rated, ratings.size());
   }
 
   /**
    * Get all ratings by public id
    *
-   * @param publicId
+   * @param publicDSId
    * @return
    */
-  public List<DatasetRating> getAllRatings(String publicId) {
-    Dataset dataset = datasetFacade.find(publicId);
-    if (dataset == null) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
+  public List<DatasetRating> getAllRatings(String publicDSId) throws ThirdPartyException {
+    Dataset dataset = getDataset(publicDSId);
     List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
     return ratings;
   }
@@ -99,32 +80,90 @@ public class RatingController {
    *
    * @param datasetRating
    */
-  public void addRating(String publicCId, RateDTO datasetRating) {
+  public void addRating(String publicCId, RateDTO datasetRating) throws ThirdPartyException {
     rateDTOSanityCheck(datasetRating);
-    Optional<Dataset> dataset = datasetFacade.findByPublicId(datasetRating.getDatasetId());
-    if (!dataset.isPresent()) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
-    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(datasetRating.getUser().getEmail(), publicCId);
-    if (!user.isPresent()) {
-      throw new IllegalArgumentException("User not found.");
-    }
-    DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset.get(), user.get());
+    Dataset dataset = getDataset(datasetRating.getDatasetId());
+    Users user = getUser(datasetRating.getUser().getEmail(), publicCId);
+    DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset, user);
     if (managedRating != null) {
       if (managedRating.getRating() != datasetRating.getRating()) {
         managedRating.setRating(datasetRating.getRating());
         datasetRatingFacade.edit(managedRating);
+      } else {
+        //no update in rating - so we do not need to recompute
+        return;
       }
+    } else {
+      DatasetRating newDatasetRating = new DatasetRating(datasetRating.getRating(), user, dataset);
+      datasetRatingFacade.create(newDatasetRating);
+    }
+    updateRatingInDataset(dataset);
+  }
+
+  /**
+   * Removes rating with the given id.
+   *
+   * @param ratingId
+   */
+  public void deleteRating(Integer ratingId) {
+    DatasetRating datasetRating = getDatasetRating(ratingId);
+    Dataset dataset = datasetRating.getDatasetId();
+    datasetRatingFacade.remove(datasetRating);
+    updateRatingInDataset(dataset);
+  }
+
+  /**
+   *
+   * @param datasetRating
+   */
+  public void updateRating(RateDTO datasetRating) {
+    DatasetRating rating = updateRateDTOSanityCheck(datasetRating);
+
+    if (rating.getRating() == datasetRating.getRating()) {
       return;
     }
-    DatasetRating newDatasetRating = new DatasetRating(datasetRating.getRating(), user.get(), dataset.get());
-    datasetRatingFacade.create(newDatasetRating);
+    rating.setRating(datasetRating.getRating());
+    datasetRatingFacade.edit(rating);
+    updateRatingInDataset(rating.getDatasetId());
+  }
 
+  private void updateRatingInDataset(Dataset dataset) {
     //update dataset
-    List<DatasetRating> ratings = new ArrayList(dataset.get().getDatasetRatingCollection());
+    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
     int rated = calculateRating(ratings);
-    dataset.get().setRating(rated);
-    datasetFacade.edit(dataset.get());
+    dataset.setRating(rated);
+    datasetFacade.edit(dataset);
+  }
+
+  private int calculateRating(List<DatasetRating> ratings) {
+    int rated = 0;
+    for (DatasetRating rate : ratings) {
+      rated += rate.getRating();
+    }
+    rated /= ratings.size();
+    return rated;
+  }
+
+  private DatasetRating updateRateDTOSanityCheck(RateDTO rateDTO) {
+    rateDTOSanityCheck(rateDTO);
+
+    DatasetRating rating = getDatasetRating(rateDTO.getId());
+    if (!rating.getUsers().getEmail().equalsIgnoreCase(rateDTO.getUser().getEmail())) {
+      throw new IllegalArgumentException("Rating not found for given user.");
+    }
+    return rating;
+  }
+
+  private DatasetRating getDatasetRating(Integer ratingId) {
+    if (ratingId == null) {
+      throw new IllegalArgumentException("Rating not found.");
+    }
+
+    DatasetRating rating = datasetRatingFacade.find(ratingId);
+    if (rating == null) {
+      throw new IllegalArgumentException("Rating not found.");
+    }
+    return rating;
   }
 
   private void rateDTOSanityCheck(RateDTO rateDTO) {
@@ -142,67 +181,21 @@ public class RatingController {
     }
   }
 
-  /**
-   * Removes rating with the given id.
-   *
-   * @param ratingId
-   */
-  public void deleteRating(Integer ratingId) {
-    if (ratingId == null) {
-      throw new IllegalArgumentException("Id not assigned.");
+  private Dataset getDataset(String publicDSId) throws ThirdPartyException {
+    Optional<Dataset> dataset = datasetFacade.findByPublicId(publicDSId);
+    if (!dataset.isPresent()) {
+      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(),
+        ThirdPartyException.Error.DATASET_DOES_NOT_EXIST, ThirdPartyException.Source.REMOTE_DELA, "bad request");
     }
-    DatasetRating datasetRating = datasetRatingFacade.find(ratingId);
-    Dataset dataset = datasetRating.getDatasetId();
-    datasetRatingFacade.remove(datasetRating);
-
-    //update dataset
-    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
-    int rated = calculateRating(ratings);
-    dataset.setRating(rated);
-    datasetFacade.edit(dataset);
+    return dataset.get();
   }
 
-  /**
-   *
-   * @param datasetRating
-   */
-  public void updateRating(RateDTO datasetRating) {
-    if (datasetRating == null || datasetRating.getId() == null) {
-      throw new IllegalArgumentException("One or more arguments not assigned.");
+  private Users getUser(String publicCId, String userEmail) throws ThirdPartyException {
+    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(userEmail, publicCId);
+    if (!user.isPresent()) {
+      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(),
+        ThirdPartyException.Error.USER_NOT_REGISTERED, ThirdPartyException.Source.REMOTE_DELA, "bad request");
     }
-    if (datasetRating.getRating() < 1) {
-      throw new IllegalArgumentException("Rating should be positive int.");
-    }
-
-    DatasetRating rating = datasetRatingFacade.find(datasetRating.getId());
-    if (rating == null) {
-      throw new IllegalArgumentException("Rating not found.");
-    }
-
-    if (!rating.getUsers().getEmail().equalsIgnoreCase(datasetRating.getUser().getEmail())) {
-      throw new IllegalArgumentException("Rating not found for given user.");
-    }
-
-    if (rating.getRating() == datasetRating.getRating()) {
-      return;
-    }
-    rating.setRating(datasetRating.getRating());
-    datasetRatingFacade.edit(rating);
-
-    //update dataset
-    Dataset dataset = rating.getDatasetId();
-    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
-    int rated = calculateRating(ratings);
-    dataset.setRating(rated);
-    datasetFacade.edit(dataset);
-  }
-
-  private int calculateRating(List<DatasetRating> ratings) {
-    int rated = 0;
-    for (DatasetRating rate : ratings) {
-      rated += rate.getRating();
-    }
-    rated /= ratings.size();
-    return rated;
+    return user.get();
   }
 }
