@@ -22,6 +22,7 @@ import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dao.facade.DatasetRatingFacade;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dao.facade.UsersFacade;
+import io.hops.site.dto.UserDTO;
 import io.hops.site.old_dto.RateDTO;
 import io.hops.site.old_dto.RatingDTO;
 import io.hops.site.rest.exception.ThirdPartyException;
@@ -53,16 +54,52 @@ public class RatingController {
    * @param publicDSId
    * @return
    */
-  public RatingDTO getRating(String publicDSId) throws ThirdPartyException {
+  public RatingDTO getDatasetAllRating(String publicDSId) throws ThirdPartyException {
     Dataset dataset = getDataset(publicDSId);
-    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
-    if (ratings.isEmpty()) {
-      return new RatingDTO(publicDSId, 0, 0);
+    int rating = calculateRating(dataset);
+    RatingDTO result = new RatingDTO(publicDSId, rating, dataset.getDatasetRatingCollection().size());
+    return result;
+  }
+  
+  public RatingDTO getDatasetUserRating(String publicCId, String publicDSId, UserDTO userDTO) 
+    throws ThirdPartyException {
+    Dataset dataset = getDataset(publicDSId);
+    Users user = getUser(userDTO.getEmail(), publicCId);
+    DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset, user);
+    RatingDTO result;
+    if (managedRating == null) {
+      result = new RatingDTO(publicCId, 0, dataset.getDatasetRatingCollection().size());
+    } else {
+      result = new RatingDTO(publicCId, managedRating.getRating(), dataset.getDatasetRatingCollection().size());
     }
-    int rated = calculateRating(ratings);
-    return new RatingDTO(publicDSId, rated, ratings.size());
+    return result;
   }
 
+  /**
+   * Adds rating for a dataset
+   *
+   * @param ratingDTO
+   */
+  public void addRating(String publicCId, String publicDSId, RateDTO ratingDTO) throws ThirdPartyException {
+    rateDTOSanityCheck(ratingDTO);
+    Dataset dataset = getDataset(publicDSId);
+    Users user = getUser(ratingDTO.getUser().getEmail(), publicCId);
+    DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset, user);
+    if (managedRating != null) {
+      if (managedRating.getRating() == ratingDTO.getRating()) {
+        //no update in rating - so we do not need to recompute
+        return;
+      }
+      managedRating.setRating(ratingDTO.getRating());
+      datasetRatingFacade.edit(managedRating);
+    } else {
+      DatasetRating newDatasetRating = new DatasetRating(ratingDTO.getRating(), user, dataset);
+      datasetRatingFacade.create(newDatasetRating);
+    }
+    updateRatingInDataset(dataset);
+  }
+
+  //********************************************************************************************************************
   /**
    * Get all ratings by public id
    *
@@ -73,31 +110,6 @@ public class RatingController {
     Dataset dataset = getDataset(publicDSId);
     List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
     return ratings;
-  }
-
-  /**
-   * Adds rating for a dataset
-   *
-   * @param datasetRating
-   */
-  public void addRating(String publicCId, RateDTO datasetRating) throws ThirdPartyException {
-    rateDTOSanityCheck(datasetRating);
-    Dataset dataset = getDataset(datasetRating.getDatasetId());
-    Users user = getUser(datasetRating.getUser().getEmail(), publicCId);
-    DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset, user);
-    if (managedRating != null) {
-      if (managedRating.getRating() != datasetRating.getRating()) {
-        managedRating.setRating(datasetRating.getRating());
-        datasetRatingFacade.edit(managedRating);
-      } else {
-        //no update in rating - so we do not need to recompute
-        return;
-      }
-    } else {
-      DatasetRating newDatasetRating = new DatasetRating(datasetRating.getRating(), user, dataset);
-      datasetRatingFacade.create(newDatasetRating);
-    }
-    updateRatingInDataset(dataset);
   }
 
   /**
@@ -127,20 +139,23 @@ public class RatingController {
     updateRatingInDataset(rating.getDatasetId());
   }
 
+  //********************************************************************************************************************
   private void updateRatingInDataset(Dataset dataset) {
     //update dataset
-    List<DatasetRating> ratings = new ArrayList(dataset.getDatasetRatingCollection());
-    int rated = calculateRating(ratings);
+    int rated = calculateRating(dataset);
     dataset.setRating(rated);
     datasetFacade.edit(dataset);
   }
 
-  private int calculateRating(List<DatasetRating> ratings) {
+  private int calculateRating(Dataset dataset) {
+    if (dataset.getDatasetRatingCollection().isEmpty()) {
+      return 0;
+    }
     int rated = 0;
-    for (DatasetRating rate : ratings) {
+    for (DatasetRating rate : dataset.getDatasetRatingCollection()) {
       rated += rate.getRating();
     }
-    rated /= ratings.size();
+    rated /= dataset.getDatasetRatingCollection().size();
     return rated;
   }
 

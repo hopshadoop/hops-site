@@ -18,6 +18,7 @@ package io.hops.site.rest;
 import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.controller.RatingController;
 import io.hops.site.dao.entity.DatasetRating;
+import io.hops.site.dto.UserDTO;
 import io.hops.site.old_dto.RateDTO;
 import io.hops.site.old_dto.RatingDTO;
 import io.hops.site.rest.annotation.NoCache;
@@ -59,23 +60,38 @@ public class RatingService {
   //**************************************************PUBLIC************************************************************
   @GET
   @NoCache
-  @Path("dataset/{publicDSId}")
-  public Response getRatingByPublicId(@PathParam("publicDSId") String publicDSId) throws ThirdPartyException {
-    RatingDTO ratingDto = ratingController.getRating(publicDSId);
-    LOG.log(Level.INFO, "Get all rating for dataset: {0}", publicDSId);
-    return Response.ok().entity(ratingDto).build();
-  }
-
-  @GET
-  @NoCache
-  @Path("all/{publicDSId}")
+  @Path("/dataset/{publicDSId}/all")
   public Response getAllRatings(@PathParam("publicDSId") String publicDSId) throws ThirdPartyException {
-    List<DatasetRating> ratings = ratingController.getAllRatings(publicDSId);
-    GenericEntity<List<DatasetRating>> datasetRatings = new GenericEntity<List<DatasetRating>>(ratings) {};
-    LOG.log(Level.INFO, "Get all rating for dataset: {0}", publicDSId);
-    return Response.ok().entity(datasetRatings).build();
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:get:all <{0}>",new Object[]{publicDSId});
+    RatingDTO result = ratingController.getDatasetAllRating(publicDSId);
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:get:all - done <{0}, {1}>",new Object[]{publicDSId});
+    return Response.ok(result).build();
   }
 
+  //****************************************************CLUSTER ID******************************************************
+  @POST
+  @NoCache
+  @Path("/cluster/{publicCId}/dataset/{publicDSId}/user")
+  public Response getDatasetUserRating(@PathParam("publicCId") String publicCId, 
+    @PathParam("publicDSId") String publicDSId, UserDTO userDTO) throws ThirdPartyException {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:get:user <{0}, {1}>",new Object[]{publicCId, publicDSId});
+    RatingDTO result = ratingController.getDatasetUserRating(publicCId, publicDSId, userDTO);
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:get:user - done <{0}, {1}>",new Object[]{publicCId, publicDSId});
+    return Response.ok(result).build();
+  }
+  
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Path("/cluster/{publicCId}/dataset/{publicDSId}/add")
+  public Response addRating(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId, 
+    RateDTO datasetRating) throws ThirdPartyException {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:add <{0}, {1}>",new Object[]{publicCId, publicDSId});
+    ratingController.addRating(publicCId, publicDSId, datasetRating);
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:add - done <{0}, {1}>",new Object[]{publicCId, publicDSId});
+    return Response.ok("ok").build();
+  }
+  
+  //********************************************************************************************************************
   @GET
   @NoCache
   @Path("all/byPublicId/{publicDSId}")
@@ -84,18 +100,6 @@ public class RatingService {
     GenericEntity<List<DatasetRating>> datasetRatings = new GenericEntity<List<DatasetRating>>(ratings) {};
     LOG.log(Level.INFO, "Get all rating for dataset: {0}", publicDSId);
     return Response.ok().entity(datasetRatings).build();
-  }
-
-  //****************************************************CLUSTER ID*****************************************************
-  @POST
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Path("/add/{publicCId}")
-  public Response addRating(@PathParam("publicCId") String publicCId, RateDTO datasetRating) 
-    throws ThirdPartyException {
-    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:add {0}", publicCId);
-    ratingController.addRating(publicCId, datasetRating);
-    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:add - done {0}", publicCId);
-    return Response.ok("ok").build();
   }
 
   @PUT
