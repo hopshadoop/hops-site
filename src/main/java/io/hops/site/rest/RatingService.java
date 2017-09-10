@@ -18,9 +18,8 @@ package io.hops.site.rest;
 import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.controller.RatingController;
 import io.hops.site.dao.entity.DatasetRating;
-import io.hops.site.dto.UserDTO;
-import io.hops.site.old_dto.RateDTO;
-import io.hops.site.old_dto.RatingDTO;
+import io.hops.site.dto.RateDTO;
+import io.hops.site.dto.RatingDTO;
 import io.hops.site.rest.annotation.NoCache;
 import io.hops.site.rest.exception.ThirdPartyException;
 import io.swagger.annotations.Api;
@@ -36,7 +35,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -73,9 +71,9 @@ public class RatingService {
   @NoCache
   @Path("/cluster/{publicCId}/dataset/{publicDSId}/user")
   public Response getDatasetUserRating(@PathParam("publicCId") String publicCId, 
-    @PathParam("publicDSId") String publicDSId, UserDTO userDTO) throws ThirdPartyException {
+    @PathParam("publicDSId") String publicDSId, String userEmail) throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:get:user <{0}, {1}>",new Object[]{publicCId, publicDSId});
-    RatingDTO result = ratingController.getDatasetUserRating(publicCId, publicDSId, userDTO);
+    RatingDTO result = ratingController.getDatasetUserRating(publicCId, publicDSId, userEmail);
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:get:user - done <{0}, {1}>",new Object[]{publicCId, publicDSId});
     return Response.ok(result).build();
   }
@@ -100,14 +98,6 @@ public class RatingService {
     GenericEntity<List<DatasetRating>> datasetRatings = new GenericEntity<List<DatasetRating>>(ratings) {};
     LOG.log(Level.INFO, "Get all rating for dataset: {0}", publicDSId);
     return Response.ok().entity(datasetRatings).build();
-  }
-
-  @PUT
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateRating(RateDTO datasetRating) {
-    ratingController.updateRating(datasetRating);
-    LOG.log(Level.INFO, "Update rating to: {0}", datasetRating.getRating());
-    return Response.ok("OK").build();
   }
 
   @DELETE

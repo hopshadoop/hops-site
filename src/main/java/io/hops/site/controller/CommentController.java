@@ -24,8 +24,9 @@ import io.hops.site.dao.facade.CommentIssueFacade;
 import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dao.facade.UsersFacade;
-import io.hops.site.old_dto.CommentDTO;
-import io.hops.site.old_dto.CommentIssueDTO;
+import io.hops.site.dto.CommentDTO;
+import io.hops.site.dto.CommentIssueDTO;
+import io.hops.site.rest.exception.ThirdPartyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +36,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.ws.rs.core.Response;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.NEVER)
@@ -54,103 +56,29 @@ public class CommentController {
   private CommentIssueFacade commentIssueFacade;
 
   /**
+   * Get all dataset comments for the given public dataset id
+   *
+   * @param publicDSId
+   * @return
+   */
+  public List<Comment> getAllComments(String publicDSId) throws ThirdPartyException {
+    Dataset dataset = getDataset(publicDSId);
+    List<Comment> comments = new ArrayList(dataset.getCommentCollection());
+    return comments;
+  }
+  
+  /**
    * Add new comment by comment.user for comment.dataset
    *
    * @param comment
    */
-  public void addComment(CommentDTO comment) {
-    commentDTOSanityCheck(comment);
-    Optional<Dataset> dataset = datasetFacade.findByPublicId(comment.getDatasetId());
-    if (!dataset.isPresent()) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
-    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(comment.getUser().getEmail(),
-      comment.getDatasetId());
-    if (user.isPresent()) {
-      throw new IllegalArgumentException("User not found.");
-    }
-    Comment newComment = new Comment(comment.getContent(), user.get(), dataset.get());
+  public void addComment(String publicCId, String publicDSId, CommentDTO.Publish comment) throws ThirdPartyException {
+    commentDTOSanityCheck(publicDSId, comment);
+    Dataset dataset = getDataset(publicDSId);
+    Users user = getUser(publicCId, comment.getUserEmail());
+    Comment newComment = new Comment(comment.getContent(), user, dataset);
     commentFacade.create(newComment);
     LOGGER.log(Level.INFO, "Adding new comment.");
-  }
-
-  private void commentDTOSanityCheck(CommentDTO comment) {
-    if (comment == null || comment.getDatasetId() == null || comment.getUser() == null) {
-      throw new IllegalArgumentException("One or more arguments not assigned.");
-    }
-    if (comment.getUser().getEmail() == null) {
-      throw new IllegalArgumentException("User email not assigned.");
-    }
-    if (comment.getContent().isEmpty()) {
-      throw new IllegalArgumentException("Comment content can not be empty.");
-    }
-  }
-
-  /**
-   * Report abuse on commentIssue.comment
-   *
-   * @param commentIssue
-   */
-  public void reportAbuse(CommentIssueDTO commentIssue) {
-    commentIssueDTOSanityCheck(commentIssue);
-    Comment comment = commentFacade.find(commentIssue.getCommentId());
-    if (comment == null) {
-      throw new IllegalArgumentException("Comment not found.");
-    }
-    CommentIssue newCommentIssue = new CommentIssue(commentIssue.getType(), commentIssue.getMsg(), comment.getUsers(),
-      comment);
-    commentIssueFacade.create(newCommentIssue);
-    LOGGER.log(Level.INFO, "Adding new issue for comment: {0}.", comment.getId());
-  }
-  
-  private void commentIssueDTOSanityCheck(CommentIssueDTO commentIssue) {
-    if (commentIssue == null) {
-      throw new IllegalArgumentException("One or more arguments not assigned.");
-    }
-    if (commentIssue.getUser() == null || commentIssue.getUser().getEmail() == null) {
-      throw new IllegalArgumentException("User email not assigned.");
-    }
-    if (commentIssue.getCommentId() == null) {
-      throw new IllegalArgumentException("Dataset id not assigned.");
-    }
-    if (commentIssue.getType().isEmpty()) {
-      throw new IllegalArgumentException("Issue type not assigned.");
-    }
-  }
-
-  /**
-   * Remove comment by the author
-   * <p>
-   * @param comment
-   */
-  public void removeOwnComment(CommentDTO comment) {
-    commentDTOSanityCheck(comment);
-    Comment managedComment = commentFacade.find(comment.getId());
-    if (managedComment == null) {
-      throw new IllegalArgumentException("Comment not found.");
-    }
-    if (!managedComment.getUsers().getEmail().equalsIgnoreCase(comment.getUser().getEmail())) {
-      throw new IllegalArgumentException("Comment not found for given user.");
-    }
-    LOGGER.log(Level.INFO, "Removing comment with id: {0} by the author.", comment.getId());
-    commentFacade.remove(managedComment);
-  }
-
-  /**
-   * Remove comment identified by commentId
-   *
-   * @param commentId
-   */
-  public void removeComment(Integer commentId) {
-    if (commentId == null) {
-      throw new IllegalArgumentException("Comment id not assigned.");
-    }
-    Comment comment = commentFacade.find(commentId);
-    if (comment == null) {
-      throw new IllegalArgumentException("Comment not found.");
-    }
-    LOGGER.log(Level.INFO, "Removing comment: {0}.", comment.getId());
-    commentFacade.remove(comment);
   }
 
   /**
@@ -158,54 +86,105 @@ public class CommentController {
    *
    * @param comment
    */
-  public void updateComment(CommentDTO comment) {
-    commentDTOSanityCheck(comment);
-    Comment managedComment = commentFacade.find(comment.getId());
-    if (managedComment == null) {
-      throw new IllegalArgumentException("Comment not found.");
-    }
-    if (!managedComment.getUsers().getEmail().equalsIgnoreCase(comment.getUser().getEmail())) {
-      throw new IllegalArgumentException("Comment not found for given user.");
-    }
-    if (comment.getContent().isEmpty()) {
-      throw new IllegalArgumentException("Comment content can not be empty.");
-    }
+  public void updateComment(String publicCId, String publicDSId, Integer commentId, CommentDTO.Publish comment) 
+    throws ThirdPartyException {
+    commentDTOSanityCheck(publicDSId, comment);
+    Users user = getUser(publicCId, comment.getUserEmail());
+    Comment managedComment = getComment(commentId);
+    managedCommentCheck(user, managedComment);
     if (managedComment.getContent().equals(comment.getContent())) {
       return;
     }
-    LOGGER.log(Level.INFO, "Updating comment: {0}.", comment.getId());
+    LOGGER.log(Level.INFO, "Updating comment: {0}.", commentId);
     managedComment.setContent(comment.getContent());
     commentFacade.edit(managedComment);
   }
 
   /**
-   * Get all dataset comments for the given public dataset id
+   * Remove comment identified by commentId
    *
-   * @param publicId
-   * @return
+   * @param commentId
    */
-  public List<Comment> getAllComments(String publicId) {
-    Optional<Dataset> dataset = datasetFacade.findByPublicId(publicId);
-    if (dataset.isPresent()) {
-      throw new IllegalArgumentException("Dataset not found.");
+  public void removeComment(String publicCId, String publicDSId, Integer commentId, String userEmail) 
+    throws ThirdPartyException {
+    if (commentId == null) {
+      throw new IllegalArgumentException("Comment id not assigned.");
     }
-    List<Comment> comments = new ArrayList(dataset.get().getCommentCollection());
-    return comments;
+    Users user = getUser(publicCId, userEmail);
+    Comment managedComment = getComment(commentId);
+    managedCommentCheck(user, managedComment);
+    LOGGER.log(Level.INFO, "Removing comment: {0}.", managedComment.getId());
+    commentFacade.remove(managedComment);
   }
 
   /**
-   * Get all dataset comments for the given dataset id
+   * Report abuse on commentIssue.comment
    *
-   * @param datasetId
-   * @return
+   * @param commentIssue
    */
-  public List<Comment> getAllComments(Integer datasetId) {
-    Dataset dataset = datasetFacade.find(datasetId);
-    if (dataset == null) {
-      throw new IllegalArgumentException("Dataset not found.");
-    }
-    List<Comment> comments = new ArrayList(dataset.getCommentCollection());
-    return comments;
+  public void reportAbuse(String publicCId, String publicDSId, Integer commentId, CommentIssueDTO commentIssue) 
+    throws ThirdPartyException {
+    commentIssueDTOSanityCheck(commentIssue);
+    Users user = getUser(publicCId, commentIssue.getUserEmail());
+    Comment managedComment = getComment(commentId);
+    CommentIssue newCommentIssue = 
+      new CommentIssue(commentIssue.getType(), commentIssue.getMsg(), managedComment.getUsers(), managedComment);
+    commentIssueFacade.create(newCommentIssue);
+    LOGGER.log(Level.INFO, "Adding new issue for comment: {0}.", managedComment.getId());
   }
 
+  private void commentDTOSanityCheck(String publicDSId, CommentDTO.Publish comment) {
+    if (comment == null || publicDSId == null || comment.getUserEmail()== null) {
+      throw new IllegalArgumentException("One or more arguments not assigned.");
+    }
+    if (comment.getContent().isEmpty()) {
+      throw new IllegalArgumentException("Comment content can not be empty.");
+    }
+  }
+  
+  private void managedCommentCheck(Users user, Comment comment) throws ThirdPartyException {
+    if (!comment.getUsers().getId().equals(user.getId())) {
+      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(),
+        "comment not found for given user", ThirdPartyException.Source.REMOTE_DELA, "bad request");
+    }
+  }
+
+  private void commentIssueDTOSanityCheck(CommentIssueDTO commentIssue) {
+    if (commentIssue == null) {
+      throw new IllegalArgumentException("One or more arguments not assigned.");
+    }
+    if (commentIssue.getUserEmail()== null) {
+      throw new IllegalArgumentException("User email not assigned.");
+    }
+    if (commentIssue.getType().isEmpty()) {
+      throw new IllegalArgumentException("Issue type not assigned.");
+    }
+  }
+
+  private Dataset getDataset(String publicDSId) throws ThirdPartyException {
+    Optional<Dataset> dataset = datasetFacade.findByPublicId(publicDSId);
+    if (!dataset.isPresent()) {
+      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(),
+        ThirdPartyException.Error.DATASET_DOES_NOT_EXIST, ThirdPartyException.Source.REMOTE_DELA, "bad request");
+    }
+    return dataset.get();
+  }
+
+  private Users getUser(String publicCId, String userEmail) throws ThirdPartyException {
+    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(userEmail, publicCId);
+    if (!user.isPresent()) {
+      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(),
+        ThirdPartyException.Error.USER_NOT_REGISTERED, ThirdPartyException.Source.REMOTE_DELA, "bad request");
+    }
+    return user.get();
+  }
+
+  private Comment getComment(Integer commentId) throws ThirdPartyException {
+    Comment managedComment = commentFacade.find(commentId);
+    if (managedComment == null) {
+      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(),
+        "comment not found", ThirdPartyException.Source.REMOTE_DELA, "bad request");
+    }
+    return managedComment;
+  }
 }

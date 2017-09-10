@@ -22,9 +22,8 @@ import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dao.facade.DatasetRatingFacade;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dao.facade.UsersFacade;
-import io.hops.site.dto.UserDTO;
-import io.hops.site.old_dto.RateDTO;
-import io.hops.site.old_dto.RatingDTO;
+import io.hops.site.dto.RateDTO;
+import io.hops.site.dto.RatingDTO;
 import io.hops.site.rest.exception.ThirdPartyException;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,20 +56,20 @@ public class RatingController {
   public RatingDTO getDatasetAllRating(String publicDSId) throws ThirdPartyException {
     Dataset dataset = getDataset(publicDSId);
     int rating = calculateRating(dataset);
-    RatingDTO result = new RatingDTO(publicDSId, rating, dataset.getDatasetRatingCollection().size());
+    RatingDTO result = new RatingDTO(rating, dataset.getDatasetRatingCollection().size());
     return result;
   }
   
-  public RatingDTO getDatasetUserRating(String publicCId, String publicDSId, UserDTO userDTO) 
+  public RatingDTO getDatasetUserRating(String publicCId, String publicDSId, String userEmail) 
     throws ThirdPartyException {
     Dataset dataset = getDataset(publicDSId);
-    Users user = getUser(userDTO.getEmail(), publicCId);
+    Users user = getUser(userEmail, publicCId);
     DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset, user);
     RatingDTO result;
     if (managedRating == null) {
-      result = new RatingDTO(publicCId, 0, dataset.getDatasetRatingCollection().size());
+      result = new RatingDTO(0, dataset.getDatasetRatingCollection().size());
     } else {
-      result = new RatingDTO(publicCId, managedRating.getRating(), dataset.getDatasetRatingCollection().size());
+      result = new RatingDTO(managedRating.getRating(), dataset.getDatasetRatingCollection().size());
     }
     return result;
   }
@@ -80,20 +79,20 @@ public class RatingController {
    *
    * @param ratingDTO
    */
-  public void addRating(String publicCId, String publicDSId, RateDTO ratingDTO) throws ThirdPartyException {
-    rateDTOSanityCheck(ratingDTO);
+  public void addRating(String publicCId, String publicDSId, RateDTO rateDTO) throws ThirdPartyException {
+    rateDTOSanityCheck(rateDTO);
     Dataset dataset = getDataset(publicDSId);
-    Users user = getUser(ratingDTO.getUser().getEmail(), publicCId);
+    Users user = getUser(rateDTO.getUserEmail(), publicCId);
     DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset, user);
     if (managedRating != null) {
-      if (managedRating.getRating() == ratingDTO.getRating()) {
+      if (managedRating.getRating() == rateDTO.getRating()) {
         //no update in rating - so we do not need to recompute
         return;
       }
-      managedRating.setRating(ratingDTO.getRating());
+      managedRating.setRating(rateDTO.getRating());
       datasetRatingFacade.edit(managedRating);
     } else {
-      DatasetRating newDatasetRating = new DatasetRating(ratingDTO.getRating(), user, dataset);
+      DatasetRating newDatasetRating = new DatasetRating(rateDTO.getRating(), user, dataset);
       datasetRatingFacade.create(newDatasetRating);
     }
     updateRatingInDataset(dataset);
@@ -124,21 +123,6 @@ public class RatingController {
     updateRatingInDataset(dataset);
   }
 
-  /**
-   *
-   * @param datasetRating
-   */
-  public void updateRating(RateDTO datasetRating) {
-    DatasetRating rating = updateRateDTOSanityCheck(datasetRating);
-
-    if (rating.getRating() == datasetRating.getRating()) {
-      return;
-    }
-    rating.setRating(datasetRating.getRating());
-    datasetRatingFacade.edit(rating);
-    updateRatingInDataset(rating.getDatasetId());
-  }
-
   //********************************************************************************************************************
   private void updateRatingInDataset(Dataset dataset) {
     //update dataset
@@ -159,11 +143,11 @@ public class RatingController {
     return rated;
   }
 
-  private DatasetRating updateRateDTOSanityCheck(RateDTO rateDTO) {
+  private DatasetRating updateRateDTOSanityCheck(int rateId, RateDTO rateDTO) {
     rateDTOSanityCheck(rateDTO);
 
-    DatasetRating rating = getDatasetRating(rateDTO.getId());
-    if (!rating.getUsers().getEmail().equalsIgnoreCase(rateDTO.getUser().getEmail())) {
+    DatasetRating rating = getDatasetRating(rateId);
+    if (!rating.getUsers().getEmail().equalsIgnoreCase(rateDTO.getUserEmail())) {
       throw new IllegalArgumentException("Rating not found for given user.");
     }
     return rating;
@@ -185,11 +169,8 @@ public class RatingController {
     if (rateDTO == null) {
       throw new IllegalArgumentException("One or more arguments not assigned.");
     }
-    if (rateDTO.getUser() == null || rateDTO.getUser().getEmail() == null) {
+    if (rateDTO.getUserEmail() == null) {
       throw new IllegalArgumentException("User email not assigned.");
-    }
-    if (rateDTO.getDatasetId() == null) {
-      throw new IllegalArgumentException("Dataset id not assigned.");
     }
     if (rateDTO.getRating() <= 0) {
       throw new IllegalArgumentException("Rating should be positive int.");

@@ -13,32 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.site.old_dto;
+package io.hops.site.dto;
 
-import java.util.Objects;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class RatingDTO {
 
-  private String datasetId;
   private int rate;
   private int ratedBy;
 
-  public RatingDTO(String datasetId, int rate, int ratedBy) {
-    this.datasetId = datasetId;
+  public RatingDTO(int rate, int ratedBy) {
     this.rate = rate;
     this.ratedBy = ratedBy;
   }
 
-  public String getDatasetId() {
-    return datasetId;
-  }
-
-  public void setDatasetId(String datasetId) {
-    this.datasetId = datasetId;
-  }
-  
   public int getRate() {
     return rate;
   }
@@ -54,30 +43,4 @@ public class RatingDTO {
   public void setRatedBy(int ratedBy) {
     this.ratedBy = ratedBy;
   }
-
-  @Override
-  public int hashCode() {
-    int hash = 7;
-    hash = 43 * hash + Objects.hashCode(this.datasetId);
-    return hash;
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    final RatingDTO other = (RatingDTO) obj;
-    if (!Objects.equals(this.datasetId, other.datasetId)) {
-      return false;
-    }
-    return true;
-  }
-
 }

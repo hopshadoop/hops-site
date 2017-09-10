@@ -16,13 +16,14 @@
 package io.hops.site.rest;
 
 import io.hops.site.controller.CommentController;
+import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dao.entity.Comment;
-import io.hops.site.old_dto.CommentDTO;
-import io.hops.site.old_dto.CommentIssueDTO;
+import io.hops.site.dto.CommentDTO;
+import io.hops.site.dto.CommentIssueDTO;
 import io.hops.site.rest.annotation.NoCache;
+import io.hops.site.rest.exception.ThirdPartyException;
 import io.swagger.annotations.Api;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
@@ -45,75 +46,71 @@ import javax.ws.rs.core.Response;
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "/comment",
-        description = "Comment service")
+  description = "Comment service")
 @TransactionAttribute(TransactionAttributeType.NEVER)
 public class CommentService {
 
-  private final static Logger LOGGER = Logger.getLogger(CommentService.class.getName());
+  private final static Logger LOG = Logger.getLogger(CommentService.class.getName());
 
   @EJB
   private CommentController commentController;
 
   @GET
   @NoCache
-  @Path("{datasetId}")
-  public Response getAll(@PathParam("datasetId") Integer datasetId) {
-    List<Comment> comments = commentController.getAllComments(datasetId);
-    GenericEntity<List<Comment>> datasetComments = new GenericEntity<List<Comment>>(comments) {};
-    LOGGER.log(Level.INFO, "Get all comments for dataset: {0}", datasetId);
-    return Response.ok().entity(datasetComments).build();
-  }
-
-  @GET
-  @NoCache
-  @Path("byPublicId/{publicId}")
-  public Response getAllByPublicId(@PathParam("publicId") String publicId) {
-    List<Comment> comments = commentController.getAllComments(publicId);
-    GenericEntity<List<Comment>> datasetComments = new GenericEntity<List<Comment>>(comments) {};
-    LOGGER.log(Level.INFO, "Get all comments for dataset: {0}", publicId);
+  @Path("dataset/{publicDSId}/all")
+  public Response getAllByPublicId(@PathParam("publicDSId") String publicDSId) throws ThirdPartyException {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:all <{0}>", new Object[]{publicDSId});
+    List<Comment> comments = commentController.getAllComments(publicDSId);
+    GenericEntity<List<Comment>> datasetComments = new GenericEntity<List<Comment>>(comments) {
+    };
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:all - done <{0}>", new Object[]{publicDSId});
     return Response.ok().entity(datasetComments).build();
   }
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response addComment(CommentDTO comment) {
-    commentController.addComment(comment);
-    LOGGER.log(Level.INFO, "Add comment for dataset: {0}", comment.getDatasetId());
-    return Response.ok("OK").build();
-  }
-
-  @POST
-  @Path("reportAbuse")
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response reportAbuse(CommentIssueDTO commentIssue) {
-    commentController.reportAbuse(commentIssue);
-    LOGGER.log(Level.INFO, "Report abuse for comment: {0}", commentIssue.getCommentId());
-    return Response.ok("OK").build();
+  @Path("cluster/{publicCId}/dataset/{publicDSId}/add")
+  public Response addComment(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId,
+    CommentDTO.Publish comment) throws ThirdPartyException {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:add <{0}>", new Object[]{publicDSId});
+    commentController.addComment(publicCId, publicDSId, comment);
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:add - done <{0}>", new Object[]{publicDSId});
+    return Response.ok("ok").build();
   }
 
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response updateComment(CommentDTO comment) {
-    commentController.updateComment(comment);
-    LOGGER.log(Level.INFO, "Update comment with id: {0}", comment.getId());
-    return Response.ok("OK").build();
+  @Path("cluster/{publicCId}/dataset/{publicDSId}/update/{commentId}")
+  public Response updateComment(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId,
+    @PathParam("commentId") Integer commentId, CommentDTO.Publish comment) throws ThirdPartyException {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:update <{0},{1}>", new Object[]{publicDSId, commentId});
+    commentController.updateComment(publicCId, publicDSId, commentId, comment);
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:update - done <{0}, {1}>",
+      new Object[]{publicDSId, commentId});
+    return Response.ok("ok").build();
   }
 
   @DELETE
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response deleteComment(CommentDTO comment) {
-    commentController.removeOwnComment(comment);
-    LOGGER.log(Level.INFO, "Delete comment with id: {0}", comment.getId());
-    return Response.ok("OK").build();
-  }
-
-  @DELETE
-  @Path("{commentId}")
+  @Path("cluster/{publicCId}/dataset/{publicDSId}/delete/{commentId}")
   @RolesAllowed({"admin"})
-  public Response deleteCommentById(@PathParam("commentId") Integer commentId) {
-    commentController.removeComment(commentId);
-    LOGGER.log(Level.INFO, "Delete comment with id: {0}", commentId);
-    return Response.ok("OK").build();
+  public Response deleteCommentById(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId,
+    @PathParam("commentId") Integer commentId, String userEmail) throws ThirdPartyException {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:delete <{0},{1}>", new Object[]{publicDSId, commentId});
+    commentController.removeComment(publicCId, publicDSId, commentId, userEmail);
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:delete - done <{0},{1}>",
+      new Object[]{publicDSId, commentId});
+    return Response.ok("ok").build();
   }
 
+  @POST
+  @Path("cluster/{publicCId}/dataset/{publicDSId}/report/{commentId}")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response reportAbuse(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId, 
+    @PathParam("commentId") Integer commentId, CommentIssueDTO commentIssue) throws ThirdPartyException {
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:issue <{0},{1}>", new Object[]{publicDSId, commentId});
+    commentController.reportAbuse(publicCId, publicDSId, commentId, commentIssue);
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:issue - done <{0},{1}>",
+      new Object[]{publicDSId, commentId});
+    return Response.ok("ok").build();
+  }
 }

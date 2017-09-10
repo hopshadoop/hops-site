@@ -13,51 +13,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.hops.site.old_dto;
+package io.hops.site.dto;
 
-import io.hops.site.dto.UserDTO;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class CommentDTO {
+public class CommentIssueDTO {
 
-  private Integer id;
-  private String content;
-  private UserDTO user;
-  private String datasetId;
+  private String type;
+  private String msg;
+  private String userEmail;
 
-  public CommentDTO() {
+  public CommentIssueDTO() {
   }
 
-  public Integer getId() {
-    return id;
+  public String getType() {
+    return type;
   }
 
-  public void setId(Integer id) {
-    this.id = id;
+  public void setType(String type) {
+    this.type = type;
   }
 
-  public String getContent() {
-    return content;
+  public String getMsg() {
+    return msg;
   }
 
-  public void setContent(String content) {
-    this.content = content;
+  public void setMsg(String msg) {
+    this.msg = msg;
   }
 
-  public UserDTO getUser() {
-    return user;
+  public String getUserEmail() {
+    return userEmail;
   }
 
-  public void setUser(UserDTO user) {
-    this.user = user;
-  }
-
-  public String getDatasetId() {
-    return datasetId;
-  }
-
-  public void setDatasetId(String datasetId) {
-    this.datasetId = datasetId;
+  public void setUserEmail(String userEmail) {
+    this.userEmail = userEmail;
   }
 }

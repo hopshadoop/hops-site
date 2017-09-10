@@ -7,15 +7,21 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.ws.rs.container.ContainerRequestContext;
 
 public class CertificateHelper {
 
   private final static Logger LOGGER = Logger.getLogger(CertificateHelper.class.getName());
 
+  public static String getUserEmail(ContainerRequestContext requestContext) {
+    X509Certificate cert = ((X509Certificate[]) requestContext.getProperty("javax.servlet.request.X509Certificate"))[0];
+    return getCertificateEmail(cert);
+  }
+
   public static String getCertificateEmail(X509Certificate principalCert) {
     return getCertificatePart(principalCert, "EMAILADDRESS");
   }
-  
+
   public static String getCertificatePart(X509Certificate principalCert, String partName) {
     String tmpName, name = "";
     Principal principal = principalCert.getSubjectDN();
@@ -35,7 +41,7 @@ public class CertificateHelper {
     }
     return name.toLowerCase();
   }
-  
+
   public static boolean matchCerts(byte[] cert, X509Certificate principalCert) {
     try {
       return Arrays.equals(principalCert.getEncoded(), cert);
