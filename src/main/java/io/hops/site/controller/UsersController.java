@@ -43,7 +43,7 @@ public class UsersController {
    *
    * @param user
    */
-  public void addNewUser(String publicCId, UserDTO user) {
+  public void addNewUser(String publicCId, UserDTO.Publish user) {
     userDTOSanityCheck(publicCId, user);
     Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(publicCId);
     if (!cluster.isPresent()) {
@@ -59,7 +59,7 @@ public class UsersController {
    *
    * @param updateUser
    */
-  public void updateUser(String publicCId, UserDTO updateUser) {
+  public void updateUser(String publicCId, UserDTO.Publish updateUser) {
     userDTOSanityCheck(publicCId, updateUser);
     Optional<Users> userAux = userFacade.findByEmailAndPublicClusterId(updateUser.getEmail(), publicCId);
     if (!userAux.isPresent()) {
@@ -72,7 +72,7 @@ public class UsersController {
     LOGGER.log(Level.INFO, "Updating user: {0}.", user.getId());
   }
 
-  private void userDTOSanityCheck(String publicCId, UserDTO user) {
+  private void userDTOSanityCheck(String publicCId, UserDTO.Publish user) {
     if (user == null) {
       throw new IllegalArgumentException("User is not assigned.");
     }

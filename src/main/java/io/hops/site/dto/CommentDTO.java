@@ -55,13 +55,13 @@ public class CommentDTO {
 
     private Integer id;
     private String content;
-    private UserDTO user;
+    private UserDTO.Retrieve user;
     private Date datePublished;
 
     public RetrieveComment() {
     }
 
-    public RetrieveComment(Integer id, String content, UserDTO user, Date datePublished) {
+    public RetrieveComment(Integer id, String content, UserDTO.Retrieve user, Date datePublished) {
       this.id = id;
       this.content = content;
       this.user = user;
@@ -84,11 +84,11 @@ public class CommentDTO {
       this.content = content;
     }
 
-    public UserDTO getUser() {
+    public UserDTO.Retrieve getUser() {
       return user;
     }
 
-    public void setUser(UserDTO user) {
+    public void setUser(UserDTO.Retrieve user) {
       this.user = user;
     }
 

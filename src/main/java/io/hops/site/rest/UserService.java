@@ -15,10 +15,10 @@
  */
 package io.hops.site.rest;
 
-import io.hops.site.rest.exception.AppException;
 import io.hops.site.controller.UsersController;
 import io.hops.site.dao.entity.Users;
 import io.hops.site.dto.UserDTO;
+import io.hops.site.rest.exception.AppException;
 import io.swagger.annotations.Api;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -54,7 +54,7 @@ public class UserService {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Path("/register/{publicCId}")
-  public Response getUser(@PathParam("publicCId") String publicCId, UserDTO userDTO) {
+  public Response registerUser(@PathParam("publicCId") String publicCId, UserDTO.Publish userDTO) {
     Optional<Users> user = usersController.findUserByEmailAndClusterId(userDTO.getEmail(), publicCId);
     if (!user.isPresent()) {
       usersController.addNewUser(publicCId, userDTO);
@@ -70,7 +70,7 @@ public class UserService {
   public Response getUser(@PathParam("publicCId") String publicCId, String userEmail) throws AppException {
     Optional<Users> user = usersController.findUserByEmailAndClusterId(userEmail, publicCId);
     if (!user.isPresent()) {
-      return Response.ok(new UserDTO(user.get())).build();
+      return Response.ok(new UserDTO.Retrieve(user.get())).build();
     } else {
       throw new AppException(Response.Status.EXPECTATION_FAILED.getStatusCode(), "user not found");
     }

@@ -7,7 +7,6 @@ import io.hops.site.rest.RatingService;
 import io.hops.site.rest.UserService;
 import io.hops.site.rest.exception.mapper.AppExceptionMapper;
 import io.hops.site.rest.exception.mapper.EJBExceptionMapper;
-import io.hops.site.rest.request.filter.AddRowsFilter;
 import io.hops.site.rest.request.filter.AuthFilter;
 import io.hops.site.rest.response.filter.CORSFilter;
 import io.hops.site.rest.response.filter.CacheControlFilter;
@@ -36,7 +35,6 @@ public class ApplicationConfig extends ResourceConfig {
     register(CacheControlFilter.class);
     //request filters
     register(AuthFilter.class);
-    register(AddRowsFilter.class);
     
     //swagger
     register(ApiListingResource.class);

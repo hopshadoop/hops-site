@@ -23,17 +23,17 @@ public class DatasetIssueDTO {
 
   private String type;
   private String msg;
-  private UserDTO user;
+  private UserDTO.Publish user;
   private String datasetId;
 
   public DatasetIssueDTO() {
   }
 
-  public UserDTO getUser() {
+  public UserDTO.Publish getUser() {
     return user;
   }
 
-  public void setUser(UserDTO user) {
+  public void setUser(UserDTO.Publish user) {
     this.user = user;
   }
 

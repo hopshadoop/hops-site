@@ -66,7 +66,7 @@ public class CommentController {
     Dataset dataset = getDataset(publicDSId);
     List<CommentDTO.RetrieveComment> comments = new ArrayList();
     for(Comment c : dataset.getCommentCollection()) {
-      UserDTO user = new UserDTO(c.getUsers());
+      UserDTO.Retrieve user = new UserDTO.Retrieve(c.getUsers());
       comments.add(new CommentDTO.RetrieveComment(c.getId(), c.getContent(), user, c.getDatePublished()));
     }
     return comments;
