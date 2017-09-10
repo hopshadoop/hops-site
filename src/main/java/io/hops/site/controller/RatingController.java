@@ -63,7 +63,7 @@ public class RatingController {
   public RatingDTO getDatasetUserRating(String publicCId, String publicDSId, String userEmail) 
     throws ThirdPartyException {
     Dataset dataset = getDataset(publicDSId);
-    Users user = getUser(userEmail, publicCId);
+    Users user = getUser(publicCId, userEmail);
     DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset, user);
     RatingDTO result;
     if (managedRating == null) {
@@ -82,7 +82,7 @@ public class RatingController {
   public void addRating(String publicCId, String publicDSId, RateDTO rateDTO) throws ThirdPartyException {
     rateDTOSanityCheck(rateDTO);
     Dataset dataset = getDataset(publicDSId);
-    Users user = getUser(rateDTO.getUserEmail(), publicCId);
+    Users user = getUser(publicCId, rateDTO.getUserEmail());
     DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset, user);
     if (managedRating != null) {
       if (managedRating.getRating() == rateDTO.getRating()) {
