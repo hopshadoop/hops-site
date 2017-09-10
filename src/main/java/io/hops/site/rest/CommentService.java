@@ -15,6 +15,7 @@
  */
 package io.hops.site.rest;
 
+import com.google.gson.Gson;
 import io.hops.site.controller.CommentController;
 import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dao.entity.Comment;
@@ -38,7 +39,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -61,10 +61,8 @@ public class CommentService {
   public Response getAllByPublicId(@PathParam("publicDSId") String publicDSId) throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:all <{0}>", new Object[]{publicDSId});
     List<Comment> comments = commentController.getAllComments(publicDSId);
-    GenericEntity<List<Comment>> datasetComments = new GenericEntity<List<Comment>>(comments) {
-    };
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:all - done <{0}>", new Object[]{publicDSId});
-    return Response.ok().entity(datasetComments).build();
+    return Response.ok().entity(new Gson().toJson(comments)).build();
   }
 
   @POST
