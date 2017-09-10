@@ -61,7 +61,7 @@ public class ClusterService {
   @NoCache
   @Path("register")
   public Response register(@Context HttpServletRequest req, ClusterServiceDTO.Register msg)
-    throws CertificateEncodingException {
+    throws CertificateEncodingException, ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster register");
     X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
     X509Certificate clientCert = certs[0];

@@ -7,7 +7,7 @@
 CREATE TABLE `registered_cluster` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `public_id` varchar(200) NOT NULL UNIQUE,
-  `org_name` varchar(100) NOT NULL,
+  `org_name` varchar(100) NOT NULL UNIQUE,
   `email` varchar(100) NOT NULL,
   `cert` blob NOT NULL,
   `dela_endpoint` varchar(100) NOT NULL,

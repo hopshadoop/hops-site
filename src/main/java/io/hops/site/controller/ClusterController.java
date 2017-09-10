@@ -26,6 +26,7 @@ import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dto.ClusterAddressDTO;
 import io.hops.site.dto.ClusterServiceDTO;
 import io.hops.site.rest.ClusterService;
+import io.hops.site.rest.exception.ThirdPartyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,8 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.persistence.PersistenceException;
+import javax.ws.rs.core.Response;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.NEVER)
@@ -59,7 +62,7 @@ public class ClusterController {
    * @param msg
    * @return
    */
-  public String registerCluster(byte[] cert, String orgName, ClusterServiceDTO.Register msg) {
+  public String registerCluster(byte[] cert, String orgName, ClusterServiceDTO.Register msg) throws ThirdPartyException {
     Optional<RegisteredCluster> c = clusterFacade.findByEmail(msg.getEmail());
     if (c.isPresent()) {
       return c.get().getPublicId();
@@ -67,7 +70,12 @@ public class ClusterController {
     String clusterPublicId = settings.getClusterId();
     RegisteredCluster cluster = new RegisteredCluster(clusterPublicId, msg.getDelaTransferAddress(),
       msg.getDelaClusterAddress(), msg.getEmail().toLowerCase(), cert, orgName);
-    clusterFacade.create(cluster);
+    try {
+      clusterFacade.create(cluster);
+    } catch (PersistenceException ex) {
+      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(), "wrong register values",
+        ThirdPartyException.Source.REMOTE_DELA, "bad request");
+    }
     return clusterPublicId;
   }
 
@@ -89,14 +97,14 @@ public class ClusterController {
 
   private boolean pingSanityCheck(int clusterId, ClusterServiceDTO.Ping msg) {
     List<LiveDataset> liveDatasets = liveDatasetFacade.liveDatasets(clusterId);
-    if(liveDatasets.size() != msg.getDwnlDSSize() + msg.getUpldDSSize()) {
+    if (liveDatasets.size() != msg.getDwnlDSSize() + msg.getUpldDSSize()) {
       return false;
     }
-    
+
     int dwnl = 0;
     int upld = 0;
-    for(LiveDataset liveDataset : liveDatasets) {
-      if(liveDataset.getStatus() == HopsSiteSettings.LIVE_DATASET_STATUS_UPLOAD) {
+    for (LiveDataset liveDataset : liveDatasets) {
+      if (liveDataset.getStatus() == HopsSiteSettings.LIVE_DATASET_STATUS_UPLOAD) {
         upld++;
       } else if (liveDataset.getStatus() == HopsSiteSettings.LIVE_DATASET_STATUS_DOWNLOAD) {
         dwnl++;
@@ -127,7 +135,7 @@ public class ClusterController {
       return Action.REGISTER;
     }
   }
-  
+
   public static enum Action {
 
     REGISTER,
