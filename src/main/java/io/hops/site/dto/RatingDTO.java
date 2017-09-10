@@ -23,6 +23,9 @@ public class RatingDTO {
   private int rate;
   private int ratedBy;
 
+  public RatingDTO() {
+  }
+
   public RatingDTO(int rate, int ratedBy) {
     this.rate = rate;
     this.ratedBy = ratedBy;
