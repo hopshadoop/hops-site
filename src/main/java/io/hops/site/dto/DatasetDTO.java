@@ -262,7 +262,7 @@ public class DatasetDTO {
     }
 
     public Owner(Users owner) {
-      this.clusterDescription = owner.getCluster().getPublicId();
+      this.clusterDescription = owner.getCluster().getOrgName();
       this.userDescription = owner.getFirstname() + " " + owner.getLastname();
     }
 
