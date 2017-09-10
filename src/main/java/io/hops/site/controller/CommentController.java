@@ -15,6 +15,7 @@
  */
 package io.hops.site.controller;
 
+import io.hops.site.common.SettingsHelper;
 import io.hops.site.dao.entity.Comment;
 import io.hops.site.dao.entity.CommentIssue;
 import io.hops.site.dao.entity.Dataset;
@@ -80,7 +81,7 @@ public class CommentController {
   public void addComment(String publicCId, String publicDSId, CommentDTO.Publish comment) throws ThirdPartyException {
     commentDTOSanityCheck(publicDSId, comment);
     Dataset dataset = getDataset(publicDSId);
-    Users user = getUser(publicCId, comment.getUserEmail());
+    Users user = SettingsHelper.getUser(userFacade, publicCId, comment.getUserEmail());
     Comment newComment = new Comment(comment.getContent(), user, dataset);
     commentFacade.create(newComment);
     LOGGER.log(Level.INFO, "Adding new comment.");
@@ -94,7 +95,7 @@ public class CommentController {
   public void updateComment(String publicCId, String publicDSId, Integer commentId, CommentDTO.Publish comment) 
     throws ThirdPartyException {
     commentDTOSanityCheck(publicDSId, comment);
-    Users user = getUser(publicCId, comment.getUserEmail());
+    Users user = SettingsHelper.getUser(userFacade, publicCId, comment.getUserEmail());
     Comment managedComment = getComment(commentId);
     managedCommentCheck(user, managedComment);
     if (managedComment.getContent().equals(comment.getContent())) {
@@ -115,7 +116,7 @@ public class CommentController {
     if (commentId == null) {
       throw new IllegalArgumentException("Comment id not assigned.");
     }
-    Users user = getUser(publicCId, userEmail);
+    Users user = SettingsHelper.getUser(userFacade, publicCId, userEmail);
     Comment managedComment = getComment(commentId);
     managedCommentCheck(user, managedComment);
     LOGGER.log(Level.INFO, "Removing comment: {0}.", managedComment.getId());
@@ -130,7 +131,7 @@ public class CommentController {
   public void reportAbuse(String publicCId, String publicDSId, Integer commentId, CommentIssueDTO commentIssue) 
     throws ThirdPartyException {
     commentIssueDTOSanityCheck(commentIssue);
-    Users user = getUser(publicCId, commentIssue.getUserEmail());
+    Users user = SettingsHelper.getUser(userFacade, publicCId, commentIssue.getUserEmail());
     Comment managedComment = getComment(commentId);
     CommentIssue newCommentIssue = 
       new CommentIssue(commentIssue.getType(), commentIssue.getMsg(), managedComment.getUsers(), managedComment);
@@ -173,15 +174,6 @@ public class CommentController {
         ThirdPartyException.Error.DATASET_DOES_NOT_EXIST, ThirdPartyException.Source.REMOTE_DELA, "bad request");
     }
     return dataset.get();
-  }
-
-  private Users getUser(String publicCId, String userEmail) throws ThirdPartyException {
-    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(userEmail, publicCId);
-    if (!user.isPresent()) {
-      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(),
-        ThirdPartyException.Error.USER_NOT_REGISTERED, ThirdPartyException.Source.REMOTE_DELA, "bad request");
-    }
-    return user.get();
   }
 
   private Comment getComment(Integer commentId) throws ThirdPartyException {

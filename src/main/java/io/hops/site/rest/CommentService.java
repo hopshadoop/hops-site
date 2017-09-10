@@ -25,13 +25,11 @@ import io.hops.site.rest.exception.ThirdPartyException;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.logging.Logger;
-import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -87,15 +85,16 @@ public class CommentService {
     return Response.ok("ok").build();
   }
 
-  @DELETE
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
   @Path("/cluster/{publicCId}/dataset/{publicDSId}/delete/{commentId}")
-  @RolesAllowed({"admin"})
   public Response deleteCommentById(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId,
     @PathParam("commentId") Integer commentId, String userEmail) throws ThirdPartyException {
-    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:delete <{0},{1}>", new Object[]{publicDSId, commentId});
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:delete <{0},{1},{2}>", 
+      new Object[]{publicDSId, commentId, userEmail});
     commentController.removeComment(publicCId, publicDSId, commentId, userEmail);
-    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:delete - done <{0},{1}>",
-      new Object[]{publicDSId, commentId});
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:delete - done <{0},{1},{2}>",
+      new Object[]{publicDSId, commentId, userEmail});
     return Response.ok("ok").build();
   }
 
