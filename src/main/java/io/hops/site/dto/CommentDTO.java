@@ -15,6 +15,7 @@
  */
 package io.hops.site.dto;
 
+import java.util.Date;
 import javax.xml.bind.annotation.XmlRootElement;
 
 public class CommentDTO {
@@ -47,6 +48,56 @@ public class CommentDTO {
 
     public void setUserEmail(String userEmail) {
       this.userEmail = userEmail;
+    }
+  }
+  
+    public static class RetrieveComment {
+
+    private Integer id;
+    private String content;
+    private UserDTO user;
+    private Date datePublished;
+
+    public RetrieveComment() {
+    }
+
+    public RetrieveComment(Integer id, String content, UserDTO user, Date datePublished) {
+      this.id = id;
+      this.content = content;
+      this.user = user;
+      this.datePublished = datePublished;
+    }
+
+    public Integer getId() {
+      return id;
+    }
+
+    public void setId(Integer id) {
+      this.id = id;
+    }
+
+    public String getContent() {
+      return content;
+    }
+
+    public void setContent(String content) {
+      this.content = content;
+    }
+
+    public UserDTO getUser() {
+      return user;
+    }
+
+    public void setUser(UserDTO user) {
+      this.user = user;
+    }
+
+    public Date getDatePublished() {
+      return datePublished;
+    }
+
+    public void setDatePublished(Date datePublished) {
+      this.datePublished = datePublished;
     }
   }
 }

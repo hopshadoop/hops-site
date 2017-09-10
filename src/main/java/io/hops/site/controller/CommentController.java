@@ -26,6 +26,7 @@ import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dao.facade.UsersFacade;
 import io.hops.site.dto.CommentDTO;
 import io.hops.site.dto.CommentIssueDTO;
+import io.hops.site.dto.UserDTO;
 import io.hops.site.rest.exception.ThirdPartyException;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,9 +62,13 @@ public class CommentController {
    * @param publicDSId
    * @return
    */
-  public List<Comment> getAllComments(String publicDSId) throws ThirdPartyException {
+  public List<CommentDTO.RetrieveComment> getAllComments(String publicDSId) throws ThirdPartyException {
     Dataset dataset = getDataset(publicDSId);
-    List<Comment> comments = new ArrayList(dataset.getCommentCollection());
+    List<CommentDTO.RetrieveComment> comments = new ArrayList();
+    for(Comment c : dataset.getCommentCollection()) {
+      UserDTO user = new UserDTO(c.getUsers());
+      comments.add(new CommentDTO.RetrieveComment(c.getId(), c.getContent(), user, c.getDatePublished()));
+    }
     return comments;
   }
   
