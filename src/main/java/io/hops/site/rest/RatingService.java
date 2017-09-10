@@ -68,8 +68,8 @@ public class RatingService {
 
   //****************************************************CLUSTER ID******************************************************
   @POST
-  @NoCache
   @Path("/cluster/{publicCId}/dataset/{publicDSId}/user")
+  @Consumes(MediaType.APPLICATION_JSON)
   public Response getDatasetUserRating(@PathParam("publicCId") String publicCId, 
     @PathParam("publicDSId") String publicDSId, String userEmail) throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:rating:get:user <{0}, {1}>",new Object[]{publicCId, publicDSId});
