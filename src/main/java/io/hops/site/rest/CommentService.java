@@ -57,7 +57,7 @@ public class CommentService {
 
   @GET
   @NoCache
-  @Path("dataset/{publicDSId}/all")
+  @Path("/dataset/{publicDSId}/all")
   public Response getAllByPublicId(@PathParam("publicDSId") String publicDSId) throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:all <{0}>", new Object[]{publicDSId});
     List<Comment> comments = commentController.getAllComments(publicDSId);
@@ -67,7 +67,7 @@ public class CommentService {
 
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
-  @Path("cluster/{publicCId}/dataset/{publicDSId}/add")
+  @Path("/cluster/{publicCId}/dataset/{publicDSId}/add")
   public Response addComment(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId,
     CommentDTO.Publish comment) throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:add <{0}>", new Object[]{publicDSId});
@@ -78,7 +78,7 @@ public class CommentService {
 
   @PUT
   @Consumes(MediaType.APPLICATION_JSON)
-  @Path("cluster/{publicCId}/dataset/{publicDSId}/update/{commentId}")
+  @Path("/cluster/{publicCId}/dataset/{publicDSId}/update/{commentId}")
   public Response updateComment(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId,
     @PathParam("commentId") Integer commentId, CommentDTO.Publish comment) throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:comment:update <{0},{1}>", new Object[]{publicDSId, commentId});
@@ -89,7 +89,7 @@ public class CommentService {
   }
 
   @DELETE
-  @Path("cluster/{publicCId}/dataset/{publicDSId}/delete/{commentId}")
+  @Path("/cluster/{publicCId}/dataset/{publicDSId}/delete/{commentId}")
   @RolesAllowed({"admin"})
   public Response deleteCommentById(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId,
     @PathParam("commentId") Integer commentId, String userEmail) throws ThirdPartyException {
@@ -101,7 +101,7 @@ public class CommentService {
   }
 
   @POST
-  @Path("cluster/{publicCId}/dataset/{publicDSId}/report/{commentId}")
+  @Path("/cluster/{publicCId}/dataset/{publicDSId}/report/{commentId}")
   @Consumes(MediaType.APPLICATION_JSON)
   public Response reportAbuse(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId, 
     @PathParam("commentId") Integer commentId, CommentIssueDTO commentIssue) throws ThirdPartyException {
