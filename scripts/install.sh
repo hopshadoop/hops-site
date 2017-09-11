@@ -2,7 +2,7 @@
 set -e
 
 INSTALL_PATH='/srv/hops'
-GLASSFISH_PATH='/srv/hops/glassfish/versions/glassfish-4.1.2.172'
+GLASSFISH_PATH='/srv/hops/glassfish/versions/glassfish-4.1.2.173'
 DOMAIN_DIR='/srv/hops/domains'
 DOMAIN='domain2'
 DOMAINPW_FILE="${DOMAIN_DIR}/master-password"

@@ -35,8 +35,6 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.persistence.PersistenceException;
-import javax.ws.rs.core.Response;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.NEVER)
@@ -70,12 +68,7 @@ public class ClusterController {
     String clusterPublicId = settings.getClusterId();
     RegisteredCluster cluster = new RegisteredCluster(clusterPublicId, msg.getDelaTransferAddress(),
       msg.getDelaClusterAddress(), msg.getEmail().toLowerCase(), cert, orgName);
-    try {
-      clusterFacade.create(cluster);
-    } catch (PersistenceException ex) {
-      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(), "wrong register values",
-        ThirdPartyException.Source.REMOTE_DELA, "bad request");
-    }
+    clusterFacade.create(cluster);
     return clusterPublicId;
   }
 
@@ -133,6 +126,7 @@ public class ClusterController {
       return Action.HEAVY_PING;
     } else {
       return Action.REGISTER;
+
     }
   }
 

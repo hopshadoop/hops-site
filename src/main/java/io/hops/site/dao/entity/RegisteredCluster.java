@@ -74,7 +74,7 @@ public class RegisteredCluster implements Serializable {
   @Basic(optional = false)
   @Size(min = 1,
     max = 200)
-  @Column(name = "public_id")
+  @Column(name = "public_id", unique = true)
   private String publicId;
   @NotNull
   @Basic(optional = false)
@@ -89,13 +89,13 @@ public class RegisteredCluster implements Serializable {
   @Basic(optional = false)
   @Size(min = 1,
     max = 100)
-  @Column(name = "email")
+  @Column(name = "email", unique = true)
   private String email;
   @NotNull
   @Basic(optional = false)
   @Size(min = 1,
     max = 100)
-  @Column(name = "org_name")
+  @Column(name = "org_name", unique = true)
   private String orgName;
   @Basic(optional = false)
   @NotNull

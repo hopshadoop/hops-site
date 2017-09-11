@@ -66,8 +66,10 @@ public class ClusterService {
     X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
     X509Certificate clientCert = certs[0];
     //TODO:check if cert email == registerJson.getEmail()
-    String orgName = CertificateHelper.getCertificatePart(clientCert, "CN");
-    String publicCId = clusterController.registerCluster(clientCert.getEncoded(), orgName, msg);
+    String orgName = CertificateHelper.getCertificatePart(clientCert, "O");
+    String orgUnit = CertificateHelper.getCertificatePart(clientCert, "OU");
+    String fullOrgName = orgName + ":" + orgUnit;
+    String publicCId = clusterController.registerCluster(clientCert.getEncoded(), fullOrgName, msg);
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster register done:{0}", publicCId);
     return Response.ok(publicCId).build();
   }
