@@ -66,8 +66,9 @@ public class UserService {
   }
 
   @GET
-  @Path("/{publicCId}")
-  public Response getUser(@PathParam("publicCId") String publicCId, String userEmail) throws AppException {
+  @Path("/{publicCId}/{userEmail}")
+  public Response getUser(@PathParam("publicCId") String publicCId, @PathParam("userEmail") String userEmail) throws
+          AppException {
     Optional<Users> user = usersController.findUserByEmailAndClusterId(userEmail, publicCId);
     if (!user.isPresent()) {
       return Response.ok(new UserDTO.Retrieve(user.get())).build();
@@ -77,8 +78,9 @@ public class UserService {
   }
 
   @GET
-  @Path("/id/{publicCId}")
-  public Response getUserId(@PathParam("publicCId") String publicCId, String userEmail) throws AppException {
+  @Path("/id/{publicCId}/{userEmail}")
+  public Response getUserId(@PathParam("publicCId") String publicCId, @PathParam("userEmail") String userEmail) throws
+          AppException {
     Optional<Users> user = usersController.findUserByEmailAndClusterId(userEmail, publicCId);
     if (!user.isPresent()) {
       return Response.ok(user.get().getId()).build();
