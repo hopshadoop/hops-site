@@ -2,14 +2,18 @@
 Bootstrap server for HopsWorks
 
 
-Required database -> hops_site
+Required database
 
-Required tables -> create table registered_cluster(cluster_id varchar(200) not null, search_endpoint varchar(100) not null, email varchar(100) not null, cert varchar(1000) not null, gvod_endpoint varchar(100) not null, heartbeats_missed bigint not null, date_registered varchar(100) not null, date_last_ping varchar(100) not null, PRIMARY KEY(cluster_id));
+     CREATE DATABASE hops_site;
+
+Required tables -> 
+
+    CREATE TABLE registered_cluster(cluster_id VARCHAR(200) NOT NULL, search_endpoint VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL, cert VARCHAR(1000) NOT NULL, gvod_endpoint VARCHAR(100) NOT NULL, heartbeats_missed BIGINT NOT NULL, date_registered VARCHAR(100) NOT NULL, date_last_ping VARCHAR(100) NOT NULL, PRIMARY KEY(cluster_id));
 
 and 
 
 
-create table popular_dataset(dataset_id varchar(300) not null, manifest longtext not null, partners longtext not null, leeches int not null, seeds int not null, PRIMARY KEY(dataset_id)); 
+    CREATE TABLE popular_dataset(dataset_id VARCHAR(300) NOT NULL, manifest LONGTEXT NOT NULL, partners LONGTEXT NOT NULL, leeches INT NOT NULL, seeds INT NOT NULL, PRIMARY KEY(dataset_id)); 
 
 
 # Bash script for installation
