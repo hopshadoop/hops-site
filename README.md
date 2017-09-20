@@ -8,12 +8,18 @@ Required database
 
 Required tables -> 
 
-    CREATE TABLE registered_cluster(cluster_id VARCHAR(200) NOT NULL, search_endpoint VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL, cert VARCHAR(1000) NOT NULL, gvod_endpoint VARCHAR(100) NOT NULL, heartbeats_missed BIGINT NOT NULL, date_registered VARCHAR(100) NOT NULL, date_last_ping VARCHAR(100) NOT NULL, PRIMARY KEY(cluster_id));
+    CREATE TABLE registered_cluster(cluster_id VARCHAR(200) NOT NULL, \
+    search_endpoint VARCHAR(100) NOT NULL, email VARCHAR(100) NOT NULL, \
+    cert VARCHAR(1000) NOT NULL, gvod_endpoint VARCHAR(100) NOT NULL, \
+    heartbeats_missed BIGINT NOT NULL, date_registered VARCHAR(100) NOT NULL, \
+    date_last_ping VARCHAR(100) NOT NULL, PRIMARY KEY(cluster_id));
 
 and 
 
 
-    CREATE TABLE popular_dataset(dataset_id VARCHAR(300) NOT NULL, manifest LONGTEXT NOT NULL, partners LONGTEXT NOT NULL, leeches INT NOT NULL, seeds INT NOT NULL, PRIMARY KEY(dataset_id)); 
+    CREATE TABLE popular_dataset(dataset_id VARCHAR(300) NOT NULL, \
+    manifest LONGTEXT NOT NULL, partners LONGTEXT NOT NULL, \
+    leeches INT NOT NULL, seeds INT NOT NULL, PRIMARY KEY(dataset_id)); 
 
 
 # Bash script for installation
