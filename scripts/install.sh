@@ -1,47 +1,26 @@
 #!/bin/bash
 set -e
 
-INSTALL_PATH='/srv/hops'
-GLASSFISH_PATH='/srv/hops/glassfish/versions/glassfish-4.1.2.173'
-DOMAIN_DIR='/srv/hops/domains'
-DOMAIN='domain2'
-DOMAINPW_FILE="${DOMAIN_DIR}/master-password"
-CERTS_DIR='/srv/hops/certs-dir'
-MYSQL_SERVER='10.0.2.15'
-MYSQL_PORT='3306'
-DB_NAME='hops_site'
-MYSQL_DIR='/srv/hops/mysql-cluster/ndb/scripts/'
-MSQL_CONNECTOR='mysql-connector-java-5.1.29-bin.jar'
-HOPS_SITE_BASE="${INSTALL_PATH}/hops-site"
-HOPS_SITE_TABLES="${HOPS_SITE_BASE}/sql/tables.sql"
-HOPS_SITE_ROWS="${HOPS_SITE_BASE}/sql/rows.sql"
-HOPS_SITE_TAR='hops-site.tar.gz'
-HOPS_SITE_WAR="${INSTALL_PATH}/hops-site/target/hops-site.war"
-HOPS_SITE_DOWNLOAD_URL="http://snurran.sics.se/hops/"
-ASASMDIN_PW="--user adminuser --passwordfile ${DOMAINPW_FILE}"
-KEYSTOREPW="adminpw"
-KEYSTORE_PASSWORD="-srcstorepass $KEYSTOREPW -deststorepass $KEYSTOREPW -destkeypass $KEYSTOREPW"
-KEY_PASSWORD="-keypass $KEYSTOREPW -storepass $KEYSTOREPW"
-OPENSSL_CONF="${HOPS_SITE_BASE}/conf/openssl-ca.cnf"
-ADMIN_CERT_ALIAS="hops.site-admin"
-DOMAIN_BASE_PORT=50000
-ADMIN_PORT=`expr $DOMAIN_BASE_PORT + 48` # HTTPS listener port: portbase + 81
+. hops-site-env.sh
 
 cd ${INSTALL_PATH}
 sudo mkdir $HOPS_SITE_BASE
-sudo chown vagrant:vagrant $HOPS_SITE_BASE
 cd $HOPS_SITE_BASE
-sudo wget ${HOPS_SITE_DOWNLOAD_URL}${HOPS_SITE_TAR} && tar xvzf ${HOPS_SITE_TAR} && sudo rm ${HOPS_SITE_TAR}
+sudo wget ${HOPS_SITE_DOWNLOAD_URL}${HOPS_SITE_TAR} && sudo tar xvzf ${HOPS_SITE_TAR} && sudo rm ${HOPS_SITE_TAR}
+sudo chown -R glassfish:glassfish $HOPS_SITE_BASE
 
-sudo chown mysql:mysql ${HOPS_SITE_BASE}/rows.sql
-sudo chown mysql:mysql ${HOPS_SITE_BASE}/tables.sql
+sudo chown mysql:mysql ${HOPS_SITE_TABLES}
+sudo chown mysql:mysql ${HOPS_SITE_ROWS}
 sudo su -c '/srv/hops/mysql-cluster/ndb/scripts/mysql-client.sh -e "CREATE DATABASE IF NOT EXISTS hops_site"' mysql
-sudo su -c '/srv/hops/mysql-cluster/ndb/scripts/mysql-client.sh hops_site < /srv/hops/hops-site/tables.sql' mysql
-sudo su -c '/srv/hops/mysql-cluster/ndb/scripts/mysql-client.sh hops_site < /srv/hops/hops-site/rows.sql' mysql
+sudo su -c "/srv/hops/mysql-cluster/ndb/scripts/mysql-client.sh hops_site < ${HOPS_SITE_TABLES}" mysql
+sudo su -c "/srv/hops/mysql-cluster/ndb/scripts/mysql-client.sh hops_site < ${HOPS_SITE_ROWS}" mysql
+
+sudo -u $DESIRED_USERNAME sh -s "${HOPS_SITE_BASE}/scripts" <<'EOF'
+. $1/hops-site-env.sh
 
 cd ${GLASSFISH_PATH}/bin
-echo -e "AS_ADMIN_PASSWORD=${KEYSTOREPW}\nAS_ADMIN_MASTERPASSWORD=${KEYSTOREPW}" > $DOMAINPW_FILE
-./asadmin create-domain --portbase ${DOMAIN_BASE_PORT} ${DOMAIN} $ASASMDIN_PW
+echo "AS_ADMIN_PASSWORD=${KEYSTOREPW}\nAS_ADMIN_MASTERPASSWORD=${KEYSTOREPW}" > $DOMAINPW_FILE
+./asadmin $ASASMDIN_PW create-domain --portbase ${DOMAIN_BASE_PORT} ${DOMAIN}
 ./asadmin $ASASMDIN_PW start-domain ${DOMAIN}
 
 cp ${DOMAIN_DIR}/domain1/lib/${MSQL_CONNECTOR} ${DOMAIN_DIR}/${DOMAIN}/lib
@@ -73,9 +52,13 @@ keytool -certreq -alias hops.site-instance -keyalg RSA -file hops.site-instance.
 
 cp ${OPENSSL_CONF} "${CERTS_DIR}/openssl-ca.cnf"
 
-cd ${CERTS_DIR}
-sudo openssl ca -batch -in ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-admin.req -cert certs/ca.cert.pem -keyfile private/ca.key.pem -out ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-admin.pem -config ./openssl-ca.cnf -key $KEYSTOREPW
-sudo openssl ca -batch -in ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-instance.req -cert certs/ca.cert.pem -keyfile private/ca.key.pem -out ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-instance.pem -config ./openssl-ca.cnf -key $KEYSTOREPW
+EOF
+
+sudo openssl ca -batch -in ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-admin.req -cert ${CERTS_DIR}/certs/ca.cert.pem -keyfile ${CERTS_DIR}/private/ca.key.pem -out ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-admin.pem -config ${CERTS_DIR}/openssl-ca.cnf -key $KEYSTOREPW
+sudo openssl ca -batch -in ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-instance.req -cert ${CERTS_DIR}/certs/ca.cert.pem -keyfile ${CERTS_DIR}/private/ca.key.pem -out ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-instance.pem -config ${CERTS_DIR}/openssl-ca.cnf -key $KEYSTOREPW
+
+sudo -u $DESIRED_USERNAME sh -s "${HOPS_SITE_BASE}/scripts" <<'EOF'
+. $1/hops-site-env.sh
 
 cd ${DOMAIN_DIR}/${DOMAIN}/config
 openssl x509 -in hops.site-admin.pem -outform DER -out hops.site-admin.der
@@ -99,11 +82,13 @@ cd ${GLASSFISH_PATH}/bin
 cd ${HOPS_SITE_BASE}/scripts
 ./hops-site_elastic.sh
 
+EOF
+
 # hack fix for RootCA private key not readable by vagrant user
-sudo chown root:vagrant /srv/hops/certs-dir/private/ca.key.pem
+sudo chown root:glassfish /srv/hops/certs-dir/private/ca.key.pem
 sudo chmod 440 /srv/hops/certs-dir/private/ca.key.pem
 # hack fix for .rnd not owned by vagrant
-sudo chown vagrant:vagrant ~/.rnd
+sudo chown glassfish:glassfish ~/.rnd
 
 cd ${DOMAIN_DIR}
-python domain1/bin/csr-ca.py
+sudo su -c 'python domain1/bin/csr-ca.py' glassfish
