@@ -30,17 +30,18 @@ ADMIN_PORT=`expr $DOMAIN_BASE_PORT + 48` # HTTPS listener port: portbase + 81
 cd ${INSTALL_PATH}
 sudo mkdir $HOPS_SITE_BASE
 sudo chown vagrant:vagrant $HOPS_SITE_BASE
+cd $HOPS_SITE_BASE
 sudo wget ${HOPS_SITE_DOWNLOAD_URL}${HOPS_SITE_TAR} && tar xvzf ${HOPS_SITE_TAR} && sudo rm ${HOPS_SITE_TAR}
 
-cd ${MYSQL_DIR}
-./mysql-client.sh -e "CREATE DATABASE IF NOT EXISTS hops_site"
-./mysql-client.sh hops_site < ${HOPS_SITE_TABLES}
-./mysql-client.sh hops_site < ${HOPS_SITE_ROWS}
-
+sudo chown mysql:mysql ${HOPS_SITE_BASE}/rows.sql
+sudo chown mysql:mysql ${HOPS_SITE_BASE}/tables.sql
+sudo su -c '/srv/hops/mysql-cluster/ndb/scripts/mysql-client.sh -e "CREATE DATABASE IF NOT EXISTS hops_site"' mysql
+sudo su -c '/srv/hops/mysql-cluster/ndb/scripts/mysql-client.sh hops_site < /srv/hops/hops-site/tables.sql' mysql
+sudo su -c '/srv/hops/mysql-cluster/ndb/scripts/mysql-client.sh hops_site < /srv/hops/hops-site/rows.sql' mysql
 
 cd ${GLASSFISH_PATH}/bin
 echo -e "AS_ADMIN_PASSWORD=${KEYSTOREPW}\nAS_ADMIN_MASTERPASSWORD=${KEYSTOREPW}" > $DOMAINPW_FILE
-./asadmin create-domain --portbase ${DOMAIN_BASE_PORT} ${DOMAIN} $ASASMDIN_PW 
+./asadmin create-domain --portbase ${DOMAIN_BASE_PORT} ${DOMAIN} $ASASMDIN_PW
 ./asadmin $ASASMDIN_PW start-domain ${DOMAIN}
 
 cp ${DOMAIN_DIR}/domain1/lib/${MSQL_CONNECTOR} ${DOMAIN_DIR}/${DOMAIN}/lib

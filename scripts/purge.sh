@@ -13,8 +13,7 @@ DB_NAME='hops_site'
 MSQL_DIR='/srv/hops/mysql-cluster/ndb/scripts/'
 ASASMDIN_PW="--user adminuser --passwordfile ${DOMAINPW_FILE}"
 
-cd ${MSQL_DIR}
-./mysql-client.sh -e "DROP DATABASE IF EXISTS hops_site"
+sudo su -c '/srv/hops/mysql-cluster/ndb/scripts/mysql-client.sh -e "DROP DATABASE IF EXISTS hops_site"' mysql
 
 cd ${GLASSFISH_PATH}/bin
 ./asadmin $ASASMDIN_PW stop-domain ${DOMAIN}
