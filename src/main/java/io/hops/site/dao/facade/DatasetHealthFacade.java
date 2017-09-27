@@ -5,6 +5,7 @@ import io.hops.site.dao.entity.DatasetHealth;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -18,6 +19,9 @@ public class DatasetHealthFacade extends AbstractFacade<DatasetHealth> {
 
   @PersistenceContext(unitName = "hops-sitePU")
   private EntityManager em;
+  
+  @EJB
+  private HopsSiteSettings hsettings;
 
   public DatasetHealthFacade() {
     super(DatasetHealth.class);
@@ -50,7 +54,7 @@ public class DatasetHealthFacade extends AbstractFacade<DatasetHealth> {
     Timestamp updated_now = (Timestamp) em.createNativeQuery("SELECT CURRENT_TIMESTAMP").getSingleResult();
     Calendar cal = Calendar.getInstance();
     cal.setTimeInMillis(updated_now.getTime());
-    cal.add(Calendar.SECOND, (-1)*HopsSiteSettings.DATASET_HEALTH_OLDER_THAN);
+    cal.add(Calendar.SECOND, (-1)*hsettings.getDATASET_HEALTH_OLDER_THAN());
     Timestamp old = new Timestamp(cal.getTime().getTime());
     //update
     int updates = em.createNativeQuery("INSERT INTO hops_site.dataset_health (dataset_id, status, count, updated) "

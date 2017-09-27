@@ -1,9 +1,8 @@
 package io.hops.site.controller;
 
-import io.hops.site.rest.exception.AppException;
 import io.hops.site.common.Ip;
 import io.hops.site.common.ResponseMessages;
-import io.hops.site.common.Settings;
+import io.hops.site.rest.exception.AppException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -38,7 +37,7 @@ public class ElasticController {
 
   private final static Logger LOG = Logger.getLogger(ElasticController.class.getName());
   @EJB
-  private Settings settings;
+  private HopsSiteSettings settings;
 
   public SearchHits search(String index, String[] docTypes, QueryBuilder qb) throws AppException {
     Client client = getClient();
@@ -82,7 +81,7 @@ public class ElasticController {
 
       int respStatus = response.getShardInfo().status().getStatus();
       if (respStatus == 200) {
-        LOG.log(Settings.DEBUG, "added to elastic:{0}", docId);
+        LOG.log(HopsSiteSettings.DEBUG, "added to elastic:{0}", docId);
         return;
       } else {
         LOG.log(Level.WARNING, "Elasticsearch error code: {0}", respStatus);

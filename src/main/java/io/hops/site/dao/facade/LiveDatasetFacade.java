@@ -1,6 +1,6 @@
 package io.hops.site.dao.facade;
 
-import io.hops.site.common.Settings;
+import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.entity.LiveDataset;
 import io.hops.site.dao.entity.RegisteredCluster;
@@ -23,7 +23,7 @@ public class LiveDatasetFacade extends AbstractFacade<LiveDataset> {
   private EntityManager em;
 
   @EJB
-  private Settings settings;
+  private HopsSiteSettings settings;
   @EJB
   private RegisteredClusterFacade clusterFacade;
   @EJB
@@ -102,10 +102,10 @@ public class LiveDatasetFacade extends AbstractFacade<LiveDataset> {
   public void uploadDataset(int clusterId, int datasetId) {
     LiveDataset ld = find(new LiveDataset.PK(datasetId, clusterId));
     if (ld == null) {
-      ld = new LiveDataset(datasetId, clusterId, settings.LIVE_DATASET_UPLOAD_STATUS);
+      ld = new LiveDataset(datasetId, clusterId, settings.DATASET_STATUS_UPLOAD);
       create(ld);
-    } else if (ld.getStatus() != settings.LIVE_DATASET_UPLOAD_STATUS) {
-      ld.setStatus(settings.LIVE_DATASET_UPLOAD_STATUS);
+    } else if (ld.getStatus() != settings.DATASET_STATUS_UPLOAD) {
+      ld.setStatus(settings.DATASET_STATUS_UPLOAD);
       edit(ld);
     }
   }
@@ -113,7 +113,7 @@ public class LiveDatasetFacade extends AbstractFacade<LiveDataset> {
   public void downloadDataset(int clusterId, int datasetId) {
     LiveDataset ld = find(new LiveDataset.PK(datasetId, clusterId));
     if (ld == null) {
-      ld = new LiveDataset(datasetId, clusterId, settings.LIVE_DATASET_DOWNLOAD_STATUS);
+      ld = new LiveDataset(datasetId, clusterId, settings.DATASET_STATUS_DOWNLOAD);
       create(ld);
     } else {
       //if status is upload - weird download status

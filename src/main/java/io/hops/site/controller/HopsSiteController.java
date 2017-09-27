@@ -2,7 +2,6 @@ package io.hops.site.controller;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import io.hops.site.common.Settings;
 import io.hops.site.dao.facade.DatasetHealthFacade;
 import io.hops.site.dao.facade.HeartbeatFacade;
 import java.io.Serializable;
@@ -30,9 +29,7 @@ public class HopsSiteController {
   private static final Logger LOG = Logger.getLogger(HopsSiteController.class.getName());
 
   @EJB
-  private Settings settings;
-  @EJB
-  private HopsSiteSettings hsettings;
+  private HopsSiteSettings settings;
   @Resource
   TimerService timerService;
 
@@ -46,8 +43,8 @@ public class HopsSiteController {
 
   @PostConstruct
   private void init() {
-    timerService.createTimer(0, hsettings.DATASET_HEALTH_INTERVAL, DATASET_HEALTH_TIMER);
-    timerService.createTimer(0, hsettings.HEARTBEAT_CHECK_INTERVAL, HEARTBEAT_CHECK_TIMER);
+    timerService.createTimer(0, settings.getDATASET_HEALTH_INTERVAL(), DATASET_HEALTH_TIMER);
+    timerService.createTimer(0, settings.getHEARTBEAT_CHECK_INTERVAL(), HEARTBEAT_CHECK_TIMER);
   }
 
   @PreDestroy
@@ -87,7 +84,7 @@ public class HopsSiteController {
   private Date heartbeatsToBeCleaned;
 
   private void hearbeatCheckTimeout() {
-    LOG.log(Settings.DEBUG, "{0}", HEARTBEAT_CHECK_TIMER);
+    LOG.log(HopsSiteSettings.DEBUG, "{0}", HEARTBEAT_CHECK_TIMER);
     heartbeatFacade.deleteHeartbeats(heartbeatsToBeCleaned);
     heartbeatsToBeCleaned = settings.getDateNow();
   }
@@ -97,14 +94,14 @@ public class HopsSiteController {
   private DatasetHealthFacade datasetHealthFacade;
 
   private void datasetHealthTimeout() {
-    LOG.log(Settings.DEBUG, "{0}", DATASET_HEALTH_TIMER);
+    LOG.log(HopsSiteSettings.DEBUG, "{0}", DATASET_HEALTH_TIMER);
     datasetHealthFacade.updateAllDatasetHealth();
   }
 
   //********************************************************************************************************************
   @Timeout
   public void performTimeout(Timer timer) {
-    LOG.log(Settings.DEBUG, "timer {0}", timer.getInfo());
+    LOG.log(HopsSiteSettings.DEBUG, "timer {0}", timer.getInfo());
     if (timer.getInfo().equals(DATASET_HEALTH_TIMER)) {
       datasetHealthTimeout();
     } else if (timer.getInfo().equals(HEARTBEAT_CHECK_TIMER)) {

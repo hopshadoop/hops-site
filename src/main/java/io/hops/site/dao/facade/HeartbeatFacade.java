@@ -1,6 +1,6 @@
 package io.hops.site.dao.facade;
 
-import io.hops.site.common.Settings;
+import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dao.entity.Heartbeat;
 import java.util.Date;
 import java.util.Optional;
@@ -20,7 +20,7 @@ public class HeartbeatFacade extends AbstractFacade<Heartbeat> {
   private EntityManager em;
 
   @EJB 
-  private Settings settings;
+  private HopsSiteSettings settings;
   
   public HeartbeatFacade() {
     super(Heartbeat.class);

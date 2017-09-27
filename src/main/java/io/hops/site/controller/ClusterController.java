@@ -15,7 +15,6 @@
  */
 package io.hops.site.controller;
 
-import io.hops.site.common.Settings;
 import io.hops.site.dao.entity.Heartbeat;
 import io.hops.site.dao.entity.LiveDataset;
 import io.hops.site.dao.entity.RegisteredCluster;
@@ -42,7 +41,7 @@ public class ClusterController {
 
   private final static Logger LOGGER = Logger.getLogger(ClusterService.class.getName());
   @EJB
-  private Settings settings;
+  private HopsSiteSettings settings;
   @EJB
   private RegisteredClusterFacade clusterFacade;
   @EJB
@@ -97,9 +96,9 @@ public class ClusterController {
     int dwnl = 0;
     int upld = 0;
     for (LiveDataset liveDataset : liveDatasets) {
-      if (liveDataset.getStatus() == HopsSiteSettings.LIVE_DATASET_STATUS_UPLOAD) {
+      if (liveDataset.getStatus() == HopsSiteSettings.DATASET_STATUS_UPLOAD) {
         upld++;
-      } else if (liveDataset.getStatus() == HopsSiteSettings.LIVE_DATASET_STATUS_DOWNLOAD) {
+      } else if (liveDataset.getStatus() == HopsSiteSettings.DATASET_STATUS_DOWNLOAD) {
         dwnl++;
       }
     }

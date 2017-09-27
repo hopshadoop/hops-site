@@ -17,7 +17,6 @@ package io.hops.site.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
-import io.hops.site.common.Settings;
 import io.hops.site.controller.HopsSiteController.Session;
 import io.hops.site.dao.entity.Category;
 import io.hops.site.dao.entity.Dataset;
@@ -66,7 +65,7 @@ public class DatasetController {
   private final static Logger LOG = Logger.getLogger(DatasetController.class.getName());
 
   @EJB
-  private Settings settings;
+  private HopsSiteSettings settings;
   @EJB
   private DatasetFacade datasetFacade;
   @EJB
@@ -140,9 +139,9 @@ public class DatasetController {
   private DatasetDTO.Health health(List<DatasetHealth> aux) {
     DatasetDTO.Health datasetHealth = new DatasetDTO.Health();
     for(DatasetHealth dh : aux) {
-      if(HopsSiteSettings.LIVE_DATASET_STATUS_UPLOAD == dh.getId().getStatus()) {
+      if(HopsSiteSettings.DATASET_STATUS_UPLOAD == dh.getId().getStatus()) {
         datasetHealth.setSeeders(dh.getCount());
-      } else if(HopsSiteSettings.LIVE_DATASET_STATUS_DOWNLOAD == dh.getId().getStatus()) {
+      } else if(HopsSiteSettings.DATASET_STATUS_DOWNLOAD == dh.getId().getStatus()) {
         datasetHealth.setLeechers(dh.getCount());
       }
     }
@@ -236,7 +235,7 @@ public class DatasetController {
     Optional<LiveDataset> c = liveDatasetFacade.connection(datasetPublicId, clusterPublicId);
     if (c.isPresent()) {
       LiveDataset connection = c.get();
-      connection.setStatus(settings.LIVE_DATASET_UPLOAD_STATUS);
+      connection.setStatus(settings.DATASET_STATUS_UPLOAD);
       liveDatasetFacade.edit(connection);
     }
   }
