@@ -3,6 +3,9 @@ set -e
 
 . hops-site-env.sh
 
+RUN_DIR=`pwd`
+echo ${RUN_DIR}
+
 cd ${INSTALL_PATH}
 sudo mkdir $HOPS_SITE_BASE
 cd $HOPS_SITE_BASE
@@ -12,7 +15,7 @@ sudo chown -R ${GLASSFISH_USER}:${GLASSFISH_USER} $HOPS_SITE_BASE
 sudo chown ${MYSQL_USER}:${MYSQL_USER} ${HOPS_SITE_TABLES}
 sudo chown ${MYSQL_USER}:${MYSQL_USER} ${HOPS_SITE_ROWS}
 
-sudo -u $MYSQL_USER sh -s "${HOPS_SITE_BASE}/scripts" <<'EOF'
+sudo -u $MYSQL_USER sh -s ${RUN_DIR}<<'EOF'
 . $1/hops-site-env.sh
 cd ${MYSQL_DIR}
 ./mysql-client.sh -e "CREATE DATABASE IF NOT EXISTS hops_site"
@@ -20,7 +23,7 @@ cd ${MYSQL_DIR}
 ./mysql-client.sh hops_site < ${HOPS_SITE_ROWS}
 EOF
 
-sudo -u $GLASSFISH_USER sh -s "${HOPS_SITE_BASE}/scripts" <<'EOF'
+sudo -u $GLASSFISH_USER sh -s ${RUN_DIR} <<'EOF'
 . $1/hops-site-env.sh
 
 cd ${GLASSFISH_PATH}/bin
@@ -56,13 +59,12 @@ keytool -genkey -alias hops.site-instance -keyalg RSA -keysize 1024 -keystore ke
 keytool -certreq -alias hops.site-instance -keyalg RSA -file hops.site-instance.req -keystore keystore.jks $KEY_PASSWORD
 
 cp ${OPENSSL_CONF} "${CERTS_DIR}/openssl-ca.cnf"
-
 EOF
 
 sudo openssl ca -batch -in ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-admin.req -cert ${CERTS_DIR}/certs/ca.cert.pem -keyfile ${CERTS_DIR}/private/ca.key.pem -out ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-admin.pem -config ${CERTS_DIR}/openssl-ca.cnf -key $KEYSTOREPW
 sudo openssl ca -batch -in ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-instance.req -cert ${CERTS_DIR}/certs/ca.cert.pem -keyfile ${CERTS_DIR}/private/ca.key.pem -out ${DOMAIN_DIR}/${DOMAIN}/config/hops.site-instance.pem -config ${CERTS_DIR}/openssl-ca.cnf -key $KEYSTOREPW
 
-sudo -u $GLASSFISH_USER sh -s "${HOPS_SITE_BASE}/scripts" <<'EOF'
+sudo -u $GLASSFISH_USER sh -s ${RUN_DIR} <<'EOF'
 . $1/hops-site-env.sh
 
 cd ${DOMAIN_DIR}/${DOMAIN}/config
@@ -83,7 +85,6 @@ cd ${GLASSFISH_PATH}/bin
 ./asadmin $ASADMIN_PW start-domain ${DOMAIN}
 
 ./asadmin --interactive=false --port $ADMIN_PORT $ASADMIN_PW deploy --force=true ${HOPS_SITE_WAR}
-
 EOF
 
 cd ${HOPS_SITE_BASE}/scripts
