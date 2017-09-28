@@ -17,7 +17,7 @@ export HOPS_SITE_ROWS="${HOPS_SITE_BASE}/sql/rows.sql"
 export HOPS_SITE_TAR='hops-site.tar.gz'
 export HOPS_SITE_WAR="${INSTALL_PATH}/hops-site/target/hops-site.war"
 export HOPS_SITE_DOWNLOAD_URL="http://snurran.sics.se/hops/"
-export ASASMDIN_PW="--user adminuser --passwordfile ${DOMAINPW_FILE}"
+export ASADMIN_PW="--user adminuser --passwordfile ${DOMAINPW_FILE}"
 export KEYSTOREPW="adminpw"
 export KEYSTORE_PASSWORD="-srcstorepass $KEYSTOREPW -deststorepass $KEYSTOREPW -destkeypass $KEYSTOREPW"
 export KEY_PASSWORD="-keypass $KEYSTOREPW -storepass $KEYSTOREPW"
@@ -26,4 +26,5 @@ export ADMIN_CERT_ALIAS="hops.site-admin"
 export DOMAIN_BASE_PORT=50000
 export ADMIN_PORT=`expr $DOMAIN_BASE_PORT + 48` # HTTPS listener port: portbase + 81
 
-export DESIRED_USERNAME="glassfish"
+export MYSQL_USER="mysql"
+export GLASSFISH_USER="glassfish"
