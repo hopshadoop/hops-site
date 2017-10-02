@@ -77,18 +77,6 @@ public class UserService {
     }
   }
 
-  @GET
-  @Path("/id/{publicCId}/{userEmail}")
-  public Response getUserId(@PathParam("publicCId") String publicCId, @PathParam("userEmail") String userEmail) throws
-          AppException {
-    Optional<Users> user = usersController.findUserByEmailAndClusterId(userEmail, publicCId);
-    if (user.isPresent()) {
-      return Response.ok(user.get().getId()).build();
-    } else {
-      throw new AppException(Response.Status.EXPECTATION_FAILED.getStatusCode(), "user not found");
-    }
-  }
-
   @DELETE
   @Path("/delete/{userId}")
   @RolesAllowed({"admin"})
