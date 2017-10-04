@@ -45,11 +45,9 @@ import javax.xml.bind.annotation.XmlTransient;
   @NamedQuery(name = "DatasetRating.findById",
           query = "SELECT d FROM DatasetRating d WHERE d.id = :id"),
   @NamedQuery(name = "DatasetRating.findByRating",
-          query
-          = "SELECT d FROM DatasetRating d WHERE d.rating = :rating"),
+          query = "SELECT d FROM DatasetRating d WHERE d.rating = :rating"),
   @NamedQuery(name = "DatasetRating.findByDatasetAndUser",
-          query
-          = "SELECT d FROM DatasetRating d WHERE d.datasetId.publicId = :publicId AND d.users.email = :email"),
+          query = "SELECT d FROM DatasetRating d WHERE d.datasetId.publicId = :publicId AND d.users.id = :userId"),
   @NamedQuery(name = "DatasetRating.findByDatePublished",
           query
           = "SELECT d FROM DatasetRating d WHERE d.datePublished = :datePublished")})
