@@ -63,15 +63,16 @@ public class RatingController {
   public RatingDTO getDatasetUserRating(String publicCId, String publicDSId, String userEmail) 
     throws ThirdPartyException {
     Dataset dataset = getDataset(publicDSId);
-    Users user = getUser(publicCId, userEmail);
-    DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset, user);
-    RatingDTO result;
-    if (managedRating == null) {
-      result = new RatingDTO(0, dataset.getDatasetRatingCollection().size());
-    } else {
-      result = new RatingDTO(managedRating.getRating(), dataset.getDatasetRatingCollection().size());
+    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(userEmail, publicCId);
+    if(!user.isPresent()) {
+      return new RatingDTO(0, dataset.getDatasetRatingCollection().size());
     }
-    return result;
+    DatasetRating managedRating = datasetRatingFacade.findByDatasetAndUser(dataset, user.get());
+    if (managedRating == null) {
+      return new RatingDTO(0, dataset.getDatasetRatingCollection().size());
+    } else {
+      return new RatingDTO(managedRating.getRating(), dataset.getDatasetRatingCollection().size());
+    }
   }
 
   /**
