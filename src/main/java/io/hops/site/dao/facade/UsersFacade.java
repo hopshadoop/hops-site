@@ -43,14 +43,14 @@ public class UsersFacade extends AbstractFacade<Users> {
     super(Users.class);
   }
 
-  public Optional<Users> findByEmailAndPublicClusterId(String email, String clusterPublicId) {
-    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(clusterPublicId);
+  public Optional<Users> findByEmailAndPublicClusterId(String email, String publicCId) {
+    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(publicCId);
     if(!cluster.isPresent()) {
       throw new IllegalArgumentException("Cluster not found.");
     }
     TypedQuery<Users> query = em.createNamedQuery("Users.findByEmailAndClusterId", Users.class)
             .setParameter("email", email)
-            .setParameter("clusterId", cluster.get().getId());
+            .setParameter("publicCId", publicCId);
     try {
       return Optional.of(query.getSingleResult());
     } catch (NoResultException e) {
