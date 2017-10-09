@@ -1,20 +1,43 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package rest.application.config;
 
+import io.hops.site.rest.ClusterService;
+import io.hops.site.rest.CommentService;
+import io.hops.site.rest.DatasetService;
+import io.hops.site.rest.RatingService;
+import io.hops.site.rest.UserService;
+import io.hops.site.rest.exception.mapper.AppExceptionMapper;
+import io.hops.site.rest.exception.mapper.EJBExceptionMapper;
+import io.hops.site.rest.request.filter.AuthFilter;
+import io.hops.site.rest.response.filter.CORSFilter;
+import io.hops.site.rest.response.filter.CacheControlFilter;
+import io.swagger.annotations.Api;
+import io.swagger.jaxrs.listing.ApiListingResource;
+import io.swagger.jaxrs.listing.SwaggerSerializers;
 import org.glassfish.jersey.server.ResourceConfig;
-import site.hops.rest.RegisterAndPingService;
 
-/**
- *
- * @author jsvhqr
- */
-@javax.ws.rs.ApplicationPath("webapi")
+@Api
+@javax.ws.rs.ApplicationPath("api")
 public class ApplicationConfig extends ResourceConfig {
-    public ApplicationConfig() {
-        register(RegisterAndPingService.class);
-    }
+
+  public ApplicationConfig() {
+    register(ClusterService.class);
+    register(DatasetService.class);
+    register(CommentService.class);
+    register(RatingService.class);
+    register(UserService.class);
+    
+    //Exception mappers
+    register(EJBExceptionMapper.class);
+    register(AppExceptionMapper.class);
+    
+    //response filters
+    register(CORSFilter.class);
+    register(CacheControlFilter.class);
+    //request filters
+    register(AuthFilter.class);
+    
+    //swagger
+    register(ApiListingResource.class);
+    register(SwaggerSerializers.class);
+  }
 }
