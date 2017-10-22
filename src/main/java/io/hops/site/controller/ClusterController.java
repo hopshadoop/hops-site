@@ -62,6 +62,16 @@ public class ClusterController {
   public String registerCluster(byte[] cert, String orgName, ClusterServiceDTO.Register msg) throws ThirdPartyException {
     Optional<RegisteredCluster> c = clusterFacade.findByEmail(msg.getEmail());
     if (c.isPresent()) {
+      RegisteredCluster cluster = c.get();
+      cluster.setDelaEndpoint(msg.getDelaTransferAddress());
+      cluster.setHttpEndpoint(msg.getDelaClusterAddress());
+      cluster.setCert(cert);
+      cluster.setOrgName(orgName);
+      clusterFacade.edit(cluster); 
+      Optional<Heartbeat> h = heartbeatFacade.findByClusterId(cluster.getId());
+      if(h.isPresent()) {
+        heartbeatFacade.remove(h.get());
+      }
       return c.get().getPublicId();
     }
     String clusterPublicId = settings.getClusterId();
