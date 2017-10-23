@@ -168,7 +168,7 @@ public class DatasetController {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} live dataset",
       new Object[]{publicDSId, publicCId});
     liveDatasetFacade.uploadDataset(cluster.getId(), dataset.getId());
-    ElasticDoc elasticDoc = elasticDoc(publicDSId, msg);
+    ElasticDoc elasticDoc = elasticDoc(publicDSId, msg, version);
     try {
       elasticCtrl.add(settings.DELA_DOC_INDEX, ElasticDoc.DOC_TYPE, publicDSId, toJson(elasticDoc));
     } catch (AppException ex) {
@@ -190,8 +190,8 @@ public class DatasetController {
     return version+1;
   }
 
-  private ElasticDoc elasticDoc(String publicDSId, DatasetDTO.Proto msg) {
-    return new ElasticDoc(publicDSId, msg.getName(), msg.getVersion(), msg.getDescription());
+  private ElasticDoc elasticDoc(String publicDSId, DatasetDTO.Proto msg, int version) {
+    return new ElasticDoc(publicDSId, msg.getName(), version, msg.getDescription());
   }
 
   private String toJson(ElasticDoc doc) {

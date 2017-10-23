@@ -11,7 +11,6 @@ public class DatasetDTO {
   @XmlRootElement
   public static class Proto implements Serializable {
     private String name;
-    private int version;
     private String description;
     private Collection<String> categories;
     private long size;
@@ -23,14 +22,6 @@ public class DatasetDTO {
 
     public void setName(String name) {
       this.name = name;
-    }
-
-    public int getVersion() {
-      return version;
-    }
-
-    public void setVersion(int version) {
-      this.version = version;
     }
 
     public String getDescription() {
