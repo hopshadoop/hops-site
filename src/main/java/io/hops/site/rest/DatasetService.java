@@ -28,6 +28,8 @@ import io.hops.site.old_dto.PopularDatasetDTO;
 import io.hops.site.rest.annotation.NoCache;
 import io.hops.site.rest.exception.AppException;
 import io.swagger.annotations.Api;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +48,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import jersey.repackaged.com.google.common.primitives.Ints;
 
 @Path("/dataset")
 @Stateless
@@ -218,6 +221,17 @@ public class DatasetService {
   @NoCache
   public Response getAll() {
     List<Dataset> result = datasetFacade.findAll();
+    Comparator<Dataset> lexiComp = new Comparator<Dataset>() {
+      @Override
+      public int compare(Dataset o1, Dataset o2) {
+        int res = o1.getName().compareTo(o2.getName());
+        if(res == 0) {
+          res = Ints.compare(o1.getVersion(), o2.getVersion());
+        }
+        return res;
+      }
+    };
+    Collections.sort(result, lexiComp);
     GenericEntity<List<Dataset>> genericResult = new GenericEntity<List<Dataset>>(result){};
     return Response.ok(genericResult).build();
   }
