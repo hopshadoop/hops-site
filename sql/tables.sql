@@ -34,7 +34,7 @@ CREATE TABLE `dataset` (
   `owner_user_id` int(11) NOT NULL,
   `project_name` varchar(255) NOT NULL,
   `dataset_name` varchar(255) NOT NULL,
-  `version` int(11) NOT NULL AUTO_INCREMENT,
+  `version` int(11) NOT NULL,
   `description` varchar(2000) DEFAULT NULL,
   `published_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `readme_path` varchar(150) DEFAULT NULL,
