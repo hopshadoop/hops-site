@@ -32,7 +32,6 @@ CREATE TABLE `dataset` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `public_id` varchar(1000) NOT NULL UNIQUE,
   `owner_user_id` int(11) NOT NULL,
-  `project_name` varchar(255) NOT NULL,
   `name` varchar(255) NOT NULL,
   `version` int(11) NOT NULL,
   `description` varchar(2000) DEFAULT NULL,

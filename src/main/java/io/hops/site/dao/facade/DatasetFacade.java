@@ -77,16 +77,15 @@ public class DatasetFacade extends AbstractFacade<Dataset> {
     return query.getResultList();
   }
 
-  public Dataset createDataset(String publicId, String projectName, String datasetName, int version, String description, 
+  public Dataset createDataset(String publicId, String datasetName, int version, String description, 
     String readmePath, Collection<Category> categories, Users owner, long size) {
-    create(new Dataset(publicId, projectName, datasetName, version, description, readmePath, categories, owner, size));
+    create(new Dataset(publicId, datasetName, version, description, readmePath, categories, owner, size));
     Optional<Dataset> d = findByPublicId(publicId);
     return d.get();
   }
   
-  public List<Dataset> findSimilar(String projectName, String datasetName) {
+  public List<Dataset> findSimilar(String datasetName) {
     TypedQuery<Dataset> query = em.createNamedQuery(Dataset.FIND_SIMILAR, Dataset.class)
-      .setParameter(Dataset.PROJECT_NAME, projectName)
       .setParameter(Dataset.DATASET_NAME, datasetName);
     return query.getResultList();
   }

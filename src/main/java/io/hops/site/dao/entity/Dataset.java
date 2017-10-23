@@ -66,15 +66,13 @@ import javax.xml.bind.annotation.XmlRootElement;
   @NamedQuery(name = "Dataset.findByStatus",
     query = "SELECT d FROM Dataset d WHERE d.status = :status"),
   @NamedQuery(name = "Dataset.findSimilar",
-    query = "SELECT d FROM Dataset d " + 
-      "WHERE d.projectName = :" + Dataset.PROJECT_NAME + " AND d.name= :" + Dataset.DATASET_NAME)})
+    query = "SELECT d FROM Dataset d " + "WHERE d.name= :" + Dataset.DATASET_NAME)})
 public class Dataset implements Serializable {
   public static final String FIND_BY_PUBLIC_ID = "Dataset.findByPublicId";
   public static final String FIND_BY_PUBLIC_ID_LIST = "Dataset.findByPublicIdList";
   public static final String FIND_SIMILAR = "Dataset.findSimilar";
   public static final String PUBLIC_ID = "publicId";
   public static final String PUBLIC_ID_LIST = "publicIdList"; 
-  public static final String PROJECT_NAME = "project_name";
   public static final String DATASET_NAME = "name";
   private static final long serialVersionUID = 1L;
   @Id
@@ -88,10 +86,6 @@ public class Dataset implements Serializable {
     max = 1000)
   @Column(name = "public_id")
   private String publicId;
-  @NotNull
-  @Size(max = 255)
-  @Column(name = "project_name")
-  private String projectName;
   @NotNull
   @Size(max = 255)
   @Column(name = "name")
@@ -143,10 +137,9 @@ public class Dataset implements Serializable {
   public Dataset() {
   }
 
-  public Dataset(String publicId, String projectName, String name, int version, String description, 
+  public Dataset(String publicId, String name, int version, String description, 
     String readmePath, Collection<Category> categoryCollection, Users owner, long dsSize) {
     this.publicId = publicId;
-    this.projectName = projectName;
     this.name = name;
     this.version = version;
     this.description = description;
@@ -171,14 +164,6 @@ public class Dataset implements Serializable {
 
   public void setPublicId(String publicId) {
     this.publicId = publicId;
-  }
-
-  public String getProjectName() {
-    return projectName;
-  }
-
-  public void setProjectName(String projectName) {
-    this.projectName = projectName;
   }
 
   public String getName() {
