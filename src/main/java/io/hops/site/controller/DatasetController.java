@@ -191,7 +191,7 @@ public class DatasetController {
   }
 
   private ElasticDoc elasticDoc(String publicDSId, DatasetDTO.Proto msg) {
-    return new ElasticDoc(publicDSId, msg.getName(), msg.getDescription());
+    return new ElasticDoc(publicDSId, msg.getName(), msg.getVersion(), msg.getDescription());
   }
 
   private String toJson(ElasticDoc doc) {
@@ -259,7 +259,8 @@ public class DatasetController {
         String datasetId = hit.getId();
         String name = (String) hit.getSource().get(ElasticDoc.NAME_FIELD);
         String description = (String) hit.getSource().get(ElasticDoc.DESCRIPTION_FIELD);
-        cachedHits.add(new CachedItem(datasetId, name, description, hit.getScore()));
+        int version = (Integer) hit.getSource().get(ElasticDoc.VERSION_FIELD);
+        cachedHits.add(new CachedItem(datasetId, name, version, description, hit.getScore()));
       }
       return new SearchSession(searchParams, cachedHits);
     }
@@ -284,12 +285,14 @@ public class DatasetController {
 
     public final String publicDSId;
     private String name;
+    private int version;
     private String description;
     private final float score;
 
-    public CachedItem(String publicDSId, String name, String description, float score) {
+    public CachedItem(String publicDSId, String name, int version, String description, float score) {
       this.publicDSId = publicDSId;
       this.name = name;
+      this.version = version;
       this.description = description;
       this.score = score;
     }
@@ -299,7 +302,7 @@ public class DatasetController {
     }
 
     public SearchServiceDTO.Item build() {
-      DatasetDTO.Search dataset = new DatasetDTO.Search(name, description);
+      DatasetDTO.Search dataset = new DatasetDTO.Search(name, version, description);
       return new SearchServiceDTO.Item(publicDSId, dataset, score);
     }
   }
