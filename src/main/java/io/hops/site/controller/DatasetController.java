@@ -187,7 +187,7 @@ public class DatasetController {
          version = dataset.getVersion();
       }
     }
-    return version;
+    return version+1;
   }
 
   private ElasticDoc elasticDoc(String publicDSId, DatasetDTO.Proto msg) {
