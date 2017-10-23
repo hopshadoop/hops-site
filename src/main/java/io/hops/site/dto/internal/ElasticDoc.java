@@ -7,22 +7,22 @@ public class ElasticDoc {
 
   public static final String DOC_TYPE = "dataset";
   public static final String NAME_FIELD = "name";
-  public static final String VERSION_FIELD = "version";
+  public static final String VERSION_FIELD = "dsv";
   public static final String DESCRIPTION_FIELD = "description";
   public static final String ID_FIELD = "id";
 
   private String id;
   private String name;
-  private int version;
+  private int dsv;
   private String description;
 
   public ElasticDoc() {
   }
 
-  public ElasticDoc(String id, String name, int version, String description) {
+  public ElasticDoc(String id, String name, int dsv, String description) {
     this.id = id;
     this.name = name;
-    this.version = version;
+    this.dsv = dsv;
     this.description = description;
   }
 
@@ -42,14 +42,14 @@ public class ElasticDoc {
     this.name = name;
   }
 
-  public int getVersion() {
-    return version;
+  public int getDsv() {
+    return dsv;
   }
 
-  public void setVersion(int version) {
-    this.version = version;
+  public void setDsv(int dsv) {
+    this.dsv = dsv;
   }
-  
+
   public String getDescription() {
     return description;
   }
