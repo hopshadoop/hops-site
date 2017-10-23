@@ -16,7 +16,6 @@
 package io.hops.site.rest;
 
 import com.google.gson.Gson;
-import io.hops.site.rest.exception.AppException;
 import io.hops.site.controller.DatasetController;
 import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dao.entity.Dataset;
@@ -27,6 +26,7 @@ import io.hops.site.old_dto.DatasetIssueDTO;
 import io.hops.site.old_dto.JsonResponse;
 import io.hops.site.old_dto.PopularDatasetDTO;
 import io.hops.site.rest.annotation.NoCache;
+import io.hops.site.rest.exception.AppException;
 import io.swagger.annotations.Api;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,14 +63,13 @@ public class DatasetService {
 
   @POST
   @NoCache
-  @Path("/publish/{publicCId}/{publicDSId}")
-  public Response publish(@PathParam("publicCId") String publicCId, @PathParam("publicDSId") String publicDSId, 
-    DatasetDTO.Proto msg) throws AppException {
+  @Path("/publish/{publicCId}")
+  public Response publish(@PathParam("publicCId") String publicCId, DatasetDTO.Proto msg) throws AppException {
     publishDatasetSanityCheck(msg);
     try {
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset - {0} cluster:{1} publishing", 
-        new Object[]{publicDSId, publicCId});
-      datasetCtrl.publishDataset(publicDSId, publicCId, msg);
+      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:cluster:{0} publishing", 
+        new Object[]{publicCId});
+      String publicDSId = datasetCtrl.publishDataset(publicCId, msg);
       LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:done - {0} cluster:{1} publishing", 
         new Object[]{publicDSId, publicCId});
       return Response.ok(publicDSId).build();
@@ -108,7 +107,7 @@ public class DatasetService {
     if (!dataset.isPresent()) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
-    DatasetDTO.Complete ds = new DatasetDTO.Complete(null, dataset.get().getName(), dataset.get().getDescription(),
+    DatasetDTO.Complete ds = new DatasetDTO.Complete(null, dataset.get().getDatasetName(), dataset.get().getDescription(),
             dataset.get().getCategories(), dataset.get().getMadePublicOn(), dataset.get().getRating(), dataset.get().
             getDsSize());
     LOG.log(Level.INFO, "Get dataset for id- {0}", publicDSId);

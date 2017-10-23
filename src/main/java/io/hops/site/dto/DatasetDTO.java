@@ -10,18 +10,27 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class DatasetDTO {
   @XmlRootElement
   public static class Proto implements Serializable {
-    private String name;
+    private String projectName;
+    private String datasetName;
     private String description;
     private Collection<String> categories;
     private long size;
     private String userEmail;
 
-    public String getName() {
-      return name;
+    public String getProjectName() {
+      return projectName;
     }
 
-    public void setName(String name) {
-      this.name = name;
+    public void setProjectName(String projectName) {
+      this.projectName = projectName;
+    }
+
+    public String getDatasetName() {
+      return datasetName;
+    }
+
+    public void setDatasetName(String datasetName) {
+      this.datasetName = datasetName;
     }
 
     public String getDescription() {

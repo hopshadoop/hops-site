@@ -39,6 +39,9 @@ import io.hops.site.dto.internal.ElasticDoc;
 import io.hops.site.old_dto.DatasetIssueDTO;
 import io.hops.site.rest.exception.AppException;
 import io.hops.site.rest.exception.ThirdPartyException;
+import io.hops.site.util.ClusterHelper;
+import io.hops.site.util.DatasetHelper;
+import io.hops.site.util.UserHelper;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -135,13 +138,13 @@ public class DatasetController {
     DatasetDTO.Details details = new DatasetDTO.Details(owner, dataset.get(), datasetHealth);
     return new SearchServiceDTO.ItemDetails(details, bootstrap);
   }
-  
+
   private DatasetDTO.Health health(List<DatasetHealth> aux) {
     DatasetDTO.Health datasetHealth = new DatasetDTO.Health();
-    for(DatasetHealth dh : aux) {
-      if(HopsSiteSettings.DATASET_STATUS_UPLOAD == dh.getId().getStatus()) {
+    for (DatasetHealth dh : aux) {
+      if (HopsSiteSettings.DATASET_STATUS_UPLOAD == dh.getId().getStatus()) {
         datasetHealth.setSeeders(dh.getCount());
-      } else if(HopsSiteSettings.DATASET_STATUS_DOWNLOAD == dh.getId().getStatus()) {
+      } else if (HopsSiteSettings.DATASET_STATUS_DOWNLOAD == dh.getId().getStatus()) {
         datasetHealth.setLeechers(dh.getCount());
       }
     }
@@ -149,37 +152,27 @@ public class DatasetController {
   }
 
   //******************************************************DATASET*******************************************************
-  public String publishDataset(String publicDSId, String publicCId, DatasetDTO.Proto msg) throws ThirdPartyException {
-    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(publicCId);
-    if (!cluster.isPresent()) {
-      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(), 
-        ThirdPartyException.Error.CLUSTER_NOT_REGISTERED, ThirdPartyException.Source.REMOTE_DELA, "access control");
-    }
-    Optional<Users> user = userFacade.findByEmailAndPublicClusterId(msg.getUserEmail(), publicCId);
-    if(!user.isPresent()) {
-      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(), 
-        ThirdPartyException.Error.USER_NOT_REGISTERED, ThirdPartyException.Source.REMOTE_DELA, "access control");
-    }
+  public String publishDataset(String publicCId, DatasetDTO.Proto msg) throws ThirdPartyException {
+    RegisteredCluster cluster = ClusterHelper.getCluster(clusterFacade, publicCId);
+    Users user = UserHelper.getUser(userFacade, publicCId, msg.getUserEmail());
     Collection<Category> categories = categoryFacade.getAndStoreCategories(msg.getCategories());
     //TODO Alex - Readme
     String readmePath = "";
-    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:publish {0}",
-      new Object[]{publicDSId});
-    Optional<Dataset> dAux = datasetFacade.findByPublicId(publicDSId);
-    if(dAux.isPresent())  {
-      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(), 
-        ThirdPartyException.Error.DATASET_EXISTS, ThirdPartyException.Source.REMOTE_DELA, "duplicate resource");
-    }
-    Dataset dataset = datasetFacade.createDataset(publicDSId, msg.getName(), msg.getDescription(),
-      readmePath, categories, user.get(), msg.getSize());
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:cluster {0} publishing",
+      new Object[]{publicCId});
+    List<Dataset> similar = datasetFacade.findSimilar(msg.getProjectName(), msg.getDatasetName());
+    int version = getVersion(similar);
+    String publicDSId = DatasetHelper.getPublicDatasetId(msg.getProjectName(), msg.getDatasetName(), version);
+    Dataset dataset = datasetFacade.createDataset(publicDSId, msg.getProjectName(), msg.getDatasetName(), version,
+      msg.getDescription(), readmePath, categories, user, msg.getSize());
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} live dataset",
       new Object[]{publicDSId, publicCId});
-    liveDatasetFacade.uploadDataset(cluster.get().getId(), dataset.getId());
+    liveDatasetFacade.uploadDataset(cluster.getId(), dataset.getId());
     ElasticDoc elasticDoc = elasticDoc(publicDSId, msg);
     try {
       elasticCtrl.add(settings.DELA_DOC_INDEX, ElasticDoc.DOC_TYPE, publicDSId, toJson(elasticDoc));
     } catch (AppException ex) {
-      throw new ThirdPartyException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "elastic", 
+      throw new ThirdPartyException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "elastic",
         ThirdPartyException.Source.LOCAL, "internal error");
     }
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:publish - done {0}",
@@ -187,8 +180,18 @@ public class DatasetController {
     return publicDSId;
   }
 
+  private int getVersion(List<Dataset> datasets) {
+    int version = 0;
+    for (Dataset dataset : datasets) {
+      if(version < dataset.getVersion()) {
+         version = dataset.getVersion();
+      }
+    }
+    return version;
+  }
+
   private ElasticDoc elasticDoc(String publicDSId, DatasetDTO.Proto msg) {
-    return new ElasticDoc(publicDSId, msg.getName(), msg.getDescription());
+    return new ElasticDoc(publicDSId, msg.getDatasetName(), msg.getDescription());
   }
 
   private String toJson(ElasticDoc doc) {

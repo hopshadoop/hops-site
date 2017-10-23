@@ -58,18 +58,24 @@ import javax.xml.bind.annotation.XmlRootElement;
   @NamedQuery(name = Dataset.FIND_BY_PUBLIC_ID_LIST,
     query = "SELECT d FROM Dataset d WHERE d.publicId IN :" + Dataset.PUBLIC_ID_LIST),
   @NamedQuery(name = "Dataset.findByName",
-    query = "SELECT d FROM Dataset d WHERE d.name = :name"),
+    query = "SELECT d FROM Dataset d WHERE d.dataset_name = :name"),
   @NamedQuery(name = "Dataset.findByDescription",
     query = "SELECT d FROM Dataset d WHERE d.description = :description"),
   @NamedQuery(name = "Dataset.findByMadePublicOn",
     query = "SELECT d FROM Dataset d WHERE d.madePublicOn = :madePublicOn"),
   @NamedQuery(name = "Dataset.findByStatus",
-    query = "SELECT d FROM Dataset d WHERE d.status = :status")})
+    query = "SELECT d FROM Dataset d WHERE d.status = :status"),
+  @NamedQuery(name = "Dataset.findSimilar",
+    query = "SELECT d FROM Dataset d " + 
+      "WHERE d.projectName = :" + Dataset.PROJECT_NAME + " AND d.datasetName= :" + Dataset.DATASET_NAME)})
 public class Dataset implements Serializable {
   public static final String FIND_BY_PUBLIC_ID = "Dataset.findByPublicId";
   public static final String FIND_BY_PUBLIC_ID_LIST = "Dataset.findByPublicIdList";
+  public static final String FIND_SIMILAR = "Dataset.findSimilar";
   public static final String PUBLIC_ID = "publicId";
   public static final String PUBLIC_ID_LIST = "publicIdList"; 
+  public static final String PROJECT_NAME = "project_name";
+  public static final String DATASET_NAME = "dataset_name";
   private static final long serialVersionUID = 1L;
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -84,8 +90,17 @@ public class Dataset implements Serializable {
   private String publicId;
   @NotNull
   @Size(max = 255)
-  @Column(name = "name")
-  private String name;
+  @Column(name = "project_name")
+  private String projectName;
+  @NotNull
+  @Size(max = 255)
+  @Column(name = "dataset_name")
+  private String datasetName;
+  @Id
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  @Basic(optional = false)
+  @Column(name = "version")
+  private int version;
   @Size(max = 2000)
   @Column(name = "description")
   private String description;
@@ -130,10 +145,12 @@ public class Dataset implements Serializable {
   public Dataset() {
   }
 
-  public Dataset(String publicId, String name, String description, String readmePath,
-    Collection<Category> categoryCollection, Users owner, long dsSize) {
+  public Dataset(String publicId, String projectName, String datasetName, int version, String description, 
+    String readmePath, Collection<Category> categoryCollection, Users owner, long dsSize) {
     this.publicId = publicId;
-    this.name = name;
+    this.projectName = projectName;
+    this.datasetName = datasetName;
+    this.version = version;
     this.description = description;
     this.readmePath = readmePath;
     this.categoryCollection = categoryCollection;
@@ -157,14 +174,29 @@ public class Dataset implements Serializable {
   public void setPublicId(String publicId) {
     this.publicId = publicId;
   }
-  
 
-  public String getName() {
-    return name;
+  public String getProjectName() {
+    return projectName;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setProjectName(String projectName) {
+    this.projectName = projectName;
+  }
+
+  public String getDatasetName() {
+    return datasetName;
+  }
+
+  public void setDatasetName(String datasetName) {
+    this.datasetName = datasetName;
+  }
+
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) {
+    this.version = version;
   }
 
   public String getDescription() {
