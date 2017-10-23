@@ -96,7 +96,6 @@ public class Dataset implements Serializable {
   @Size(max = 255)
   @Column(name = "dataset_name")
   private String datasetName;
-  @Id
   @Basic(optional = false)
   @Column(name = "version")
   private int version;
