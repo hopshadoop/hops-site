@@ -58,7 +58,7 @@ import javax.xml.bind.annotation.XmlRootElement;
   @NamedQuery(name = Dataset.FIND_BY_PUBLIC_ID_LIST,
     query = "SELECT d FROM Dataset d WHERE d.publicId IN :" + Dataset.PUBLIC_ID_LIST),
   @NamedQuery(name = "Dataset.findByName",
-    query = "SELECT d FROM Dataset d WHERE d.datasetName = :name"),
+    query = "SELECT d FROM Dataset d WHERE d.name = :name"),
   @NamedQuery(name = "Dataset.findByDescription",
     query = "SELECT d FROM Dataset d WHERE d.description = :description"),
   @NamedQuery(name = "Dataset.findByMadePublicOn",
@@ -67,7 +67,7 @@ import javax.xml.bind.annotation.XmlRootElement;
     query = "SELECT d FROM Dataset d WHERE d.status = :status"),
   @NamedQuery(name = "Dataset.findSimilar",
     query = "SELECT d FROM Dataset d " + 
-      "WHERE d.projectName = :" + Dataset.PROJECT_NAME + " AND d.datasetName= :" + Dataset.DATASET_NAME)})
+      "WHERE d.projectName = :" + Dataset.PROJECT_NAME + " AND d.name= :" + Dataset.DATASET_NAME)})
 public class Dataset implements Serializable {
   public static final String FIND_BY_PUBLIC_ID = "Dataset.findByPublicId";
   public static final String FIND_BY_PUBLIC_ID_LIST = "Dataset.findByPublicIdList";
@@ -75,7 +75,7 @@ public class Dataset implements Serializable {
   public static final String PUBLIC_ID = "publicId";
   public static final String PUBLIC_ID_LIST = "publicIdList"; 
   public static final String PROJECT_NAME = "project_name";
-  public static final String DATASET_NAME = "dataset_name";
+  public static final String DATASET_NAME = "name";
   private static final long serialVersionUID = 1L;
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -94,8 +94,8 @@ public class Dataset implements Serializable {
   private String projectName;
   @NotNull
   @Size(max = 255)
-  @Column(name = "dataset_name")
-  private String datasetName;
+  @Column(name = "name")
+  private String name;
   @Basic(optional = false)
   @Column(name = "version")
   private int version;
@@ -143,11 +143,11 @@ public class Dataset implements Serializable {
   public Dataset() {
   }
 
-  public Dataset(String publicId, String projectName, String datasetName, int version, String description, 
+  public Dataset(String publicId, String projectName, String name, int version, String description, 
     String readmePath, Collection<Category> categoryCollection, Users owner, long dsSize) {
     this.publicId = publicId;
     this.projectName = projectName;
-    this.datasetName = datasetName;
+    this.name = name;
     this.version = version;
     this.description = description;
     this.readmePath = readmePath;
@@ -181,12 +181,12 @@ public class Dataset implements Serializable {
     this.projectName = projectName;
   }
 
-  public String getDatasetName() {
-    return datasetName;
+  public String getName() {
+    return name;
   }
 
-  public void setDatasetName(String datasetName) {
-    this.datasetName = datasetName;
+  public void setName(String name) {
+    this.name = name;
   }
 
   public int getVersion() {

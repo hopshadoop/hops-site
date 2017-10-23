@@ -107,7 +107,7 @@ public class DatasetService {
     if (!dataset.isPresent()) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
-    DatasetDTO.Complete ds = new DatasetDTO.Complete(null, dataset.get().getDatasetName(), dataset.get().getDescription(),
+    DatasetDTO.Complete ds = new DatasetDTO.Complete(null, dataset.get().getName(), dataset.get().getDescription(),
             dataset.get().getCategories(), dataset.get().getMadePublicOn(), dataset.get().getRating(), dataset.get().
             getDsSize());
     LOG.log(Level.INFO, "Get dataset for id- {0}", publicDSId);

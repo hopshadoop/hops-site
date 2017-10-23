@@ -160,10 +160,10 @@ public class DatasetController {
     String readmePath = "";
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:cluster {0} publishing",
       new Object[]{publicCId});
-    List<Dataset> similar = datasetFacade.findSimilar(msg.getProjectName(), msg.getDatasetName());
+    List<Dataset> similar = datasetFacade.findSimilar(msg.getProjectName(), msg.getName());
     int version = getVersion(similar);
-    String publicDSId = DatasetHelper.getPublicDatasetId(msg.getProjectName(), msg.getDatasetName(), version);
-    Dataset dataset = datasetFacade.createDataset(publicDSId, msg.getProjectName(), msg.getDatasetName(), version,
+    String publicDSId = DatasetHelper.getPublicDatasetId(msg.getProjectName(), msg.getName(), version);
+    Dataset dataset = datasetFacade.createDataset(publicDSId, msg.getProjectName(), msg.getName(), version,
       msg.getDescription(), readmePath, categories, user, msg.getSize());
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} live dataset",
       new Object[]{publicDSId, publicCId});
@@ -191,7 +191,7 @@ public class DatasetController {
   }
 
   private ElasticDoc elasticDoc(String publicDSId, DatasetDTO.Proto msg) {
-    return new ElasticDoc(publicDSId, msg.getDatasetName(), msg.getDescription());
+    return new ElasticDoc(publicDSId, msg.getName(), msg.getDescription());
   }
 
   private String toJson(ElasticDoc doc) {

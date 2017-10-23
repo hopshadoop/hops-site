@@ -11,7 +11,7 @@ public class DatasetDTO {
   @XmlRootElement
   public static class Proto implements Serializable {
     private String projectName;
-    private String datasetName;
+    private String name;
     private String description;
     private Collection<String> categories;
     private long size;
@@ -25,12 +25,12 @@ public class DatasetDTO {
       this.projectName = projectName;
     }
 
-    public String getDatasetName() {
-      return datasetName;
+    public String getName() {
+      return name;
     }
 
-    public void setDatasetName(String datasetName) {
-      this.datasetName = datasetName;
+    public void setName(String name) {
+      this.name = name;
     }
 
     public String getDescription() {
