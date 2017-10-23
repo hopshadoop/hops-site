@@ -97,7 +97,6 @@ public class Dataset implements Serializable {
   @Column(name = "dataset_name")
   private String datasetName;
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Basic(optional = false)
   @Column(name = "version")
   private int version;
