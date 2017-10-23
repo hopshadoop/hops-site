@@ -58,7 +58,7 @@ import javax.xml.bind.annotation.XmlRootElement;
   @NamedQuery(name = Dataset.FIND_BY_PUBLIC_ID_LIST,
     query = "SELECT d FROM Dataset d WHERE d.publicId IN :" + Dataset.PUBLIC_ID_LIST),
   @NamedQuery(name = "Dataset.findByName",
-    query = "SELECT d FROM Dataset d WHERE d.dataset_name = :name"),
+    query = "SELECT d FROM Dataset d WHERE d.datasetName = :name"),
   @NamedQuery(name = "Dataset.findByDescription",
     query = "SELECT d FROM Dataset d WHERE d.description = :description"),
   @NamedQuery(name = "Dataset.findByMadePublicOn",
