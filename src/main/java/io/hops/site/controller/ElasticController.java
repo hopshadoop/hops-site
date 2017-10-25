@@ -44,7 +44,7 @@ public class ElasticController {
     try {
       if (!this.indexExists(client, index)) {
         LOG.log(Level.INFO, ResponseMessages.ELASTIC_INDEX_NOT_FOUND);
-        throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), 
+        throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
           ResponseMessages.ELASTIC_INDEX_NOT_FOUND);
       }
 
@@ -65,13 +65,13 @@ public class ElasticController {
       client.close();
     }
   }
-  
+
   public void add(String index, String docType, String docId, String jsonDoc) throws AppException {
     Client client = getClient();
     try {
       if (!this.indexExists(client, index)) {
         LOG.log(Level.INFO, ResponseMessages.ELASTIC_INDEX_NOT_FOUND);
-        throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), 
+        throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
           ResponseMessages.ELASTIC_INDEX_NOT_FOUND);
       }
 
@@ -93,13 +93,13 @@ public class ElasticController {
       client.close();
     }
   }
-  
+
   public void delete(String index, String docType, String docId) throws AppException {
     Client client = getClient();
     try {
       if (!this.indexExists(client, index)) {
         LOG.log(Level.INFO, ResponseMessages.ELASTIC_INDEX_NOT_FOUND);
-        throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), 
+        throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
           ResponseMessages.ELASTIC_INDEX_NOT_FOUND);
       }
 

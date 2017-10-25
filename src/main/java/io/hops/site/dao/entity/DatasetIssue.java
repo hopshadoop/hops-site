@@ -77,7 +77,7 @@ public class DatasetIssue implements Serializable {
   @ManyToOne(optional = false)
   private Users users;
   @JoinColumn(name = "dataset_id",
-          referencedColumnName = "Id")
+          referencedColumnName = "id")
   @ManyToOne(optional = false)
   private Dataset datasetId;
 

@@ -64,12 +64,16 @@ import javax.xml.bind.annotation.XmlRootElement;
   @NamedQuery(name = "Dataset.findByMadePublicOn",
     query = "SELECT d FROM Dataset d WHERE d.madePublicOn = :madePublicOn"),
   @NamedQuery(name = "Dataset.findByStatus",
-    query = "SELECT d FROM Dataset d WHERE d.status = :status")})
+    query = "SELECT d FROM Dataset d WHERE d.status = :status"),
+  @NamedQuery(name = "Dataset.findSimilar",
+    query = "SELECT d FROM Dataset d " + "WHERE d.name= :" + Dataset.DATASET_NAME)})
 public class Dataset implements Serializable {
   public static final String FIND_BY_PUBLIC_ID = "Dataset.findByPublicId";
   public static final String FIND_BY_PUBLIC_ID_LIST = "Dataset.findByPublicIdList";
+  public static final String FIND_SIMILAR = "Dataset.findSimilar";
   public static final String PUBLIC_ID = "publicId";
   public static final String PUBLIC_ID_LIST = "publicIdList"; 
+  public static final String DATASET_NAME = "name";
   private static final long serialVersionUID = 1L;
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -86,6 +90,9 @@ public class Dataset implements Serializable {
   @Size(max = 255)
   @Column(name = "name")
   private String name;
+  @Basic(optional = false)
+  @Column(name = "version")
+  private int version;
   @Size(max = 2000)
   @Column(name = "description")
   private String description;
@@ -130,10 +137,11 @@ public class Dataset implements Serializable {
   public Dataset() {
   }
 
-  public Dataset(String publicId, String name, String description, String readmePath,
-    Collection<Category> categoryCollection, Users owner, long dsSize) {
+  public Dataset(String publicId, String name, int version, String description, 
+    String readmePath, Collection<Category> categoryCollection, Users owner, long dsSize) {
     this.publicId = publicId;
     this.name = name;
+    this.version = version;
     this.description = description;
     this.readmePath = readmePath;
     this.categoryCollection = categoryCollection;
@@ -157,7 +165,6 @@ public class Dataset implements Serializable {
   public void setPublicId(String publicId) {
     this.publicId = publicId;
   }
-  
 
   public String getName() {
     return name;
@@ -165,6 +172,14 @@ public class Dataset implements Serializable {
 
   public void setName(String name) {
     this.name = name;
+  }
+
+  public int getVersion() {
+    return version;
+  }
+
+  public void setVersion(int version) {
+    this.version = version;
   }
 
   public String getDescription() {

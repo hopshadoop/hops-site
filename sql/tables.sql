@@ -33,6 +33,7 @@ CREATE TABLE `dataset` (
   `public_id` varchar(1000) NOT NULL UNIQUE,
   `owner_user_id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
+  `version` int(11) NOT NULL,
   `description` varchar(2000) DEFAULT NULL,
   `published_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `readme_path` varchar(150) DEFAULT NULL,

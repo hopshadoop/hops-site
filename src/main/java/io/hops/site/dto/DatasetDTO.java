@@ -27,7 +27,7 @@ public class DatasetDTO {
     public String getDescription() {
       return description;
     }
-
+    
     public void setDescription(String description) {
       this.description = description;
     }
@@ -60,13 +60,15 @@ public class DatasetDTO {
   @XmlRootElement
   public static class Search implements Serializable {
     private String name;
+    private int version;
     private String description;
 
     public Search() {
     }
 
-    public Search(String name, String description) {
+    public Search(String name, int version, String description) {
       this.name = name;
+      this.version = version;
       this.description = description;
     }
 
@@ -78,6 +80,14 @@ public class DatasetDTO {
       this.name = name;
     }
 
+    public int getVersion() {
+      return version;
+    }
+
+    public void setVersion(int version) {
+      this.version = version;
+    }
+    
     public String getDescription() {
       return description;
     }
