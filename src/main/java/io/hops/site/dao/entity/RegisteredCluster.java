@@ -54,17 +54,19 @@ import javax.xml.bind.annotation.XmlTransient;
     query = "SELECT r FROM RegisteredCluster r WHERE r.publicId = :publicId"),
   @NamedQuery(name = "RegisteredCluster.findBySearchEndpoint",
     query = "SELECT r FROM RegisteredCluster r WHERE r.httpEndpoint = :httpEndpoint"),
-  @NamedQuery(name = "RegisteredCluster.findByEmail",
-    query = "SELECT r FROM RegisteredCluster r WHERE r.email = :email"),
   @NamedQuery(name = "RegisteredCluster.findByCert",
     query = "SELECT r FROM RegisteredCluster r WHERE r.cert = :cert"),
   @NamedQuery(name = "RegisteredCluster.findByDelaEndpoint",
     query = "SELECT r FROM RegisteredCluster r WHERE r.delaEndpoint = :delaEndpoint"),
   @NamedQuery(name = "RegisteredCluster.findByDateRegistered",
-    query = "SELECT r FROM RegisteredCluster r WHERE r.dateRegistered = :dateRegistered")})
+    query = "SELECT r FROM RegisteredCluster r WHERE r.dateRegistered = :dateRegistered"), 
+  @NamedQuery(name = RegisteredCluster.FIND_BY_SUBJECT,
+    query = "SELECT r FROM RegisteredCluster r WHERE r.email = :" + RegisteredCluster.SUBJECT)})
 public class RegisteredCluster implements Serializable {
 
   private static final long serialVersionUID = 1L;
+  public static final String FIND_BY_SUBJECT = "RegisteredCluster.findBySubject";
+  public static final String SUBJECT = "subject";
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
   @Basic(optional = false)
@@ -89,7 +91,7 @@ public class RegisteredCluster implements Serializable {
   @Basic(optional = false)
   @Size(min = 1,
     max = 100)
-  @Column(name = "email", unique = true)
+  @Column(name = "email")
   private String email;
   @NotNull
   @Basic(optional = false)
@@ -97,6 +99,12 @@ public class RegisteredCluster implements Serializable {
     max = 100)
   @Column(name = "org_name", unique = true)
   private String orgName;
+  @NotNull
+  @Basic(optional = false)
+  @Size(min = 1,
+    max = 1000)
+  @Column(name = "subject", unique = true)
+  private String subject;
   @Basic(optional = false)
   @NotNull
   @Lob
@@ -145,6 +153,14 @@ public class RegisteredCluster implements Serializable {
 
   public void setOrgName(String orgName) {
     this.orgName = orgName;
+  }
+
+  public String getSubject() {
+    return subject;
+  }
+
+  public void setSubject(String subject) {
+    this.subject = subject;
   }
 
   public byte[] getCert() {

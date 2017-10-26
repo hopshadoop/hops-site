@@ -6,7 +6,6 @@ import io.hops.site.dto.ClusterAddressDTO;
 import io.hops.site.dto.ClusterServiceDTO;
 import io.hops.site.rest.annotation.NoCache;
 import io.hops.site.rest.exception.ThirdPartyException;
-import io.hops.site.util.CertificateHelper;
 import io.swagger.annotations.Api;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -64,12 +63,7 @@ public class ClusterService {
     throws CertificateEncodingException, ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster register");
     X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
-    X509Certificate clientCert = certs[0];
-    //TODO:check if cert email == registerJson.getEmail()
-    String orgName = CertificateHelper.getCertificatePart(clientCert, "O");
-    String orgUnit = CertificateHelper.getCertificatePart(clientCert, "OU");
-    String fullOrgName = orgName + ":" + orgUnit;
-    String publicCId = clusterController.registerCluster(clientCert.getEncoded(), fullOrgName, msg);
+    String publicCId = clusterController.registerCluster(certs[0], msg);
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster register done:{0}", publicCId);
     return Response.ok(publicCId).build();
   }

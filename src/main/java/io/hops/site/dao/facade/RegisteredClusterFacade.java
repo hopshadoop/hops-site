@@ -6,6 +6,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 
 @Stateless
 public class RegisteredClusterFacade extends AbstractFacade<RegisteredCluster> {
@@ -22,12 +23,13 @@ public class RegisteredClusterFacade extends AbstractFacade<RegisteredCluster> {
     super(RegisteredCluster.class);
   }
 
-  public Optional<RegisteredCluster> findByEmail(String email) {
+  public Optional<RegisteredCluster> findBySubject(String subject) {
+    TypedQuery<RegisteredCluster> query = em.createNamedQuery(RegisteredCluster.FIND_BY_SUBJECT, RegisteredCluster.class)
+        .setParameter(RegisteredCluster.SUBJECT, subject);
     try {
-      RegisteredCluster cluster = em.createNamedQuery("RegisteredCluster.findByEmail", RegisteredCluster.class)
-        .setParameter("email", email).getSingleResult();
+      RegisteredCluster cluster = query.getSingleResult();
       return Optional.of(cluster);
-    } catch (NoResultException nre) {
+    } catch (NoResultException ex) {
       return Optional.empty();
     }
   }

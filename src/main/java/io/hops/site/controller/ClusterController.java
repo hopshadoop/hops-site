@@ -26,6 +26,9 @@ import io.hops.site.dto.ClusterAddressDTO;
 import io.hops.site.dto.ClusterServiceDTO;
 import io.hops.site.rest.ClusterService;
 import io.hops.site.rest.exception.ThirdPartyException;
+import io.hops.site.util.CertificateHelper;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +37,7 @@ import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.ws.rs.core.Response;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.NEVER)
@@ -59,26 +63,38 @@ public class ClusterController {
    * @param msg
    * @return
    */
-  public String registerCluster(byte[] cert, String orgName, ClusterServiceDTO.Register msg) throws ThirdPartyException {
-    Optional<RegisteredCluster> c = clusterFacade.findByEmail(msg.getEmail());
+  public String registerCluster(X509Certificate cert, ClusterServiceDTO.Register msg) throws ThirdPartyException {
+    String subject = CertificateHelper.getCertificateSubject(cert);
+    byte[] certByte;
+    try {
+      certByte = cert.getEncoded();
+    } catch (CertificateEncodingException ex) {
+      throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(), "certificate issue",
+        ThirdPartyException.Source.REMOTE_DELA, "bad request");
+    }
+    String orgName = CertificateHelper.getOrgName(cert);
+    String email = CertificateHelper.getCertificateEmail(cert);
+    Optional<RegisteredCluster> c = clusterFacade.findBySubject(subject);
     if (c.isPresent()) {
       RegisteredCluster cluster = c.get();
       cluster.setDelaEndpoint(msg.getDelaTransferAddress());
       cluster.setHttpEndpoint(msg.getDelaClusterAddress());
-      cluster.setCert(cert);
+      cluster.setCert(certByte);
       cluster.setOrgName(orgName);
-      clusterFacade.edit(cluster); 
+      cluster.setEmail(email.toLowerCase());
+      clusterFacade.edit(cluster);
       Optional<Heartbeat> h = heartbeatFacade.findByClusterId(cluster.getId());
-      if(h.isPresent()) {
+      if (h.isPresent()) {
         heartbeatFacade.remove(h.get());
       }
       return c.get().getPublicId();
+    } else {
+      String clusterPublicId = HopsSiteSettings.getClusterId();
+      RegisteredCluster cluster = new RegisteredCluster(clusterPublicId, msg.getDelaTransferAddress(),
+        msg.getDelaClusterAddress(), email.toLowerCase(), certByte, orgName);
+      clusterFacade.create(cluster);
+      return clusterPublicId;
     }
-    String clusterPublicId = settings.getClusterId();
-    RegisteredCluster cluster = new RegisteredCluster(clusterPublicId, msg.getDelaTransferAddress(),
-      msg.getDelaClusterAddress(), msg.getEmail().toLowerCase(), cert, orgName);
-    clusterFacade.create(cluster);
-    return clusterPublicId;
   }
 
   public Action ping(String publicCId, ClusterServiceDTO.Ping msg) {
@@ -165,11 +181,11 @@ public class ClusterController {
    * @param clusterEmail
    * @return
    */
-  public Optional<RegisteredCluster> getClusterByEmail(String clusterEmail) {
-    if (clusterEmail == null || clusterEmail.isEmpty()) {
-      throw new IllegalArgumentException("Cluster email not assigned.");
+  public Optional<RegisteredCluster> getClusterBySubject(String subject) {
+    if (subject == null || subject.isEmpty()) {
+      throw new IllegalArgumentException("Cluster subject not assigned.");
     }
-    Optional<RegisteredCluster> cluster = clusterFacade.findByEmail(clusterEmail.toLowerCase());
+    Optional<RegisteredCluster> cluster = clusterFacade.findBySubject(subject);
     return cluster;
   }
 
