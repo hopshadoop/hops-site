@@ -32,6 +32,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -74,6 +75,7 @@ public class ClusterController {
     }
     String orgName = CertificateHelper.getOrgName(cert);
     String email = CertificateHelper.getCertificateEmail(cert);
+    LOGGER.log(Level.INFO, "registering subject:{0}, email:{1}", new Object[]{subject, email});
     Optional<RegisteredCluster> c = clusterFacade.findBySubject(subject);
     if (c.isPresent()) {
       RegisteredCluster cluster = c.get();
@@ -82,6 +84,7 @@ public class ClusterController {
       cluster.setCert(certByte);
       cluster.setOrgName(orgName);
       cluster.setEmail(email.toLowerCase());
+      cluster.setSubject(subject);
       clusterFacade.edit(cluster);
       Optional<Heartbeat> h = heartbeatFacade.findByClusterId(cluster.getId());
       if (h.isPresent()) {
@@ -91,7 +94,7 @@ public class ClusterController {
     } else {
       String clusterPublicId = HopsSiteSettings.getClusterId();
       RegisteredCluster cluster = new RegisteredCluster(clusterPublicId, msg.getDelaTransferAddress(),
-        msg.getDelaClusterAddress(), email.toLowerCase(), certByte, orgName);
+        msg.getDelaClusterAddress(), email.toLowerCase(), certByte, orgName, subject);
       clusterFacade.create(cluster);
       return clusterPublicId;
     }

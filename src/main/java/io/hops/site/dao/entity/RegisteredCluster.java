@@ -60,12 +60,11 @@ import javax.xml.bind.annotation.XmlTransient;
     query = "SELECT r FROM RegisteredCluster r WHERE r.delaEndpoint = :delaEndpoint"),
   @NamedQuery(name = "RegisteredCluster.findByDateRegistered",
     query = "SELECT r FROM RegisteredCluster r WHERE r.dateRegistered = :dateRegistered"), 
-  @NamedQuery(name = RegisteredCluster.FIND_BY_SUBJECT,
-    query = "SELECT r FROM RegisteredCluster r WHERE r.email = :" + RegisteredCluster.SUBJECT)})
+  @NamedQuery(name = "RegisteredCluster.findBySubject",
+    query = "SELECT r FROM RegisteredCluster r WHERE r.subject = :" + RegisteredCluster.SUBJECT)})
 public class RegisteredCluster implements Serializable {
 
   private static final long serialVersionUID = 1L;
-  public static final String FIND_BY_SUBJECT = "RegisteredCluster.findBySubject";
   public static final String SUBJECT = "subject";
   @Id
   @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -128,13 +127,14 @@ public class RegisteredCluster implements Serializable {
   }
 
   public RegisteredCluster(String publicId, String delaTransferAddress, String delaClusterAddress, String email, 
-    byte[] cert, String orgName) {
+    byte[] cert, String orgName, String subject) {
     this.publicId = publicId;
     this.httpEndpoint = delaClusterAddress;
     this.email = email;
     this.orgName = orgName;
     this.cert = cert;
     this.delaEndpoint = delaTransferAddress;
+    this.subject = subject;
   }
 
   @XmlTransient

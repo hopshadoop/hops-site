@@ -28,7 +28,7 @@ public class CertificateHelper {
   }
 
   public static String getCertificateSubject(X509Certificate cert) {
-    return cert.getSubjectX500Principal().getName();
+    return cert.getSubjectDN().getName();
   }
 
   public static String getCertificatePart(X509Certificate cert, String partName) {

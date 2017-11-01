@@ -24,7 +24,7 @@ public class RegisteredClusterFacade extends AbstractFacade<RegisteredCluster> {
   }
 
   public Optional<RegisteredCluster> findBySubject(String subject) {
-    TypedQuery<RegisteredCluster> query = em.createNamedQuery(RegisteredCluster.FIND_BY_SUBJECT, RegisteredCluster.class)
+    TypedQuery<RegisteredCluster> query = em.createNamedQuery("RegisteredCluster.findBySubject", RegisteredCluster.class)
         .setParameter(RegisteredCluster.SUBJECT, subject);
     try {
       RegisteredCluster cluster = query.getSingleResult();
