@@ -21,6 +21,7 @@ import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.old_dto.JsonResponse;
 import io.hops.site.rest.exception.ThirdPartyException;
 import io.hops.site.util.CertificateHelper;
+import io.hops.site.util.SecurityHelper;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.cert.X509Certificate;
@@ -95,8 +96,8 @@ public class AuthFilter implements ContainerRequestFilter {
       requestContext.abortWith(fail(ThirdPartyException.Error.CERT_MISSING));
       return;
     }
-    String clusterEmail = CertificateHelper.getCertificateEmail(certs[0]);
-    if (clusterEmail == null || clusterEmail.isEmpty()) {
+    String clusterSubject = CertificateHelper.getCertificateSubject(certs[0]);
+    if (clusterSubject == null || clusterSubject.isEmpty()) {
       requestContext.abortWith(fail(ThirdPartyException.Error.EMAIL_MISSING));
       return;
     }
@@ -113,11 +114,9 @@ public class AuthFilter implements ContainerRequestFilter {
     }
     String publicCId = requestContext.getUriInfo().getPathParameters().getFirst(CLUSTER_ID_PARAM);
     if (publicCId == null) {
-//      requestContext.abortWith(fail(ThirdPartyException.Error.CLUSTER_ID_MISSING));
       return;
     }
-
-    Optional<RegisteredCluster> cluster = clusterController.getClusterByEmail(clusterEmail);
+    Optional<RegisteredCluster> cluster = clusterController.getClusterBySubject(clusterSubject);
     if (!cluster.isPresent()) {
       requestContext.abortWith(fail(ThirdPartyException.Error.CLUSTER_NOT_REGISTERED));
       return;
@@ -126,12 +125,12 @@ public class AuthFilter implements ContainerRequestFilter {
       requestContext.abortWith(fail(ThirdPartyException.Error.CERT_MISSMATCH));
       return;
     }
-    
-    
     if (!cluster.get().getPublicId().equals(publicCId)) {
       requestContext.abortWith(fail(ThirdPartyException.Error.IMPERSONATION));
       return;
     }
+    String role = SecurityHelper.getClusterRole(requestContext.getSecurityContext());
+    LOGGER.log(Level.INFO, "cluster:{0} authenticated as:{1}", new Object[]{publicCId, role});
   }
 
   private Response fail(ThirdPartyException.Error msg) {

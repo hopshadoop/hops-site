@@ -1,7 +1,5 @@
 package io.hops.site.util;
 
-import io.hops.site.controller.HopsSiteSettings;
-import java.security.Principal;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -13,6 +11,13 @@ public class CertificateHelper {
 
   private final static Logger LOGGER = Logger.getLogger(CertificateHelper.class.getName());
 
+  public static String getOrgName(X509Certificate cert) {
+    String org = getCertificatePart(cert, "O");
+    String orgUnit = getCertificatePart(cert, "OU");
+    String orgName = org + "_" + orgUnit;
+    return orgName;
+  }
+
   public static String getUserEmail(ContainerRequestContext requestContext) {
     X509Certificate cert = ((X509Certificate[]) requestContext.getProperty("javax.servlet.request.X509Certificate"))[0];
     return getCertificateEmail(cert);
@@ -22,22 +27,23 @@ public class CertificateHelper {
     return getCertificatePart(principalCert, "EMAILADDRESS");
   }
 
-  public static String getCertificatePart(X509Certificate principalCert, String partName) {
+  public static String getCertificateSubject(X509Certificate cert) {
+    return cert.getSubjectDN().getName();
+  }
+
+  public static String getCertificatePart(X509Certificate cert, String partName) {
     String tmpName, name = "";
-    Principal principal = principalCert.getSubjectDN();
-    // Extract the email
+    String subject = getCertificateSubject(cert);
     String part = partName + "=";
-    int start = principal.getName().indexOf(part);
+    int start = subject.indexOf(part);
     if (start > -1) {
-      tmpName = principal.getName().substring(start + part.length());
+      tmpName = subject.substring(start + part.length());
       int end = tmpName.indexOf(",");
       if (end > 0) {
         name = tmpName.substring(0, end);
       } else {
         name = tmpName;
       }
-      LOGGER.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cert - request from principal: {0}", principal.getName());
-      LOGGER.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cert - request with email: {0}", name.toLowerCase());
     }
     return name.toLowerCase();
   }
