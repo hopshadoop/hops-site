@@ -26,3 +26,5 @@ buildNumber.properties
 
 */glassfish-resources.xml
 src/main/webapp/WEB-INF/glassfish-resources.xml
+
+.DS_Store
