@@ -60,9 +60,9 @@ public class ClusterController {
    * Register a new cluster
    *
    * @param cert
-   * @param orgName
    * @param msg
    * @return
+   * @throws io.hops.site.rest.exception.ThirdPartyException
    */
   public String registerCluster(X509Certificate cert, ClusterServiceDTO.Register msg) throws ThirdPartyException {
     String subject = CertificateHelper.getCertificateSubject(cert);
@@ -71,7 +71,7 @@ public class ClusterController {
       certByte = cert.getEncoded();
     } catch (CertificateEncodingException ex) {
       throw new ThirdPartyException(Response.Status.BAD_REQUEST.getStatusCode(), "certificate issue",
-        ThirdPartyException.Source.REMOTE_DELA, "bad request");
+          ThirdPartyException.Source.REMOTE_DELA, "bad request");
     }
     String orgName = CertificateHelper.getOrgName(cert);
     String email = CertificateHelper.getCertificateEmail(cert);
@@ -94,7 +94,7 @@ public class ClusterController {
     } else {
       String clusterPublicId = HopsSiteSettings.getClusterId();
       RegisteredCluster cluster = new RegisteredCluster(clusterPublicId, msg.getDelaTransferAddress(),
-        msg.getDelaClusterAddress(), email.toLowerCase(), certByte, orgName, subject);
+          msg.getDelaClusterAddress(), email.toLowerCase(), certByte, orgName, subject);
       clusterFacade.create(cluster);
       return clusterPublicId;
     }
@@ -179,9 +179,14 @@ public class ClusterController {
     return to_ret;
   }
 
+  public List<RegisteredCluster> getAllClustaers() {
+    List<RegisteredCluster> registeredClusters = clusterFacade.findAll();
+    return registeredClusters;
+  }
+
   /**
    *
-   * @param clusterEmail
+   * @param subject
    * @return
    */
   public Optional<RegisteredCluster> getClusterBySubject(String subject) {

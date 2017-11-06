@@ -2,6 +2,7 @@ package io.hops.site.rest;
 
 import io.hops.site.controller.ClusterController;
 import io.hops.site.controller.HopsSiteSettings;
+import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.dto.ClusterAddressDTO;
 import io.hops.site.dto.ClusterServiceDTO;
 import io.hops.site.rest.annotation.NoCache;
@@ -109,6 +110,16 @@ public class ClusterService {
   @NoCache
   public Response getRegisterd(@Context SecurityContext sc) {
     GenericEntity result = new GenericEntity<List<ClusterAddressDTO>>(clusterController.getAll()) {
+    };
+    return Response.ok(result).build();
+  }
+  
+  @GET
+  @Path("all")
+  @NoCache
+  @RolesAllowed({"admin"})
+  public Response getAllRegisterdClusters(@Context SecurityContext sc) {
+    GenericEntity result = new GenericEntity<List<RegisteredCluster>>(clusterController.getAllClustaers()) {
     };
     return Response.ok(result).build();
   }

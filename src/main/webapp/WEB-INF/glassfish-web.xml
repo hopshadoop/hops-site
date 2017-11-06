@@ -3,7 +3,7 @@
 <glassfish-web-app error-url="">
   <security-role-mapping>
     <role-name>admin</role-name>
-    <principal-name>CN=HopsRootCA, O=SICS, L=Stockholm, ST=Sweden, C=SE</principal-name>
+    <principal-name>EMAILADDRESS=delahs@gmail.com, CN=sics.se, OU=hs, O=hopsworks, L=kista, ST=stockholm, C=se</principal-name>
   </security-role-mapping>
   <security-role-mapping>
     <role-name>clusters</role-name>
