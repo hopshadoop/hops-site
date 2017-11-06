@@ -7,6 +7,7 @@ import io.hops.site.dto.ClusterAddressDTO;
 import io.hops.site.dto.ClusterServiceDTO;
 import io.hops.site.rest.annotation.NoCache;
 import io.hops.site.rest.exception.ThirdPartyException;
+import io.hops.site.util.SecurityHelper;
 import io.swagger.annotations.Api;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -129,14 +130,7 @@ public class ClusterService {
   @Path("role")
   public Response getClusterRole(@Context SecurityContext sc) {
     LOG.log(Level.INFO, "Cluster: {0}", sc.getUserPrincipal().getName());
-    String role;
-    if (sc.isUserInRole("clusters")) {
-      role = "clusters";
-    } else if (sc.isUserInRole("admin")) {
-      role = "admin";
-    } else {
-      role = "none";
-    }
+    String role = SecurityHelper.getClusterRole(sc);
     LOG.log(Level.INFO, "Cluster Role: {0}", role);
     return Response.ok(role).build();
   }

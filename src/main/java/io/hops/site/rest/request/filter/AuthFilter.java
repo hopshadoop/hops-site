@@ -21,6 +21,7 @@ import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.old_dto.JsonResponse;
 import io.hops.site.rest.exception.ThirdPartyException;
 import io.hops.site.util.CertificateHelper;
+import io.hops.site.util.SecurityHelper;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.cert.X509Certificate;
@@ -124,11 +125,12 @@ public class AuthFilter implements ContainerRequestFilter {
       requestContext.abortWith(fail(ThirdPartyException.Error.CERT_MISSMATCH));
       return;
     }
-    
     if (!cluster.get().getPublicId().equals(publicCId)) {
       requestContext.abortWith(fail(ThirdPartyException.Error.IMPERSONATION));
       return;
     }
+    String role = SecurityHelper.getClusterRole(requestContext.getSecurityContext());
+    LOGGER.log(Level.INFO, "cluster:{0} authenticated as:{1}", new Object[]{publicCId, role});
   }
 
   private Response fail(ThirdPartyException.Error msg) {
