@@ -60,6 +60,8 @@ import javax.xml.bind.annotation.XmlTransient;
     query = "SELECT r FROM RegisteredCluster r WHERE r.delaEndpoint = :delaEndpoint"),
   @NamedQuery(name = "RegisteredCluster.findByDateRegistered",
     query = "SELECT r FROM RegisteredCluster r WHERE r.dateRegistered = :dateRegistered"), 
+  @NamedQuery(name = "RegisteredCluster.findByOrgName",
+    query = "SELECT r FROM RegisteredCluster r WHERE r.orgName = :orgName"),
   @NamedQuery(name = "RegisteredCluster.findBySubject",
     query = "SELECT r FROM RegisteredCluster r WHERE r.subject = :" + RegisteredCluster.SUBJECT)})
 public class RegisteredCluster implements Serializable {

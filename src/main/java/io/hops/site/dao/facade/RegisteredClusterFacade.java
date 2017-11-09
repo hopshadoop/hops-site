@@ -24,7 +24,8 @@ public class RegisteredClusterFacade extends AbstractFacade<RegisteredCluster> {
   }
 
   public Optional<RegisteredCluster> findBySubject(String subject) {
-    TypedQuery<RegisteredCluster> query = em.createNamedQuery("RegisteredCluster.findBySubject", RegisteredCluster.class)
+    TypedQuery<RegisteredCluster> query = em.
+        createNamedQuery("RegisteredCluster.findBySubject", RegisteredCluster.class)
         .setParameter(RegisteredCluster.SUBJECT, subject);
     try {
       RegisteredCluster cluster = query.getSingleResult();
@@ -37,7 +38,7 @@ public class RegisteredClusterFacade extends AbstractFacade<RegisteredCluster> {
   public Optional<RegisteredCluster> findByPublicId(String publicId) {
     try {
       RegisteredCluster cluster = em.createNamedQuery("RegisteredCluster.findByPublicId", RegisteredCluster.class)
-        .setParameter("publicId", publicId).getSingleResult();
+          .setParameter("publicId", publicId).getSingleResult();
       return Optional.of(cluster);
     } catch (NoResultException nre) {
       return Optional.empty();
@@ -46,8 +47,18 @@ public class RegisteredClusterFacade extends AbstractFacade<RegisteredCluster> {
 
   public Optional<RegisteredCluster> findById(int clusterId) {
     try {
-      RegisteredCluster cluster =  em.createNamedQuery("RegisteredCluster.findById", RegisteredCluster.class)
-        .setParameter("id", clusterId).getSingleResult();
+      RegisteredCluster cluster = em.createNamedQuery("RegisteredCluster.findById", RegisteredCluster.class)
+          .setParameter("id", clusterId).getSingleResult();
+      return Optional.of(cluster);
+    } catch (NoResultException nre) {
+      return Optional.empty();
+    }
+  }
+
+  public Optional<RegisteredCluster> findByOrgName(String orgName) {
+    try {
+      RegisteredCluster cluster = em.createNamedQuery("RegisteredCluster.findByOrgName", RegisteredCluster.class)
+          .setParameter("orgName", orgName).getSingleResult();
       return Optional.of(cluster);
     } catch (NoResultException nre) {
       return Optional.empty();

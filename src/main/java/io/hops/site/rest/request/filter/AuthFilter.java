@@ -75,20 +75,6 @@ public class AuthFilter implements ContainerRequestFilter {
 
   private static final String CLUSTER_ID_PARAM = "publicCId";
 
-  @PostConstruct
-  private void init() {
-    try {
-      //path, size in bytes and, number of log files to use
-      fh = new FileHandler("../logs/hops-site%g.log", 2000000, 50);
-      LOGGER.addHandler(fh);
-      SimpleFormatter formatter = new SimpleFormatter();
-      fh.setFormatter(formatter);
-    } catch (IOException | SecurityException ex) {
-      LOGGER.log(Level.SEVERE, null, ex.getMessage());
-    }
-    LOGGER.log(Level.INFO, "hops_site:auth_filter log.");
-  }
-
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
     X509Certificate[] certs = (X509Certificate[]) requestContext.getProperty("javax.servlet.request.X509Certificate");

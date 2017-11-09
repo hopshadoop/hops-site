@@ -10,11 +10,16 @@ import javax.ws.rs.container.ContainerRequestContext;
 public class CertificateHelper {
 
   private final static Logger LOGGER = Logger.getLogger(CertificateHelper.class.getName());
+  private static final String ORG_NAME_SEPARATOR = "_";
+  
+  public static String getOrgName (String org, String orgUnit) {
+    return org + ORG_NAME_SEPARATOR + orgUnit;
+  }
 
   public static String getOrgName(X509Certificate cert) {
     String org = getCertificatePart(cert, "O");
     String orgUnit = getCertificatePart(cert, "OU");
-    String orgName = org + "_" + orgUnit;
+    String orgName = getOrgName (org, orgUnit);
     return orgName;
   }
 

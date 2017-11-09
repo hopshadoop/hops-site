@@ -5,6 +5,7 @@ import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.dto.ClusterAddressDTO;
 import io.hops.site.dto.ClusterServiceDTO;
+import io.hops.site.old_dto.JsonResponse;
 import io.hops.site.rest.annotation.NoCache;
 import io.hops.site.rest.exception.ThirdPartyException;
 import io.hops.site.util.SecurityHelper;
@@ -12,6 +13,7 @@ import io.swagger.annotations.Api;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.List;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.security.RolesAllowed;
@@ -109,22 +111,12 @@ public class ClusterService {
   //********************************************************************************************************************
   @GET
   @NoCache
-  public Response getRegisterd(@Context SecurityContext sc) {
+  public Response getRegisterd() {
     GenericEntity result = new GenericEntity<List<ClusterAddressDTO>>(clusterController.getAll()) {
     };
     return Response.ok(result).build();
   }
   
-  @GET
-  @Path("all")
-  @NoCache
-  @RolesAllowed({"admin"})
-  public Response getAllRegisterdClusters(@Context SecurityContext sc) {
-    GenericEntity result = new GenericEntity<List<RegisteredCluster>>(clusterController.getAllClustaers()) {
-    };
-    return Response.ok(result).build();
-  }
-
   @GET
   @NoCache
   @Path("role")
@@ -134,6 +126,30 @@ public class ClusterService {
     LOG.log(Level.INFO, "Cluster Role: {0}", role);
     return Response.ok(role).build();
   }
+  
+  //***************************************** Admin endpoints **************************************//
+  @GET
+  @Path("all")
+  @NoCache
+  @RolesAllowed({"admin"})
+  public Response getAllRegisterdClusters() {
+    GenericEntity result = new GenericEntity<List<RegisteredCluster>>(clusterController.getAllClustaers()) {
+    };
+    return Response.ok(result).build();
+  }
+  
+  @GET
+  @Path("org/{orgName}/{orgUnit}")
+  @NoCache
+  @RolesAllowed({"admin"})
+  public Response getRegisterdCluster(@PathParam("orgName") String orgName, @PathParam("orgUnit") String orgUnit) {
+    Optional<RegisteredCluster> cluster = clusterController.getClusterByOrgName(orgName, orgUnit);
+    if (cluster.isPresent()) {
+      return Response.ok().entity(cluster.get()).build();
+    }
+    return Response.ok().entity(null).build();
+  }
+  
 
   @DELETE
   @Path("{clusterId}")

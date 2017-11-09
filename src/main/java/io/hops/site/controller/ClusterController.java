@@ -27,6 +27,7 @@ import io.hops.site.dto.ClusterServiceDTO;
 import io.hops.site.rest.ClusterService;
 import io.hops.site.rest.exception.ThirdPartyException;
 import io.hops.site.util.CertificateHelper;
+import static io.hops.site.util.CertificateHelper.getOrgName;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -207,6 +208,15 @@ public class ClusterController {
       throw new IllegalArgumentException("Cluster id not assigned.");
     }
     Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(clusterId);
+    return cluster;
+  }
+  
+  public Optional<RegisteredCluster> getClusterByOrgName(String org, String orgUnit) {
+    if (org == null || org.isEmpty() || orgUnit == null || orgUnit.isEmpty()) {
+      throw new IllegalArgumentException("Cluster orgName or orgUnitName not assigned.");
+    }
+    String orgName = getOrgName(org, orgUnit);
+    Optional<RegisteredCluster> cluster = clusterFacade.findByOrgName(orgName);
     return cluster;
   }
 
