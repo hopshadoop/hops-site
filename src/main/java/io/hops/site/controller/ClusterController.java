@@ -15,6 +15,8 @@
  */
 package io.hops.site.controller;
 
+import io.hops.site.dao.admin.entity.AdminRegisteredCluster;
+import io.hops.site.dao.admin.facade.AdminRegisteredClusterFacade;
 import io.hops.site.dao.entity.Heartbeat;
 import io.hops.site.dao.entity.LiveDataset;
 import io.hops.site.dao.entity.RegisteredCluster;
@@ -50,6 +52,8 @@ public class ClusterController {
   private HopsSiteSettings settings;
   @EJB
   private RegisteredClusterFacade clusterFacade;
+  @EJB
+  private AdminRegisteredClusterFacade adminClusterFacade;
   @EJB
   private DatasetFacade datasetFacade;
   @EJB
@@ -180,8 +184,8 @@ public class ClusterController {
     return to_ret;
   }
 
-  public List<RegisteredCluster> getAllClustaers() {
-    List<RegisteredCluster> registeredClusters = clusterFacade.findAll();
+  public List<AdminRegisteredCluster> getAllClustaers() {
+    List<AdminRegisteredCluster> registeredClusters = adminClusterFacade.findAll();
     return registeredClusters;
   }
 
@@ -211,12 +215,12 @@ public class ClusterController {
     return cluster;
   }
   
-  public Optional<RegisteredCluster> getClusterByOrgName(String org, String orgUnit) {
+  public Optional<AdminRegisteredCluster> getClusterByOrgName(String org, String orgUnit) {
     if (org == null || org.isEmpty() || orgUnit == null || orgUnit.isEmpty()) {
       throw new IllegalArgumentException("Cluster orgName or orgUnitName not assigned.");
     }
     String orgName = getOrgName(org, orgUnit);
-    Optional<RegisteredCluster> cluster = clusterFacade.findByOrgName(orgName);
+    Optional<AdminRegisteredCluster> cluster = adminClusterFacade.findByOrgName(orgName);
     return cluster;
   }
 

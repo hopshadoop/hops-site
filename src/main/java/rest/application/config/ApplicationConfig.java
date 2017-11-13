@@ -1,5 +1,7 @@
 package rest.application.config;
 
+import io.hops.site.admin.rest.AdminClusterService;
+import io.hops.site.admin.rest.AdminDatasetService;
 import io.hops.site.rest.ClusterService;
 import io.hops.site.rest.CommentService;
 import io.hops.site.rest.DatasetService;
@@ -25,6 +27,10 @@ public class ApplicationConfig extends ResourceConfig {
     register(CommentService.class);
     register(RatingService.class);
     register(UserService.class);
+    
+    //Admin
+    register(AdminClusterService.class);
+    register(AdminDatasetService.class);
     
     //Exception mappers
     register(EJBExceptionMapper.class);
