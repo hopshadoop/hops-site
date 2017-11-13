@@ -22,7 +22,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 @NamedQueries({
   @NamedQuery(name = "Heartbeat.findOlderThan",
-    query = "SELECT FROM Heartbeat h WHERE h.lastPinged < :date")})
+    query = "SELECT h FROM Heartbeat h WHERE h.lastPinged < :date")})
 public class Heartbeat implements Serializable {
 
   @Id
