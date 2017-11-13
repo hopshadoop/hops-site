@@ -19,6 +19,7 @@ import io.hops.site.dao.entity.Heartbeat;
 import io.hops.site.dao.entity.LiveDataset;
 import io.hops.site.dao.entity.RegisteredCluster;
 import io.hops.site.dao.facade.DatasetFacade;
+import io.hops.site.dao.facade.DatasetHealthFacade;
 import io.hops.site.dao.facade.HeartbeatFacade;
 import io.hops.site.dao.facade.LiveDatasetFacade;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
@@ -30,6 +31,7 @@ import io.hops.site.util.CertificateHelper;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -55,6 +57,8 @@ public class ClusterController {
   private HeartbeatFacade heartbeatFacade;
   @EJB
   private LiveDatasetFacade liveDatasetFacade;
+  @EJB
+  private DatasetHealthFacade datasetHealthFacade;
 
   /**
    * Register a new cluster
@@ -125,9 +129,9 @@ public class ClusterController {
     int dwnl = 0;
     int upld = 0;
     for (LiveDataset liveDataset : liveDatasets) {
-      if (liveDataset.getStatus() == HopsSiteSettings.DATASET_STATUS_UPLOAD) {
+      if (liveDataset.uploadStatus()) {
         upld++;
-      } else if (liveDataset.getStatus() == HopsSiteSettings.DATASET_STATUS_DOWNLOAD) {
+      } else if (liveDataset.downloadStatus()) {
         dwnl++;
       }
     }
@@ -149,8 +153,12 @@ public class ClusterController {
       } else {
         heartbeatFacade.create(new Heartbeat(cluster.getId(), settings.getDateNow()));
       }
-      liveDatasetFacade.downloadDatasets(cluster.getId(), datasetFacade.findIds(dwnlDSIds).values());
-      liveDatasetFacade.uploadDatasets(cluster.getId(), datasetFacade.findIds(upldDSIds).values());
+      Collection<Integer> downloadDatasets = datasetFacade.findIds(dwnlDSIds).values();
+      Collection<Integer> uploadDatasets = datasetFacade.findIds(upldDSIds).values();
+      liveDatasetFacade.downloadDatasets(cluster.getId(), downloadDatasets);
+      liveDatasetFacade.uploadDatasets(cluster.getId(), uploadDatasets);
+      datasetHealthFacade.downloadDatasets(downloadDatasets);
+      datasetHealthFacade.uploadDatasets(uploadDatasets);
       return Action.HEAVY_PING;
     } else {
       return Action.REGISTER;

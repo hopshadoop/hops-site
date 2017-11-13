@@ -142,9 +142,9 @@ public class DatasetController {
   private DatasetDTO.Health health(List<DatasetHealth> aux) {
     DatasetDTO.Health datasetHealth = new DatasetDTO.Health();
     for (DatasetHealth dh : aux) {
-      if (HopsSiteSettings.DATASET_STATUS_UPLOAD == dh.getId().getStatus()) {
+      if (dh.uploadStatus()) {
         datasetHealth.setSeeders(dh.getCount());
-      } else if (HopsSiteSettings.DATASET_STATUS_DOWNLOAD == dh.getId().getStatus()) {
+      } else if (dh.downloadStatus()) {
         datasetHealth.setLeechers(dh.getCount());
       }
     }
@@ -168,6 +168,7 @@ public class DatasetController {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} live dataset",
       new Object[]{publicDSId, publicCId});
     liveDatasetFacade.uploadDataset(cluster.getId(), dataset.getId());
+    datasetHealthFacade.publishDataset(dataset.getId());
     ElasticDoc elasticDoc = elasticDoc(publicDSId, msg, version);
     try {
       elasticCtrl.add(settings.DELA_DOC_INDEX, ElasticDoc.DOC_TYPE, publicDSId, toJson(elasticDoc));
@@ -199,37 +200,27 @@ public class DatasetController {
   }
 
   public void unpublishDataset(String datasetPublicId, String clusterPublicId) throws AppException {
-    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(clusterPublicId);
-    if (!cluster.isPresent()) {
-      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "cluster not registered");
-    }
-    Optional<Dataset> d = datasetFacade.findByPublicId(datasetPublicId);
-    if (!d.isPresent()) {
-      return;
-    }
-    Dataset dataset = d.get();
-    if (dataset.getOwner().getCluster().getId() != cluster.get().getId()) {
+    RegisteredCluster cluster = ClusterHelper.getCluster(clusterFacade, clusterPublicId);
+    Dataset dataset = DatasetHelper.getDataset(datasetFacade, datasetPublicId);
+    if (dataset.getOwner().getCluster().getId() != cluster.getId()) {
       throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "only owner can unpublish");
     }
+    datasetHealthFacade.unpublishDataset(dataset.getId());
     datasetFacade.remove(dataset);
     elasticCtrl.delete(settings.DELA_DOC_INDEX, ElasticDoc.DOC_TYPE, datasetPublicId);
   }
 
   public void download(String datasetPublicId, String clusterPublicId) throws AppException {
-    Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(clusterPublicId);
-    if (!cluster.isPresent()) {
-      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "cluster not registered");
-    }
-    Optional<Dataset> dataset = datasetFacade.findByPublicId(datasetPublicId);
-    if (!dataset.isPresent()) {
-      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "dataset not registered");
-    }
-    liveDatasetFacade.downloadDataset(cluster.get().getId(), dataset.get().getId());
+    RegisteredCluster cluster = ClusterHelper.getCluster(clusterFacade, clusterPublicId);
+    Dataset dataset = DatasetHelper.getDataset(datasetFacade, datasetPublicId);
+    liveDatasetFacade.downloadDataset(cluster.getId(), dataset.getId());
+    datasetHealthFacade.downloadDataset(dataset.getId());
   }
 
   public void remove(String datasetPublicId, String clusterPublicId) throws AppException {
     Optional<LiveDataset> c = liveDatasetFacade.connection(datasetPublicId, clusterPublicId);
     if (c.isPresent()) {
+      datasetHealthFacade.removeDataset(c.get());
       liveDatasetFacade.remove(c.get());
     }
   }
@@ -238,7 +229,8 @@ public class DatasetController {
     Optional<LiveDataset> c = liveDatasetFacade.connection(datasetPublicId, clusterPublicId);
     if (c.isPresent()) {
       LiveDataset connection = c.get();
-      connection.setStatus(settings.DATASET_STATUS_UPLOAD);
+      datasetHealthFacade.removeDataset(connection);
+      connection.updateStatus(LiveDataset.Status.UPLOAD);
       liveDatasetFacade.edit(connection);
     }
   }

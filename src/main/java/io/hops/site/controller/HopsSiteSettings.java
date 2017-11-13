@@ -178,9 +178,6 @@ public class HopsSiteSettings {
     checkCache();
     return ELASTIC_PORT;
   }
-  //************************************************DATASET STATUS******************************************************
-  public static final int DATASET_STATUS_UPLOAD = 0;
-  public static final int DATASET_STATUS_DOWNLOAD = 1;
   //*************************************************LIVE DATASET*******************************************************
   public final static int LIVE_DATASET_BOOTSTRAP_PEERS = 5;
   //*****************************************************LOG************************************************************

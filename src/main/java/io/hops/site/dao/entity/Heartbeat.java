@@ -21,8 +21,8 @@ import javax.xml.bind.annotation.XmlRootElement;
   schema = "")
 @XmlRootElement
 @NamedQueries({
-  @NamedQuery(name = "Heartbeat.deleteOlderThan",
-    query = "DELETE FROM Heartbeat h WHERE h.lastPinged < :date")})
+  @NamedQuery(name = "Heartbeat.findOlderThan",
+    query = "SELECT FROM Heartbeat h WHERE h.lastPinged < :date")})
 public class Heartbeat implements Serializable {
 
   @Id

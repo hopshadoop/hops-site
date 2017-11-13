@@ -43,6 +43,11 @@ public class DatasetHealth implements Serializable {
 
   public DatasetHealth() {
   }
+  
+  public DatasetHealth(int datasetId, LiveDataset.Status status, int count) {
+    this.id = new PK(datasetId, status);
+    this.count = count;
+  }
 
   public PK getId() {
     return id;
@@ -68,6 +73,23 @@ public class DatasetHealth implements Serializable {
     this.updated = updated;
   }
 
+  //********************************************HELPER METHODS********************************************************** 
+  public boolean uploadStatus() {
+    return id.status == LiveDataset.Status.UPLOAD.statusCode;
+  }
+  
+  public boolean downloadStatus() {
+    return id.status == LiveDataset.Status.DOWNLOAD.statusCode;
+  }
+  
+  public void incCount() {
+    count++;
+  }
+  
+  public void decCount() {
+    count--;
+  }
+  
   @Embeddable
   public static class PK implements Serializable {
 
@@ -81,9 +103,9 @@ public class DatasetHealth implements Serializable {
     public PK() {
     }
 
-    public PK(int datasetId, int clusterId) {
+    public PK(int datasetId, LiveDataset.Status status) {
       this.datasetId = datasetId;
-      this.status = status;
+      this.status = status.statusCode;
     }
 
     public int getDatasetId() {

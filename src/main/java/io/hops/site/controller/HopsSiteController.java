@@ -2,12 +2,18 @@ package io.hops.site.controller;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import io.hops.site.dao.entity.DatasetHealth;
+import io.hops.site.dao.entity.Heartbeat;
+import io.hops.site.dao.entity.LiveDataset;
 import io.hops.site.dao.facade.DatasetHealthFacade;
 import io.hops.site.dao.facade.HeartbeatFacade;
+import io.hops.site.dao.facade.LiveDatasetFacade;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -32,6 +38,13 @@ public class HopsSiteController {
   private HopsSiteSettings settings;
   @Resource
   TimerService timerService;
+
+  @EJB
+  private HeartbeatFacade heartbeatFacade;
+  @EJB
+  private LiveDatasetFacade liveDatasetFacade;
+  @EJB
+  private DatasetHealthFacade datasetHealthFacade;
 
   public HopsSiteController() {
     this.sessionCache = Caffeine.newBuilder()
@@ -78,24 +91,41 @@ public class HopsSiteController {
   //****************************************************HEARTBEATS******************************************************
   private static final Serializable HEARTBEAT_CHECK_TIMER = "heartbeat check timer";
 
-  @EJB
-  private HeartbeatFacade heartbeatFacade;
-
   private Date heartbeatsToBeCleaned;
 
   private void hearbeatCheckTimeout() {
     LOG.log(HopsSiteSettings.DEBUG, "{0}", HEARTBEAT_CHECK_TIMER);
-    heartbeatFacade.deleteHeartbeats(heartbeatsToBeCleaned);
+    List<Heartbeat> oldHeartbeats = heartbeatFacade.findHeartbeats(heartbeatsToBeCleaned);
+    for (Heartbeat h : oldHeartbeats) {
+      List<LiveDataset> datasets = liveDatasetFacade.liveDatasets(h.getClusterId());
+      for (LiveDataset d : datasets) {
+        updateDatasetHealth(d.getId().getDatasetId());
+      }
+      heartbeatFacade.remove(h);
+    }
     heartbeatsToBeCleaned = settings.getDateNow();
+  }
+
+  private void updateDatasetHealth(int datasetId) {
+    List<DatasetHealth> datasetHealth = datasetHealthFacade.findByDatasetId(datasetId);
+    if (datasetHealth.isEmpty()) {
+      return;
+    }
+    if (datasetHealth.size() != 2) {
+      LOG.log(Level.SEVERE, "something is wrong with dataset health maintenance");
+      return;
+    }
+    for (DatasetHealth dh : datasetHealth) {
+      dh.decCount();
+      datasetHealthFacade.edit(dh);
+    }
   }
   //***********************************************DATASET HEALTH*******************************************************
   private static final Serializable DATASET_HEALTH_TIMER = "dataset health timer";
-  @EJB
-  private DatasetHealthFacade datasetHealthFacade;
 
   private void datasetHealthTimeout() {
     LOG.log(HopsSiteSettings.DEBUG, "{0}", DATASET_HEALTH_TIMER);
-    datasetHealthFacade.updateAllDatasetHealth();
+//    datasetHealthFacade.updateAllDatasetHealth();
   }
 
   //********************************************************************************************************************

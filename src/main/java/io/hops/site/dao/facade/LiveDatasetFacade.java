@@ -102,10 +102,10 @@ public class LiveDatasetFacade extends AbstractFacade<LiveDataset> {
   public void uploadDataset(int clusterId, int datasetId) {
     LiveDataset ld = find(new LiveDataset.PK(datasetId, clusterId));
     if (ld == null) {
-      ld = new LiveDataset(datasetId, clusterId, settings.DATASET_STATUS_UPLOAD);
+      ld = new LiveDataset(datasetId, clusterId, LiveDataset.Status.UPLOAD);
       create(ld);
-    } else if (ld.getStatus() != settings.DATASET_STATUS_UPLOAD) {
-      ld.setStatus(settings.DATASET_STATUS_UPLOAD);
+    } else if (!ld.uploadStatus()) {
+      ld.updateStatus(LiveDataset.Status.UPLOAD);
       edit(ld);
     }
   }
@@ -113,7 +113,7 @@ public class LiveDatasetFacade extends AbstractFacade<LiveDataset> {
   public void downloadDataset(int clusterId, int datasetId) {
     LiveDataset ld = find(new LiveDataset.PK(datasetId, clusterId));
     if (ld == null) {
-      ld = new LiveDataset(datasetId, clusterId, settings.DATASET_STATUS_DOWNLOAD);
+      ld = new LiveDataset(datasetId, clusterId, LiveDataset.Status.UPLOAD);
       create(ld);
     } else {
       //if status is upload - weird download status

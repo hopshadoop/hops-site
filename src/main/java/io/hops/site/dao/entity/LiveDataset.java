@@ -49,9 +49,9 @@ public class LiveDataset implements Serializable {
   public LiveDataset() {
   }
 
-  public LiveDataset(int datasetId, int clusterId, int status) {
+  public LiveDataset(int datasetId, int clusterId, Status status) {
     this.id = new PK(datasetId, clusterId);
-    this.status = status;
+    this.status = status.statusCode;
   }
 
   public PK getId() {
@@ -68,6 +68,29 @@ public class LiveDataset implements Serializable {
 
   public void setStatus(int status) {
     this.status = status;
+  }
+  
+  //********************************************HELPER METHODS********************************************************** 
+  public void updateStatus(Status status) {
+    this.status = status.statusCode;
+  }
+  
+  public boolean uploadStatus() {
+    return status == Status.UPLOAD.statusCode;
+  }
+  
+  public boolean downloadStatus() {
+    return status == Status.DOWNLOAD.statusCode;
+  }
+  
+  public static enum Status {
+    UPLOAD(0), DOWNLOAD(1);
+    
+    int statusCode;
+    
+    Status(int statusCode) {
+      this.statusCode = statusCode;
+    }
   }
 
   @Embeddable

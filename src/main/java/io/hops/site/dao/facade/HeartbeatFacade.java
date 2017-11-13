@@ -3,6 +3,7 @@ package io.hops.site.dao.facade;
 import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dao.entity.Heartbeat;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -39,10 +40,9 @@ public class HeartbeatFacade extends AbstractFacade<Heartbeat> {
     return Optional.ofNullable(find(clusterId));
   }
   
-  public int deleteHeartbeats(Date olderThan) {
-    TypedQuery<Heartbeat> query = em.createNamedQuery("Heartbeat.deleteOlderThan", Heartbeat.class)
+  public List<Heartbeat> findHeartbeats(Date olderThan) {
+    TypedQuery<Heartbeat> query = em.createNamedQuery("Heartbeat.findOlderThan", Heartbeat.class)
       .setParameter("date", olderThan);
-    int updates = query.executeUpdate();
-    return updates;
+    return query.getResultList();
   }
 }
