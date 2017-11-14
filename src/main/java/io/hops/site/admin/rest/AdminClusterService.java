@@ -7,7 +7,6 @@ import io.hops.site.util.SecurityHelper;
 import io.swagger.annotations.Api;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;

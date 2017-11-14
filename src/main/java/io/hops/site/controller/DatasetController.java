@@ -215,6 +215,16 @@ public class DatasetController {
     elasticCtrl.delete(settings.DELA_DOC_INDEX, ElasticDoc.DOC_TYPE, datasetPublicId);
   }
 
+  public void unpublishDataset(String datasetPublicId) throws AppException {
+    Optional<Dataset> d = datasetFacade.findByPublicId(datasetPublicId);
+    if (!d.isPresent()) {
+      return;
+    }
+    Dataset dataset = d.get();
+    datasetFacade.remove(dataset);
+    elasticCtrl.delete(settings.DELA_DOC_INDEX, ElasticDoc.DOC_TYPE, datasetPublicId);
+  }
+
   public void download(String datasetPublicId, String clusterPublicId) throws AppException {
     Optional<RegisteredCluster> cluster = clusterFacade.findByPublicId(clusterPublicId);
     if (!cluster.isPresent()) {
