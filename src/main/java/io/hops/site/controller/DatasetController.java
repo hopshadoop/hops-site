@@ -167,6 +167,8 @@ public class DatasetController {
       msg.getDescription(), readmePath, categories, user, msg.getSize());
     LOG.log(HopsSiteSettings.DELA_DEBUG, "dataset:{0} cluster:{1} live dataset",
       new Object[]{publicDSId, publicCId});
+    LOG.log(HopsSiteSettings.DELA_DEBUG, "internal dataset:{0} cluster:{1} live dataset",
+      new Object[]{dataset.getId(), cluster.getId()});
     liveDatasetFacade.uploadDataset(cluster.getId(), dataset.getId());
     datasetHealthFacade.publishDataset(dataset.getId());
     ElasticDoc elasticDoc = elasticDoc(publicDSId, msg, version);

@@ -17,7 +17,9 @@ package io.hops.site.rest.request.filter;
 
 import io.hops.site.controller.ClusterController;
 import io.hops.site.controller.HopsSiteSettings;
+import io.hops.site.dao.entity.Heartbeat;
 import io.hops.site.dao.entity.RegisteredCluster;
+import io.hops.site.dao.facade.HeartbeatFacade;
 import io.hops.site.old_dto.JsonResponse;
 import io.hops.site.rest.exception.ThirdPartyException;
 import io.hops.site.util.CertificateHelper;
@@ -53,6 +55,8 @@ public class AuthFilter implements ContainerRequestFilter {
 
   @EJB
   private ClusterController clusterController;
+  @EJB
+  private HeartbeatFacade heartbeatFacade;
 
   @Context
   private ResourceInfo resourceInfo;
@@ -127,6 +131,11 @@ public class AuthFilter implements ContainerRequestFilter {
     }
     if (!cluster.get().getPublicId().equals(publicCId)) {
       requestContext.abortWith(fail(ThirdPartyException.Error.IMPERSONATION));
+      return;
+    }
+    Optional<Heartbeat> heartbeat = heartbeatFacade.findByClusterId(cluster.get().getId());
+    if(!heartbeat.isPresent()) {
+      requestContext.abortWith(fail(ThirdPartyException.Error.HEAVY_PING));
       return;
     }
     String role = SecurityHelper.getClusterRole(requestContext.getSecurityContext());

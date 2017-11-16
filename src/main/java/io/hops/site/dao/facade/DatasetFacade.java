@@ -80,6 +80,7 @@ public class DatasetFacade extends AbstractFacade<Dataset> {
   public Dataset createDataset(String publicId, String datasetName, int version, String description, 
     String readmePath, Collection<Category> categories, Users owner, long size) {
     create(new Dataset(publicId, datasetName, version, description, readmePath, categories, owner, size));
+    em.flush();
     Optional<Dataset> d = findByPublicId(publicId);
     return d.get();
   }

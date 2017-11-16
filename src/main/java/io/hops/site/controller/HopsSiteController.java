@@ -51,11 +51,11 @@ public class HopsSiteController {
       .expireAfterWrite(settings.SESSION_EXPIRATION_TIME.getValue0(), settings.SESSION_EXPIRATION_TIME.getValue1())
       .maximumSize(settings.SESSION_MAX_SIZE)
       .build();
-    this.heartbeatsToBeCleaned = settings.getDateNow();
   }
 
   @PostConstruct
   private void init() {
+    heartbeatsToBeCleaned = settings.getDateNow();
     timerService.createTimer(0, settings.getDATASET_HEALTH_INTERVAL(), DATASET_HEALTH_TIMER);
     timerService.createTimer(0, settings.getHEARTBEAT_CHECK_INTERVAL(), HEARTBEAT_CHECK_TIMER);
   }

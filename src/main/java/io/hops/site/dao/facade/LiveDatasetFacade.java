@@ -113,7 +113,7 @@ public class LiveDatasetFacade extends AbstractFacade<LiveDataset> {
   public void downloadDataset(int clusterId, int datasetId) {
     LiveDataset ld = find(new LiveDataset.PK(datasetId, clusterId));
     if (ld == null) {
-      ld = new LiveDataset(datasetId, clusterId, LiveDataset.Status.UPLOAD);
+      ld = new LiveDataset(datasetId, clusterId, LiveDataset.Status.DOWNLOAD);
       create(ld);
     } else {
       //if status is upload - weird download status
