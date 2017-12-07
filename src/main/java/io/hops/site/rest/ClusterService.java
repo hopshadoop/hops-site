@@ -50,7 +50,7 @@ public class ClusterService {
   //*****************************************************VERIFIED*******************************************************
   @GET
   @NoCache
-  @Path("dela/version")
+  @Path("public/dela/version")
   public Response getVersion() {
     LOG.log(Level.FINE, "dela version request");
     String version = hsettings.getDELA_VERSION();
@@ -59,7 +59,7 @@ public class ClusterService {
 
   @PUT
   @NoCache
-  @Path("register")
+  @Path("private/register")
   public Response register(@Context HttpServletRequest req, ClusterServiceDTO.Register msg)
     throws CertificateEncodingException, ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster register");
@@ -71,7 +71,7 @@ public class ClusterService {
 
   @PUT
   @NoCache
-  @Path("heavyPing/{publicCId}")
+  @Path("private/heavyPing/{publicCId}")
   public Response heavyPing(@PathParam("publicCId") String publicCId, ClusterServiceDTO.HeavyPing msg) 
     throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster heavyPing {0} <{1}, {2}>",
@@ -90,7 +90,7 @@ public class ClusterService {
 
   @PUT
   @NoCache
-  @Path("ping/{publicCId}")
+  @Path("private/ping/{publicCId}")
   public Response ping(@PathParam("publicCId") String publicCId, ClusterServiceDTO.Ping msg) 
     throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster ping {0}", publicCId);
@@ -116,7 +116,7 @@ public class ClusterService {
 
   @GET
   @NoCache
-  @Path("role")
+  @Path("private/role")
   public Response getClusterRole(@Context SecurityContext sc) {
     LOG.log(Level.INFO, "Cluster: {0}", sc.getUserPrincipal().getName());
     String role = SecurityHelper.getClusterRole(sc);
@@ -125,7 +125,7 @@ public class ClusterService {
   }
 
   @DELETE
-  @Path("{clusterId}")
+  @Path("private/{clusterId}")
   @RolesAllowed({"admin"})
   public Response removeRegisterdCluster(@PathParam("clusterId") String clusterId) {
     clusterController.removeClusterByPublicId(clusterId);

@@ -42,7 +42,7 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("rating")
+@Path("private/rating")
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
 @Api(value = "rating",

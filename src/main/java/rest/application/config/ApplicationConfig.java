@@ -2,7 +2,8 @@ package rest.application.config;
 
 import io.hops.site.rest.ClusterService;
 import io.hops.site.rest.CommentService;
-import io.hops.site.rest.DatasetService;
+import io.hops.site.rest.PrivateDatasetService;
+import io.hops.site.rest.PublicDatasetService;
 import io.hops.site.rest.RatingService;
 import io.hops.site.rest.UserService;
 import io.hops.site.rest.exception.mapper.AppExceptionMapper;
@@ -21,7 +22,8 @@ public class ApplicationConfig extends ResourceConfig {
 
   public ApplicationConfig() {
     register(ClusterService.class);
-    register(DatasetService.class);
+    register(PrivateDatasetService.class);
+    register(PublicDatasetService.class);
     register(CommentService.class);
     register(RatingService.class);
     register(UserService.class);

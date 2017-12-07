@@ -39,10 +39,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("comment")
+@Path("private/comment")
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/comment",
+@Api(value = "comment",
   description = "Comment service")
 @TransactionAttribute(TransactionAttributeType.NEVER)
 public class CommentService {

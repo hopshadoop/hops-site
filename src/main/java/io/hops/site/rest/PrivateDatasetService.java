@@ -15,13 +15,11 @@
  */
 package io.hops.site.rest;
 
-import com.google.gson.Gson;
 import io.hops.site.controller.DatasetController;
 import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dao.entity.Dataset;
 import io.hops.site.dao.facade.DatasetFacade;
 import io.hops.site.dto.DatasetDTO;
-import io.hops.site.dto.SearchServiceDTO;
 import io.hops.site.old_dto.DatasetIssueDTO;
 import io.hops.site.old_dto.JsonResponse;
 import io.hops.site.old_dto.PopularDatasetDTO;
@@ -50,15 +48,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import jersey.repackaged.com.google.common.primitives.Ints;
 
-@Path("/dataset")
+@Path("private/dataset")
 @Stateless
 @Produces(MediaType.APPLICATION_JSON)
-@Api(value = "/dataset",
+@Api(value = "private/dataset",
         description = "Dataset service")
 @TransactionAttribute(TransactionAttributeType.NEVER)
-public class DatasetService {
+public class PrivateDatasetService {
 
-  private final static Logger LOG = Logger.getLogger(DatasetService.class.getName());
+  private final static Logger LOG = Logger.getLogger(PrivateDatasetService.class.getName());
   @EJB
   private DatasetController datasetCtrl;
   @EJB
@@ -169,53 +167,7 @@ public class DatasetService {
     }
   }
   
-  //********************************************************************************************************************
-  @POST
-  @NoCache
-  @Path("search")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response search(SearchServiceDTO.Params searchParams) {
-    searchDTOParamsSanityCheck(searchParams);
-    try {
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset search");
-      SearchServiceDTO.SearchResult searchResult = datasetCtrl.search(searchParams);
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset search - done");
-      return Response.ok(searchResult).build();
-    } catch (AppException ex) {
-      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
-    }
-  }
-  
-  private void searchDTOParamsSanityCheck(SearchServiceDTO.Params req) {
-  }
-  
-  @GET
-  @NoCache
-  @Path("search/{sessionId}/page/{startItem}/{nrItems}")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response getPage(@PathParam("sessionId") String sessionId, @PathParam("startItem") Integer startItem, 
-    @PathParam("nrItems") Integer nrItems) {
-    try {
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset search page");
-      List<SearchServiceDTO.Item> result = datasetCtrl.getSearchPage(sessionId, startItem, nrItems);
-      LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset search page - done");
-      return Response.ok(new Gson().toJson(result)).build();
-    } catch (AppException ex) {
-      return Response.status(ex.getStatus()).entity(new JsonResponse(ex.getMessage())).build();
-    }
-  }
-  
-  @GET
-  @NoCache
-  @Path("{publicDSId}/details")
-  @Produces(MediaType.APPLICATION_JSON)
-  public Response details(@PathParam("publicDSId") String publicDSId) throws AppException {
-    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset - details {0}", publicDSId);
-    SearchServiceDTO.ItemDetails result = datasetCtrl.getDetails(publicDSId);
-    LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:dataset:done - details {0}", publicDSId);
-    return Response.ok(new Gson().toJson(result)).build();
-  }
-  //********************************************************************************************************************
+  //******************************************************************************************************************** 
   
   @GET
   @NoCache
