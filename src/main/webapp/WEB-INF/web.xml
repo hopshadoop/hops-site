@@ -42,7 +42,7 @@ see implementation details http://jersey.java.net/nonav/documentation/latest/jax
   </security-role>
   <security-constraint>
     <web-resource-collection>
-      <web-resource-name>All api</web-resource-name>
+      <web-resource-name>Private api</web-resource-name>
       <url-pattern>/api/private/*</url-pattern>
     </web-resource-collection>
     <auth-constraint>

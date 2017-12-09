@@ -24,7 +24,7 @@ import io.hops.site.dao.facade.LiveDatasetFacade;
 import io.hops.site.dao.facade.RegisteredClusterFacade;
 import io.hops.site.dto.ClusterAddressDTO;
 import io.hops.site.dto.ClusterServiceDTO;
-import io.hops.site.rest.ClusterService;
+import io.hops.site.rest.PrivateClusterService;
 import io.hops.site.rest.exception.ThirdPartyException;
 import io.hops.site.util.CertificateHelper;
 import java.security.cert.CertificateEncodingException;
@@ -44,7 +44,7 @@ import javax.ws.rs.core.Response;
 @TransactionAttribute(TransactionAttributeType.NEVER)
 public class ClusterController {
 
-  private final static Logger LOGGER = Logger.getLogger(ClusterService.class.getName());
+  private final static Logger LOGGER = Logger.getLogger(PrivateClusterService.class.getName());
   @EJB
   private HopsSiteSettings settings;
   @EJB

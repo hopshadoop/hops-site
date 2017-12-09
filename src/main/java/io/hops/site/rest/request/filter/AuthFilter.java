@@ -59,8 +59,7 @@ public class AuthFilter implements ContainerRequestFilter {
 
   private static final Set<String> publicPaths = new HashSet<String>() {
     {
-      add("cluster/register");
-      add("cluster/dela/version");
+      add("private/cluster/register");
     }
   };
   
@@ -91,6 +90,12 @@ public class AuthFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
+    LOGGER.log(Level.SEVERE, "path:{0}", new Object[]{requestContext.getUriInfo().getPath()});
+    String path = requestContext.getUriInfo().getPath();
+    if (path.startsWith("public") || path.startsWith("/public") || publicPaths.contains(path)) {
+      LOGGER.log(Level.INFO, "public path:{0}", new Object[]{path});
+      return;
+    }
     X509Certificate[] certs = (X509Certificate[]) requestContext.getProperty("javax.servlet.request.X509Certificate");
     if (certs == null || certs.length < 1) {
       requestContext.abortWith(fail(ThirdPartyException.Error.CERT_MISSING));
@@ -102,13 +107,9 @@ public class AuthFilter implements ContainerRequestFilter {
       return;
     }
 
-    String path = requestContext.getUriInfo().getPath();
     Method method = resourceInfo.getResourceMethod();
     LOGGER.log(HopsSiteSettings.DELA_DEBUG, "hops_site:auth: path:{0}, method:{1}", new Object[]{path, method});
 
-    if (publicPaths.contains(path)) {
-      return;
-    }
     if(isSearch(path)) {
       return;
     }

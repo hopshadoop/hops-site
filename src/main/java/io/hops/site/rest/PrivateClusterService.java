@@ -32,34 +32,25 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
-@Path("cluster")
+@Path("private/cluster")
 @Stateless
-@Api(value = "/cluster",
+@Api(value = "private/cluster",
   description = "Cluster Register And Ping service")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 @TransactionAttribute(TransactionAttributeType.NEVER)
-public class ClusterService {
+public class PrivateClusterService {
 
-  private final static Logger LOG = Logger.getLogger(ClusterService.class.getName());
+  private final static Logger LOG = Logger.getLogger(PrivateClusterService.class.getName());
   @EJB
   private ClusterController clusterController;
   @EJB
   private HopsSiteSettings hsettings;
 
   //*****************************************************VERIFIED*******************************************************
-  @GET
-  @NoCache
-  @Path("public/dela/version")
-  public Response getVersion() {
-    LOG.log(Level.FINE, "dela version request");
-    String version = hsettings.getDELA_VERSION();
-    return Response.ok(version).build();
-  }
-
   @PUT
   @NoCache
-  @Path("private/register")
+  @Path("register")
   public Response register(@Context HttpServletRequest req, ClusterServiceDTO.Register msg)
     throws CertificateEncodingException, ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster register");
@@ -71,7 +62,7 @@ public class ClusterService {
 
   @PUT
   @NoCache
-  @Path("private/heavyPing/{publicCId}")
+  @Path("heavyPing/{publicCId}")
   public Response heavyPing(@PathParam("publicCId") String publicCId, ClusterServiceDTO.HeavyPing msg) 
     throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster heavyPing {0} <{1}, {2}>",
@@ -90,7 +81,7 @@ public class ClusterService {
 
   @PUT
   @NoCache
-  @Path("private/ping/{publicCId}")
+  @Path("ping/{publicCId}")
   public Response ping(@PathParam("publicCId") String publicCId, ClusterServiceDTO.Ping msg) 
     throws ThirdPartyException {
     LOG.log(HopsSiteSettings.DELA_DEBUG, "hops_site:cluster ping {0}", publicCId);
@@ -116,7 +107,7 @@ public class ClusterService {
 
   @GET
   @NoCache
-  @Path("private/role")
+  @Path("role")
   public Response getClusterRole(@Context SecurityContext sc) {
     LOG.log(Level.INFO, "Cluster: {0}", sc.getUserPrincipal().getName());
     String role = SecurityHelper.getClusterRole(sc);
@@ -125,7 +116,7 @@ public class ClusterService {
   }
 
   @DELETE
-  @Path("private/{clusterId}")
+  @Path("{clusterId}")
   @RolesAllowed({"admin"})
   public Response removeRegisterdCluster(@PathParam("clusterId") String clusterId) {
     clusterController.removeClusterByPublicId(clusterId);

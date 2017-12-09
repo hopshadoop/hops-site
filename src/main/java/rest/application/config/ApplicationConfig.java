@@ -1,8 +1,9 @@
 package rest.application.config;
 
-import io.hops.site.rest.ClusterService;
 import io.hops.site.rest.CommentService;
+import io.hops.site.rest.PrivateClusterService;
 import io.hops.site.rest.PrivateDatasetService;
+import io.hops.site.rest.PublicClusterService;
 import io.hops.site.rest.PublicDatasetService;
 import io.hops.site.rest.RatingService;
 import io.hops.site.rest.UserService;
@@ -21,7 +22,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 public class ApplicationConfig extends ResourceConfig {
 
   public ApplicationConfig() {
-    register(ClusterService.class);
+    register(PrivateClusterService.class);
+    register(PublicClusterService.class);
     register(PrivateDatasetService.class);
     register(PublicDatasetService.class);
     register(CommentService.class);
