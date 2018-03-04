@@ -108,10 +108,11 @@ public class PrivateDatasetService {
     if (!dataset.isPresent()) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
-    DatasetDTO.Complete ds = new DatasetDTO.Complete(null, dataset.get().getName(), dataset.get().getDescription(),
-            dataset.get().getCategories(), dataset.get().getMadePublicOn(), dataset.get().getRating(), dataset.get().
-            getDsSize());
-    LOG.log(Level.INFO, "Get dataset for id- {0}", publicDSId);
+    DatasetDTO.Owner owner = new DatasetDTO.Owner(dataset.get().getOwner());
+    int datasetRating = dataset.get().getRating() == null ? 0 : dataset.get().getRating();
+    DatasetDTO.Complete ds = new DatasetDTO.Complete(owner, dataset.get().getName(), dataset.get().getDescription(),
+            dataset.get().getCategories(), dataset.get().getMadePublicOn(), datasetRating, dataset.get().getDsSize());
+    LOG.log(Level.INFO, "Get dataset for id:{0}", publicDSId);
     return Response.status(Response.Status.OK).entity(ds).build();
   }
 
