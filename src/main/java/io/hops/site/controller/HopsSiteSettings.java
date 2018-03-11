@@ -188,6 +188,11 @@ public class HopsSiteSettings {
   //****************************************************Session*********************************************************
   public static final Pair<Integer, TimeUnit> SESSION_EXPIRATION_TIME = Pair.with(30, TimeUnit.MINUTES);
   public static final int SESSION_MAX_SIZE = 10000;
+  //****************************************************Report**********************************************************
+  public static final String reportDir = "/srv/hops/hopssite/report";
+  public static String getReportDir() {
+    return reportDir;
+  }
   //*****************************************************Util***********************************************************
   public static Date getDateNow() {
     return Calendar.getInstance().getTime();

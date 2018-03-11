@@ -31,7 +31,7 @@ public class PublicClusterService {
   private ClusterController clusterController;
   @EJB
   private HopsSiteSettings hsettings;
-  
+
   @GET
   @NoCache
   @Path("dela/version")

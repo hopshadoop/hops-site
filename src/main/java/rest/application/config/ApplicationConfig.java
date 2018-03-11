@@ -6,6 +6,8 @@ import io.hops.site.rest.PrivateDatasetService;
 import io.hops.site.rest.PublicClusterService;
 import io.hops.site.rest.PublicDatasetService;
 import io.hops.site.rest.RatingService;
+import io.hops.site.rest.ReportCleanupService;
+import io.hops.site.rest.ReportService;
 import io.hops.site.rest.UserService;
 import io.hops.site.rest.exception.mapper.AppExceptionMapper;
 import io.hops.site.rest.exception.mapper.EJBExceptionMapper;
@@ -29,6 +31,8 @@ public class ApplicationConfig extends ResourceConfig {
     register(CommentService.class);
     register(RatingService.class);
     register(UserService.class);
+    register(ReportService.class);
+    register(ReportCleanupService.class);
     
     //Exception mappers
     register(EJBExceptionMapper.class);
