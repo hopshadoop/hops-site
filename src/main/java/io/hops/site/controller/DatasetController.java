@@ -130,7 +130,7 @@ public class DatasetController {
 
     Optional<Dataset> dataset = datasetFacade.findByPublicId(publicDSId);
     if (!dataset.isPresent()) {
-      throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "dataset issue");
+      throw new AppException(Response.Status.BAD_REQUEST.getStatusCode(), "no dataset");
     }
 
     DatasetDTO.Owner owner = new DatasetDTO.Owner(dataset.get().getOwner());
