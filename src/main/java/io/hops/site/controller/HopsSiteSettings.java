@@ -101,6 +101,7 @@ public class HopsSiteSettings {
   public static final Level DELA_DEBUG = Level.INFO;
   private static final String VARIABLE_DELA_VERSION = "dela_version";
   private static final String VARIABLE_DELA_HEARTBEAT_INTERVAL = "dela_heartbeat_interval";
+  private static final String VARIABLE_TRACKER_REPORT_DIR = "tracker_report_dir";
   private String DELA_VERSION = "0.1";
   private long DELA_HEARTBEAT_INTERVAL = 10*60*1000l; //same as cluster - 10mins default
   private long HEARTBEAT_CHECK_INTERVAL = 5 * DELA_HEARTBEAT_INTERVAL;
@@ -110,6 +111,7 @@ public class HopsSiteSettings {
   private void populateHopsSiteCache() {
     DELA_VERSION = setStringVar(VARIABLE_DELA_VERSION, DELA_VERSION);
     DELA_HEARTBEAT_INTERVAL = setLongVar(VARIABLE_DELA_HEARTBEAT_INTERVAL, DELA_HEARTBEAT_INTERVAL);
+    TRACKER_REPORT_DIR = setStringVar(VARIABLE_TRACKER_REPORT_DIR, TRACKER_REPORT_DIR);
     HEARTBEAT_CHECK_INTERVAL = 5 * DELA_HEARTBEAT_INTERVAL;
     DATASET_HEALTH_INTERVAL = 5 * HEARTBEAT_CHECK_INTERVAL;
     DATASET_HEALTH_OLDER_THAN = 5 * (int) (DATASET_HEALTH_INTERVAL / 1000);
@@ -189,9 +191,9 @@ public class HopsSiteSettings {
   public static final Pair<Integer, TimeUnit> SESSION_EXPIRATION_TIME = Pair.with(30, TimeUnit.MINUTES);
   public static final int SESSION_MAX_SIZE = 10000;
   //****************************************************Report**********************************************************
-  public static final String reportDir = "/srv/hops/hopssite/report";
+  public static String TRACKER_REPORT_DIR = "/srv/hops/hopssite/report";
   public static String getReportDir() {
-    return reportDir;
+    return TRACKER_REPORT_DIR;
   }
   //*****************************************************Util***********************************************************
   public static Date getDateNow() {
