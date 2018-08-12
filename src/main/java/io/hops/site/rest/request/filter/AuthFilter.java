@@ -78,7 +78,7 @@ public class AuthFilter implements ContainerRequestFilter {
   private void init() {
     try {
       //path, size in bytes and, number of log files to use
-      fh = new FileHandler("../logs/hops-site%g.log", 2000000, 50);
+      fh = new FileHandler("../logs/tracker_access%g.log", 2000000, 50);
       LOGGER.addHandler(fh);
       SimpleFormatter formatter = new SimpleFormatter();
       fh.setFormatter(formatter);
@@ -90,11 +90,13 @@ public class AuthFilter implements ContainerRequestFilter {
 
   @Override
   public void filter(ContainerRequestContext requestContext) throws IOException {
-    LOGGER.log(Level.SEVERE, "path:{0}", new Object[]{requestContext.getUriInfo().getPath()});
     String path = requestContext.getUriInfo().getPath();
+    Method method = resourceInfo.getResourceMethod();
     if (path.startsWith("public") || path.startsWith("/public") || publicPaths.contains(path)) {
-      LOGGER.log(Level.INFO, "public path:{0}", new Object[]{path});
+      LOGGER.log(Level.INFO, "public path:{0} method:{1}", new Object[]{path, method});
       return;
+    } else {
+      LOGGER.log(Level.INFO, "private path:{0} method:{1}", new Object[]{path, method});
     }
     X509Certificate[] certs = (X509Certificate[]) requestContext.getProperty("javax.servlet.request.X509Certificate");
     if (certs == null || certs.length < 1) {
@@ -106,9 +108,6 @@ public class AuthFilter implements ContainerRequestFilter {
       requestContext.abortWith(fail(ThirdPartyException.Error.EMAIL_MISSING));
       return;
     }
-
-    Method method = resourceInfo.getResourceMethod();
-    LOGGER.log(HopsSiteSettings.DELA_DEBUG, "hops_site:auth: path:{0}, method:{1}", new Object[]{path, method});
 
     if (isSearch(path)) {
       return;

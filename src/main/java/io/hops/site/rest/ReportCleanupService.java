@@ -10,15 +10,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.ejb.Schedule;
 import javax.ejb.Singleton;
 
 @Singleton
 public class ReportCleanupService {
 
   private final static Logger LOG = Logger.getLogger(ReportCleanupService.class.getName());
-
-  @Schedule(hour = "3")
+// No cleanup yet
+//  @Schedule(hour = "3")
   public void cleanup() {
     Date yesterday = yesterday();
     LOG.log(Level.INFO, "cleanup:{0}", yesterday);
