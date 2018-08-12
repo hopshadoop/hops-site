@@ -85,6 +85,7 @@ public class ReportService {
   private void writeToFile(String dirPath, String fileName, String reportVal) {
     File dir = new File(dirPath);
     if (!dir.exists()) {
+      LOG.log(Level.INFO, "reporting:{0}", dirPath);
       dir.mkdirs();
     }
     File file = new File(dir, fileName);
