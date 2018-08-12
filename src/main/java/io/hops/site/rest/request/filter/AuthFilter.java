@@ -62,11 +62,11 @@ public class AuthFilter implements ContainerRequestFilter {
       add("private/cluster/register");
     }
   };
-  
+
   public static final String SEARCH_PREFIX = "dataset/search";
-  
+
   public static boolean isSearch(String path) {
-    if(path.startsWith(SEARCH_PREFIX)) {
+    if (path.startsWith(SEARCH_PREFIX)) {
       return true;
     }
     return false;
@@ -110,7 +110,7 @@ public class AuthFilter implements ContainerRequestFilter {
     Method method = resourceInfo.getResourceMethod();
     LOGGER.log(HopsSiteSettings.DELA_DEBUG, "hops_site:auth: path:{0}, method:{1}", new Object[]{path, method});
 
-    if(isSearch(path)) {
+    if (isSearch(path)) {
       return;
     }
     String publicCId = requestContext.getUriInfo().getPathParameters().getFirst(CLUSTER_ID_PARAM);

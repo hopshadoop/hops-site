@@ -1,5 +1,8 @@
 package io.hops.site.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Charsets;
+import com.google.gson.Gson;
 import io.hops.site.controller.HopsSiteSettings;
 import io.hops.site.dto.DelaReportDTO;
 import io.hops.site.rest.annotation.NoCache;
@@ -8,6 +11,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,22 +26,24 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.commons.io.IOUtils;
 
 @Path("public/report")
 @Stateless
 @Api(value = "public/cluster",
   description = "Cluster Register And Ping service")
-@Consumes(MediaType.APPLICATION_JSON)
-@Produces(MediaType.APPLICATION_JSON)
 @TransactionAttribute(TransactionAttributeType.NEVER)
 public class ReportService {
+
   private final static Logger LOG = Logger.getLogger(ReportService.class.getName());
-  
+
   @POST
   @NoCache
   @Path("transfer")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
   public Response transferReport(DelaReportDTO report) {
-    LOG.log(Level.FINE, "transfer:{0}", report);
+    LOG.log(Level.INFO, "transfer:{0}", report);
     String reportPath = getReportPath(report.getDelaId(), report.getTorrentId(), new Date(report.getReportId()));
     writeToFile(reportPath, "transfer.csv", report.getReportVal());
     return Response.ok("ok").build();
@@ -46,8 +52,10 @@ public class ReportService {
   @POST
   @NoCache
   @Path("data")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
   public Response dataReport(DelaReportDTO report) {
-    LOG.log(Level.FINE, "data:{0}", report);
+    LOG.log(Level.INFO, "data:{0}", report);
     String reportPath = getReportPath(report.getDelaId(), report.getTorrentId(), new Date(report.getReportId()));
     writeToFile(reportPath, "data.csv", report.getReportVal());
     return Response.ok("ok").build();
@@ -56,14 +64,14 @@ public class ReportService {
   @POST
   @NoCache
   @Path("download")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
   public Response downloadReport(DelaReportDTO report) {
-    LOG.log(Level.FINE, "download:{0}", report);
+    LOG.log(Level.INFO, "download:{0}", report);
     String reportPath = getReportPath(report.getDelaId(), report.getTorrentId(), new Date(report.getReportId()));
     writeToFile(reportPath, "download.csv", report.getReportVal());
     return Response.ok("ok").build();
   }
-  
-  
   public static String getCleanupPath(Date reportId) {
     String path = HopsSiteSettings.getReportDir()
       + File.separator + reportIdInterval(reportId);
@@ -104,7 +112,7 @@ public class ReportService {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd");
     return dateFormat.format(reportId);
   }
-  
+
   private static String reportIdInstant(Date reportId) {
     SimpleDateFormat dateFormat = new SimpleDateFormat("HH_mm_ss_SSS");
     return dateFormat.format(reportId);

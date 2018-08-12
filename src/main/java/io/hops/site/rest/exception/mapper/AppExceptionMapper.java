@@ -10,16 +10,20 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-public class AppExceptionMapper implements ExceptionMapper<AppException> {
+public class AppExceptionMapper implements ExceptionMapper<Exception> {
 
   private final static Logger LOG = Logger.getLogger(AppExceptionMapper.class.getName());
 
   @Override
-  public Response toResponse(AppException ex) {
+  public Response toResponse(Exception ex) {
     if (ex instanceof ThirdPartyException) {
       return handleThirdPartyException((ThirdPartyException)ex);
+    } else if(ex instanceof AppException){
+      return handleAppException((AppException)ex);
     } else {
-      return handleAppException(ex);
+      ex.printStackTrace();
+      LOG.log(Level.WARNING, "Exception: {0}", ex.getMessage());
+      return Response.status(Response.Status.EXPECTATION_FAILED).build();
     }
   }
   
