@@ -8,9 +8,12 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.ws.rs.core.Response;
+import org.elasticsearch.action.ActionFuture;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.admin.indices.cache.clear.ClearIndicesCacheRequest;
 import org.elasticsearch.action.admin.indices.exists.indices.IndicesExistsRequestBuilder;
@@ -25,9 +28,10 @@ import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 
 /**
  * @author Alex Ormenisan <aaor@kth.se>
@@ -38,7 +42,46 @@ public class ElasticController {
   private final static Logger LOG = Logger.getLogger(ElasticController.class.getName());
   @EJB
   private HopsSiteSettings settings;
+  
+  private Client elasticClient = null;
+  
+  @PostConstruct
+  private void initClient() {
+    try {
+      getClient();
+    } catch (AppException ex) {
+      LOG.log(Level.SEVERE, null, ex);
+    }
+  }
 
+  @PreDestroy
+  private void closeClient(){
+    shutdownClient();
+  }
+  
+  private Client getClient() throws AppException {
+    if (elasticClient == null) {
+      final org.elasticsearch.common.settings.Settings settings
+          = org.elasticsearch.common.settings.Settings.builder()
+              .put("client.transport.sniff", true) //being able to retrieve other nodes
+              .put("cluster.name", "hops").build();
+
+      elasticClient = new PreBuiltTransportClient(settings)
+          .addTransportAddress(new TransportAddress(
+              new InetSocketAddress(getElasticIpAsString(),
+                  this.settings.getElasticPort())));
+    }
+    return elasticClient;
+  }
+  
+  private void shutdownClient() {
+    if (elasticClient != null) {
+//      elasticClient.admin().indices().clearCache(new ClearIndicesCacheRequest(Settings.META_INDEX));
+      elasticClient.close();
+      elasticClient = null;
+    }
+  }
+  
   public SearchHits search(String index, String[] docTypes, QueryBuilder qb) throws AppException {
     Client client = getClient();
     try {
@@ -49,7 +92,7 @@ public class ElasticController {
       }
 
       SearchRequestBuilder srb = client.prepareSearch(index).setTypes(docTypes).setQuery(qb);
-      ListenableActionFuture<SearchResponse> futureResponse = srb.execute();
+      ActionFuture<SearchResponse> futureResponse = srb.execute();
       SearchResponse response = futureResponse.actionGet();
 
       int respStatus = response.status().getStatus();
@@ -60,9 +103,7 @@ public class ElasticController {
         throw new AppException(respStatus, ResponseMessages.ELASTIC_SERVER_ERROR);
       }
     } finally {
-      //not sure why we need to clear caches all the time? why not deactivate cache then?
-      client.admin().indices().clearCache(new ClearIndicesCacheRequest(index));
-      client.close();
+      shutdownClient();
     }
   }
 
@@ -76,7 +117,7 @@ public class ElasticController {
       }
 
       IndexRequestBuilder irb = client.prepareIndex(index, docType, docId).setSource(jsonDoc);
-      ListenableActionFuture<IndexResponse> futureResponse = irb.execute();
+      ActionFuture<IndexResponse> futureResponse = irb.execute();
       IndexResponse response = futureResponse.actionGet();
 
       int respStatus = response.getShardInfo().status().getStatus();
@@ -88,9 +129,7 @@ public class ElasticController {
         throw new AppException(respStatus, ResponseMessages.ELASTIC_SERVER_ERROR);
       }
     } finally {
-      //not sure why we need to clear caches all the time? why not deactivate cache then?
-      client.admin().indices().clearCache(new ClearIndicesCacheRequest(index));
-      client.close();
+      shutdownClient();
     }
   }
 
@@ -104,7 +143,7 @@ public class ElasticController {
       }
 
       DeleteRequestBuilder irb = client.prepareDelete(index, docType, docId);
-      ListenableActionFuture<DeleteResponse> futureResponse = irb.execute();
+      ActionFuture<DeleteResponse> futureResponse = irb.execute();
       DeleteResponse response = futureResponse.actionGet();
 
       int respStatus = response.getShardInfo().status().getStatus();
@@ -115,9 +154,7 @@ public class ElasticController {
         throw new AppException(respStatus, ResponseMessages.ELASTIC_SERVER_ERROR);
       }
     } finally {
-      //not sure why we need to clear caches all the time? why not deactivate cache then?
-      client.admin().indices().clearCache(new ClearIndicesCacheRequest(index));
-      client.close();
+      shutdownClient();
     }
   }
 
@@ -128,19 +165,7 @@ public class ElasticController {
     IndicesExistsResponse response = indicesExistsRequestBuilder.execute().actionGet();
     return response.isExists();
   }
-
-  private Client getClient() throws AppException {
-    final org.elasticsearch.common.settings.Settings elasticSettings
-      = org.elasticsearch.common.settings.Settings.settingsBuilder()
-      .put("client.transport.sniff", true) //being able to retrieve other nodes 
-      .put("cluster.name", "hops").build();
-
-    return TransportClient.builder().settings(elasticSettings).build()
-      .addTransportAddress(new InetSocketTransportAddress(
-          new InetSocketAddress(getElasticIpAsString(),
-            settings.getElasticPort())));
-  }
-
+  
   private String getElasticIpAsString() throws AppException {
     String addr = settings.getElasticIp();
 

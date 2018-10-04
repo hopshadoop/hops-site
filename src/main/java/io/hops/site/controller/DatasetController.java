@@ -257,9 +257,9 @@ public class DatasetController {
       List<CachedItem> cachedHits = new LinkedList<>();
       for (SearchHit hit : searchHits) {
         String datasetId = hit.getId();
-        String name = (String) hit.getSource().get(ElasticDoc.NAME_FIELD);
-        String description = (String) hit.getSource().get(ElasticDoc.DESCRIPTION_FIELD);
-        int version = (Integer) hit.getSource().get(ElasticDoc.VERSION_FIELD);
+        String name = (String) hit.getSourceAsMap().get(ElasticDoc.NAME_FIELD);
+        String description = (String) hit.getSourceAsMap().get(ElasticDoc.DESCRIPTION_FIELD);
+        int version = (Integer) hit.getSourceAsMap().get(ElasticDoc.VERSION_FIELD);
         cachedHits.add(new CachedItem(datasetId, name, version, description, hit.getScore()));
       }
       return new SearchSession(searchParams, cachedHits);
