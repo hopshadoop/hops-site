@@ -17,6 +17,8 @@ package io.hops.site.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
+import com.google.gson.reflect.TypeToken;
 import io.hops.site.controller.HopsSiteController.Session;
 import io.hops.site.dao.entity.Category;
 import io.hops.site.dao.entity.Dataset;
@@ -43,9 +45,11 @@ import io.hops.site.util.ClusterHelper;
 import io.hops.site.util.DatasetHelper;
 import io.hops.site.util.UserHelper;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -170,7 +174,7 @@ public class DatasetController {
     liveDatasetFacade.uploadDataset(cluster.getId(), dataset.getId());
     ElasticDoc elasticDoc = elasticDoc(publicDSId, msg, version);
     try {
-      elasticCtrl.add(settings.DELA_DOC_INDEX, ElasticDoc.DOC_TYPE, publicDSId, toJson(elasticDoc));
+      elasticCtrl.add(settings.DELA_DOC_INDEX, ElasticDoc.DOC_TYPE, publicDSId, elasticDoc);
     } catch (AppException ex) {
       throw new ThirdPartyException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "elastic",
         ThirdPartyException.Source.LOCAL, "internal error");
@@ -183,19 +187,15 @@ public class DatasetController {
   private int getVersion(List<Dataset> datasets) {
     int version = 0;
     for (Dataset dataset : datasets) {
-      if(version < dataset.getVersion()) {
-         version = dataset.getVersion();
+      if (version < dataset.getVersion()) {
+        version = dataset.getVersion();
       }
     }
-    return version+1;
+    return version + 1;
   }
 
   private ElasticDoc elasticDoc(String publicDSId, DatasetDTO.Proto msg, int version) {
     return new ElasticDoc(publicDSId, msg.getName(), version, msg.getDescription());
-  }
-
-  private String toJson(ElasticDoc doc) {
-    return new Gson().toJson(doc);
   }
 
   public void unpublishDataset(String datasetPublicId, String clusterPublicId) throws AppException {

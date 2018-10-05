@@ -2,10 +2,13 @@ package io.hops.site.controller;
 
 import io.hops.site.common.Ip;
 import io.hops.site.common.ResponseMessages;
+import io.hops.site.dto.internal.ElasticDoc;
 import io.hops.site.rest.exception.AppException;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
@@ -29,6 +32,8 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.IndicesAdminClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
@@ -107,7 +112,7 @@ public class ElasticController {
     }
   }
 
-  public void add(String index, String docType, String docId, String jsonDoc) throws AppException {
+  public void add(String index, String docType, String docId, ElasticDoc doc) throws AppException {
     Client client = getClient();
     try {
       if (!this.indexExists(client, index)) {
@@ -115,8 +120,15 @@ public class ElasticController {
         throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(),
           ResponseMessages.ELASTIC_INDEX_NOT_FOUND);
       }
-
-      IndexRequestBuilder irb = client.prepareIndex(index, docType, docId).setSource(jsonDoc);
+      
+      XContentBuilder bDoc;
+      try {
+        bDoc = doc.elasticSerialize();
+      } catch (IOException ex) {
+        throw new AppException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), 
+          ResponseMessages.ELASTIC_SERVER_ERROR);
+      }
+      IndexRequestBuilder irb = client.prepareIndex(index, docType, docId).setSource(bDoc);
       ActionFuture<IndexResponse> futureResponse = irb.execute();
       IndexResponse response = futureResponse.actionGet();
 

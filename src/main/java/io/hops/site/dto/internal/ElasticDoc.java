@@ -1,6 +1,9 @@
 package io.hops.site.dto.internal;
 
+import java.io.IOException;
 import javax.xml.bind.annotation.XmlRootElement;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 
 @XmlRootElement
 public class ElasticDoc {
@@ -56,5 +59,14 @@ public class ElasticDoc {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+  
+  public XContentBuilder elasticSerialize() throws IOException {
+    return XContentFactory.jsonBuilder().startObject()
+      .field(ID_FIELD, id)
+      .field(NAME_FIELD, name)
+      .field(VERSION_FIELD, dsv)
+      .field(DESCRIPTION_FIELD, description)
+      .endObject();
   }
 }
